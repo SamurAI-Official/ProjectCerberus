@@ -386,20 +386,60 @@ STATE_SPEC = [
     ("jump_back",    5,  6, BODY,  False, "jump_back"),
     ("block_high",   2, 12, BODY,  True,  "block_high"),
     ("block_low",    2, 12, BODY,  True,  "block_low"),
-    ("hurt_mid",     4,  7, BODY,  False, "hurt_mid"),
-    ("hurt_high",    4,  7, BODY,  False, "hurt_high"),
-    ("hurt_low",     4,  7, BODY,  False, "hurt_low"),
+    # Hit-stun, and the numbers here are load-bearing rather than cosmetic.
+    #
+    # A fighter in a hurt state cannot be hit again until the hurt animation ends, so
+    # the length of these three states IS the window in which a combo can continue --
+    # and it has to be shorter than a follow-up's start-up, or the follow-up's active
+    # frame arrives while the opponent is still unhittable and the move whiffs.
+    #
+    # At 4 frames x 7 the stun ran 28 ticks, about 17 frames at 60fps, while a
+    # follow-up reaches its active frame about 5 frames after its press. A jab
+    # therefore left only the band from ~17 frames to the end of the jab's 32-tick
+    # cancel window (~19 frames) in which a straight could land -- under five frames
+    # wide. Measured with tools/verify/strikes.tscn: a straight cancelled into a jab
+    # connected at gap 22 frames and whiffed at 2, 4, 6, 8, 10, 12 and 16, which is
+    # the whole of the window a player would actually use. That is the user-visible
+    # "the combo only allows light punch and light kick": the cancel always worked,
+    # the second hit could not.
+    #
+    # 3 x 5 is 15 ticks, about 9 frames, so a follow-up pressed from ~10 frames on
+    # connects and the usable window is roughly three times as wide. The knockdowns
+    # below stay long on purpose: being knocked down should not be punished by a
+    # loop, and neither state is part of a ground chain.
+    ("hurt_mid",     3,  5, BODY,  False, "hurt_mid"),
+    ("hurt_high",    3,  5, BODY,  False, "hurt_high"),
+    ("hurt_low",     3,  5, BODY,  False, "hurt_low"),
     ("hurt_air",     4,  7, REACH, False, "hurt_air"),
     ("knocked_down", 4,  9, REACH, False, "knocked_down"),
     ("hit_ground",   3,  8, REACH, False, "hit_ground"),
     ("land",         3,  7, BODY,  False, "land"),
     ("ground",       1, 20, REACH, True,  "ground"),
     ("stand",        3,  7, BODY,  False, "stand"),
-    ("1punch",       4,  8, REACH, False, "1punch"),
-    ("2punch",       6,  8, REACH, False, "2punch"),
+    # The four chainable normals. Their frame counts are not just weight, they are
+    # the cancel window -- the frames after the active frame are the recovery, and a
+    # move may be cancelled out of for as long as it is still playing.
+    #
+    # That matters because of how this engine gates a second hit: the opponent is
+    # unhittable until its own hurt animation ends, which is 15 ticks for a mid-strength
+    # hit, and a follow-up reaches its active frame about 5-10 frames after the press.
+    # So a follow-up only lands if it is pressed late enough that its active frame
+    # arrives after the stun -- and the previous move has to still be running then, or
+    # there is nothing to cancel.
+    #
+    # At four frames a jab plays for 32 ticks (~19 frames) and the stun alone runs to
+    # ~14 frames, which left a window a couple of frames wide: measured, a straight
+    # cancelled into a jab connected only at a gap of 16 frames and whiffed at 2-12.
+    # Six frames plays for 48 ticks (~29 frames) and puts the active frame at ~10, so
+    # the follow-up's active frame clears the stun at every gap the sweep tries. This
+    # is the standard shape -- fast startup, long recovery, recovery is the window --
+    # and it is the difference between a chain that exists in the data and one that
+    # exists in the hand.
+    ("1punch",       6,  8, REACH, False, "1punch"),
+    ("2punch",       8,  8, REACH, False, "2punch"),
     ("3punch",       8,  9, REACH, False, "3punch"),
-    ("1kick",        4,  7, REACH, False, "1kick"),
-    ("2kick",        6,  8, REACH, False, "2kick"),
+    ("1kick",        6,  7, REACH, False, "1kick"),
+    ("2kick",        8,  8, REACH, False, "2kick"),
     ("3kick",        8, 10, REACH, False, "3kick"),
     ("special",      8,  8, REACH, False, "special"),
     ("special_lite", 5,  7, REACH, False, "special_lite"),
@@ -450,8 +490,28 @@ MOVES = {
 # `kick` presently extends a forward arm to y 25.6 with both feet planted 0.5
 # units in front of the origin. When the kick becomes a kick, this table gains
 # `foot_far` for it and the box follows the leg with nothing else to change.
+## Where every strike box begins: the body's front edge, in origin units forward of
+## the origin. HURTBOX_WIDTH is 12 and centred, so the body ends at +6.
+##
+## This constant is the fix for a combo that could not exist. The box used to be
+## CENTRED on the striking joint, which makes a move's reach a by-product of where a
+## pose happens to put that joint -- and the generated poses put the straight's fist
+## 0.36 units behind the jab's, so with the two boxes the same size the straight
+## reached less far than the jab it was meant to follow. Measured in the engine: the
+## jab connected at a spacing of 12.8-13.1 units, the straight only at 11.9-12.5, so
+## cancelling a jab into a straight whiffed every time the jab landed at the jab's
+## own reach. That is the "the combo only allows light punch and light kick" report,
+## and it was never the combo system -- the cancel itself worked the whole time.
+##
+## Pinning the near edge to the body makes it identical for every strike in the set
+## and makes reach monotonic: the far edge follows the joint, so a heavier move
+## extends further than a lighter one and never less far inward. The resulting ladder
+## is reported by tools/verify/strikes.tscn, which is also what caught the above.
+STRIKE_NEAR = 6.0
+
+# `margin` is how far past the joint the box reaches; the near edge is STRIKE_NEAR.
 STRIKES = {
-    # state:        (trigger,      joint,       half_width, half_height)
+    # state:        (trigger,      joint,       margin, half_height)
     "1punch":       ("HIT_M",       "hand_far",   3.5, 3.0),
     "2punch":       ("HIT_M",       "hand_far",   4.0, 3.0),
     "3punch":       ("HIT_H",       "hand_far",   4.5, 3.5),
@@ -513,7 +573,11 @@ def strike_box(state, count, profile, canvas):
             % (state, joint, rest, best_point[0])
         )
 
-    box = box_at(canvas, best_point[0], best_point[1], 2.0 * half_width, 2.0 * half_height)
+    # The box runs from the body's front edge out to the joint, plus this move's own
+    # margin. See STRIKE_NEAR for why the near edge is fixed rather than derived.
+    far = best_point[0] + half_width
+    width = max(far - STRIKE_NEAR, half_width)
+    box = box_at(canvas, STRIKE_NEAR + width / 2.0, best_point[1], width, 2.0 * half_height)
     return best_index, trigger, box
 
 

@@ -827,7 +827,7 @@ character:
     - path: data/tsu_ibano/hurt_mid00.png
       width: 30
       height: 64
-      delay: 7
+      delay: 5
       defense:
         x_pos: 9
         y_pos: 32
@@ -836,7 +836,7 @@ character:
     - path: data/tsu_ibano/hurt_mid01.png
       width: 30
       height: 64
-      delay: 7
+      delay: 5
       defense:
         x_pos: 9
         y_pos: 32
@@ -845,16 +845,7 @@ character:
     - path: data/tsu_ibano/hurt_mid02.png
       width: 30
       height: 64
-      delay: 7
-      defense:
-        x_pos: 9
-        y_pos: 32
-        width: 12
-        height: 31
-    - path: data/tsu_ibano/hurt_mid03.png
-      width: 30
-      height: 64
-      delay: 7
+      delay: 5
       defense:
         x_pos: 9
         y_pos: 32
@@ -866,7 +857,7 @@ character:
     - path: data/tsu_ibano/hurt_high00.png
       width: 30
       height: 64
-      delay: 7
+      delay: 5
       defense:
         x_pos: 9
         y_pos: 32
@@ -875,7 +866,7 @@ character:
     - path: data/tsu_ibano/hurt_high01.png
       width: 30
       height: 64
-      delay: 7
+      delay: 5
       defense:
         x_pos: 9
         y_pos: 32
@@ -884,16 +875,7 @@ character:
     - path: data/tsu_ibano/hurt_high02.png
       width: 30
       height: 64
-      delay: 7
-      defense:
-        x_pos: 9
-        y_pos: 32
-        width: 12
-        height: 31
-    - path: data/tsu_ibano/hurt_high03.png
-      width: 30
-      height: 64
-      delay: 7
+      delay: 5
       defense:
         x_pos: 9
         y_pos: 32
@@ -905,7 +887,7 @@ character:
     - path: data/tsu_ibano/hurt_low00.png
       width: 30
       height: 64
-      delay: 7
+      delay: 5
       defense:
         x_pos: 9
         y_pos: 32
@@ -914,7 +896,7 @@ character:
     - path: data/tsu_ibano/hurt_low01.png
       width: 30
       height: 64
-      delay: 7
+      delay: 5
       defense:
         x_pos: 9
         y_pos: 32
@@ -923,16 +905,7 @@ character:
     - path: data/tsu_ibano/hurt_low02.png
       width: 30
       height: 64
-      delay: 7
-      defense:
-        x_pos: 9
-        y_pos: 32
-        width: 12
-        height: 31
-    - path: data/tsu_ibano/hurt_low03.png
-      width: 30
-      height: 64
-      delay: 7
+      delay: 5
       defense:
         x_pos: 9
         y_pos: 32
@@ -1142,9 +1115,9 @@ character:
         width: 12
         height: 31
       offense:
-        x_pos: 27.6894
-        y_pos: 52.3334
-        width: 7
+        x_pos: 25
+        y_pos: 52.2543
+        width: 9.65123
         height: 6
       collision:
         path: data/collision/collision.yml
@@ -1162,6 +1135,24 @@ character:
         width: 12
         height: 31
     - path: data/tsu_ibano/1punch03.png
+      width: 38
+      height: 64
+      delay: 8
+      defense:
+        x_pos: 13
+        y_pos: 32
+        width: 12
+        height: 31
+    - path: data/tsu_ibano/1punch04.png
+      width: 38
+      height: 64
+      delay: 8
+      defense:
+        x_pos: 13
+        y_pos: 32
+        width: 12
+        height: 31
+    - path: data/tsu_ibano/1punch05.png
       width: 38
       height: 64
       delay: 8
@@ -1192,17 +1183,6 @@ character:
         y_pos: 32
         width: 12
         height: 31
-      offense:
-        x_pos: 27.3338
-        y_pos: 52.8933
-        width: 8
-        height: 6
-      collision:
-        path: data/collision/collision.yml
-        opponent: HIT_M
-        x_pos: 0
-        y_pos: 6
-        index: 2
     - path: data/tsu_ibano/2punch02.png
       width: 38
       height: 64
@@ -1212,6 +1192,17 @@ character:
         y_pos: 32
         width: 12
         height: 31
+      offense:
+        x_pos: 25
+        y_pos: 53.1628
+        width: 10.376
+        height: 6
+      collision:
+        path: data/collision/collision.yml
+        opponent: HIT_M
+        x_pos: 0
+        y_pos: 6
+        index: 2
     - path: data/tsu_ibano/2punch03.png
       width: 38
       height: 64
@@ -1231,6 +1222,24 @@ character:
         width: 12
         height: 31
     - path: data/tsu_ibano/2punch05.png
+      width: 38
+      height: 64
+      delay: 8
+      defense:
+        x_pos: 13
+        y_pos: 32
+        width: 12
+        height: 31
+    - path: data/tsu_ibano/2punch06.png
+      width: 38
+      height: 64
+      delay: 8
+      defense:
+        x_pos: 13
+        y_pos: 32
+        width: 12
+        height: 31
+    - path: data/tsu_ibano/2punch07.png
       width: 38
       height: 64
       delay: 8
@@ -1279,9 +1288,9 @@ character:
         width: 12
         height: 31
       offense:
-        x_pos: 27.4772
+        x_pos: 25
         y_pos: 53.2219
-        width: 9
+        width: 11.4772
         height: 7
       collision:
         path: data/collision/collision.yml
@@ -1372,9 +1381,9 @@ character:
         width: 12
         height: 31
       offense:
-        x_pos: 25.246
-        y_pos: 31.4123
-        width: 7
+        x_pos: 25
+        y_pos: 31.2819
+        width: 6.99249
         height: 6
       collision:
         path: data/collision/collision.yml
@@ -1392,6 +1401,24 @@ character:
         width: 12
         height: 31
     - path: data/tsu_ibano/1kick03.png
+      width: 38
+      height: 64
+      delay: 7
+      defense:
+        x_pos: 13
+        y_pos: 32
+        width: 12
+        height: 31
+    - path: data/tsu_ibano/1kick04.png
+      width: 38
+      height: 64
+      delay: 7
+      defense:
+        x_pos: 13
+        y_pos: 32
+        width: 12
+        height: 31
+    - path: data/tsu_ibano/1kick05.png
       width: 38
       height: 64
       delay: 7
@@ -1428,17 +1455,6 @@ character:
         y_pos: 32
         width: 12
         height: 31
-      offense:
-        x_pos: 32.7599
-        y_pos: 41.8937
-        width: 9
-        height: 7
-      collision:
-        path: data/collision/collision.yml
-        opponent: HIT_M
-        x_pos: 0
-        y_pos: 6
-        index: 2
     - path: data/tsu_ibano/2kick02.png
       width: 38
       height: 64
@@ -1451,6 +1467,17 @@ character:
         y_pos: 32
         width: 12
         height: 31
+      offense:
+        x_pos: 25
+        y_pos: 44.0048
+        width: 17.0684
+        height: 7
+      collision:
+        path: data/collision/collision.yml
+        opponent: HIT_M
+        x_pos: 0
+        y_pos: 6
+        index: 2
     - path: data/tsu_ibano/2kick03.png
       width: 38
       height: 64
@@ -1476,6 +1503,30 @@ character:
         width: 12
         height: 31
     - path: data/tsu_ibano/2kick05.png
+      width: 38
+      height: 64
+      delay: 8
+      move:
+        x_vel: 0
+        y_vel: 0
+      defense:
+        x_pos: 13
+        y_pos: 32
+        width: 12
+        height: 31
+    - path: data/tsu_ibano/2kick06.png
+      width: 38
+      height: 64
+      delay: 8
+      move:
+        x_vel: 0
+        y_vel: 0
+      defense:
+        x_pos: 13
+        y_pos: 32
+        width: 12
+        height: 31
+    - path: data/tsu_ibano/2kick07.png
       width: 38
       height: 64
       delay: 8
@@ -1515,9 +1566,9 @@ character:
         width: 12
         height: 31
       offense:
-        x_pos: 32.6495
+        x_pos: 25
         y_pos: 45.7829
-        width: 10
+        width: 17.6495
         height: 8
       collision:
         path: data/collision/collision.yml
@@ -1625,9 +1676,9 @@ character:
         width: 12
         height: 31
       offense:
-        x_pos: 26.3636
+        x_pos: 25
         y_pos: 51.7954
-        width: 10
+        width: 11.3636
         height: 9
       collision:
         path: data/collision/collision.yml
@@ -1735,9 +1786,9 @@ character:
         width: 12
         height: 31
       offense:
-        x_pos: 26.9926
+        x_pos: 25
         y_pos: 51.8925
-        width: 8
+        width: 9.99264
         height: 6
       collision:
         path: data/collision/collision.yml

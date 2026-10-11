@@ -17,9 +17,6 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [autoload]
 
-; Order matters: settings must be applied before anything draws, and the joypad
-; bindings must exist before the engine reads input. GameState loads the
-; manifests, so it goes last.
 UserSettings="*res://game/autoload/user_settings.gd"
 InputBindings="*res://game/autoload/input_bindings.gd"
 GameState="*res://game/autoload/game_state.gd"
@@ -136,7 +133,7 @@ p2_z={
 
 [rendering]
 
+textures/canvas_textures/default_texture_filter=0
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 environment/defaults/default_clear_color=Color(0.043, 0.043, 0.055, 1)
-textures/canvas_textures/default_texture_filter=0

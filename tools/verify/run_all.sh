@@ -79,6 +79,12 @@ else
     # headless roster test notices too, but it reports it as a 120-second timeout
     # rather than as a box problem, which is a much longer walk to the same place.
     run m3_boxes "${GODOT}" --path . res://tools/verify/m3_boxes.tscn
+    # Which state each button actually reaches, and whether a combo can continue.
+    # Windowed for the same reason video_options is, only more so: the engine steps
+    # every 10 ms, so a cancel window is a real-time property. The first version of
+    # this check ran headless and would have reported a combo window that no player
+    # could ever hit.
+    run strikes "${GODOT}" --path . res://tools/verify/strikes.tscn
     # Video and audio options, including whether the neural upscaler is actually
     # upscaling or merely installed -- two states that look identical from outside.
     # Windowed, because the pass needs rendered frames before it will say anything.
