@@ -19,7 +19,7 @@ horror), **Us vs. The Clowns** (1992 biker), and **Yokai Hon'nō Academy**
 |---|---|
 | ✅ M0 | openfight GDExtension builds natively on macOS arm64 and loads in Godot 4.7.2; class registers; 600-frame headless smoke test; Metal render test |
 | ✅ M1 | health, damage, best-of-three rounds and 4 Godot signals patched into the engine — a full match runs headless and passes its assertions |
-| ⏳ M2 | title / character select / match / results shell, gamepad input |
+| 🟡 M2 | **match shell done** — health bars, round clock, announcer and results, driven entirely by engine signals (verified headless). **Still open:** title, character select, stage select, options, gamepad bindings |
 | ⏳ M3 | art + YAML pipeline, the two vertical-slice fighters |
 | ⏳ M4 | vertical slice lock |
 

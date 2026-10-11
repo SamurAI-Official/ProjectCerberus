@@ -12,11 +12,16 @@ extends Node
 const OUT_PATH := "user://m0_render.png"
 const WARMUP_FRAMES := 90
 
+## Deliberately the bare engine scene, not the game's match scene: this test's
+## job is the engine's transparency behaviour, and its pixel census below assumes
+## nothing else is drawing. Full-scene rendering is covered by m2_hud.
+const SCENE := "res://tools/verify/m0_basic.tscn"
+
 var _frames := 0
 var _captured := false
 
 func _ready() -> void:
-	add_child(load("res://game/screens/match/match.tscn").instantiate())
+	add_child(load(SCENE).instantiate())
 
 func _process(_delta: float) -> void:
 	if _captured:

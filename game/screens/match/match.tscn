@@ -1,6 +1,11 @@
-[gd_scene format=3]
+[gd_scene load_steps=4 format=3]
 
-[node name="Match" type="Node2D"]
+[ext_resource type="Script" path="res://game/match/match_controller.gd" id="1_ctrl"]
+[ext_resource type="Script" path="res://game/match/health_bar.gd" id="2_bar"]
+[ext_resource type="Script" path="res://game/match/announcer.gd" id="3_ann"]
+
+[node name="Match" type="Node"]
+script = ExtResource("1_ctrl")
 
 [node name="OpenFight" type="OpenFightNode" parent="."]
 scale = Vector2(4, 4)
@@ -10,5 +15,81 @@ moves_path = "res://data/ryu/moves.yml"
 background_path = "res://data/background.png"
 
 [node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(198, 208)
+position = Vector2(198, 350)
 zoom = Vector2(1.5, 1.5)
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="P1Health" type="Control" parent="HUD"]
+offset_left = 24.0
+offset_top = 20.0
+offset_right = 324.0
+offset_bottom = 46.0
+script = ExtResource("2_bar")
+
+[node name="Shell" type="ColorRect" parent="HUD/P1Health"]
+offset_right = 300.0
+offset_bottom = 26.0
+color = Color(0.09, 0.09, 0.11, 0.85)
+
+[node name="Fill" type="ColorRect" parent="HUD/P1Health"]
+offset_right = 300.0
+offset_bottom = 26.0
+color = Color(0.98, 0.78, 0.2, 1)
+
+[node name="P2Health" type="Control" parent="HUD"]
+offset_left = 444.0
+offset_top = 20.0
+offset_right = 744.0
+offset_bottom = 46.0
+script = ExtResource("2_bar")
+mirror = true
+
+[node name="Shell" type="ColorRect" parent="HUD/P2Health"]
+offset_right = 300.0
+offset_bottom = 26.0
+color = Color(0.09, 0.09, 0.11, 0.85)
+
+[node name="Fill" type="ColorRect" parent="HUD/P2Health"]
+offset_right = 300.0
+offset_bottom = 26.0
+color = Color(0.98, 0.78, 0.2, 1)
+
+[node name="RoundLabel" type="Label" parent="HUD"]
+offset_left = 330.0
+offset_top = 16.0
+offset_right = 438.0
+offset_bottom = 38.0
+theme_override_font_sizes/font_size = 15
+text = "ROUND 1"
+horizontal_alignment = 1
+
+[node name="TimerLabel" type="Label" parent="HUD"]
+offset_left = 330.0
+offset_top = 34.0
+offset_right = 438.0
+offset_bottom = 64.0
+theme_override_font_sizes/font_size = 24
+text = "99"
+horizontal_alignment = 1
+
+[node name="Announcer" type="Label" parent="HUD"]
+offset_top = 140.0
+offset_right = 768.0
+offset_bottom = 200.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 44
+text = ""
+horizontal_alignment = 1
+script = ExtResource("3_ann")
+
+[node name="Result" type="Label" parent="HUD"]
+offset_top = 232.0
+offset_right = 768.0
+offset_bottom = 264.0
+theme_override_colors/font_color = Color(0.98, 0.78, 0.2, 1)
+theme_override_font_sizes/font_size = 20
+text = ""
+horizontal_alignment = 1

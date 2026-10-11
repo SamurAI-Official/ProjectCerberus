@@ -84,7 +84,7 @@ index fca69d7..f24e31d 100644
  
  Actions::Actions() {
 diff --git a/src/libopenfight/gameContext.cpp b/src/libopenfight/gameContext.cpp
-index dd0ebfb..5b6b453 100644
+index dd0ebfb..c8965d8 100644
 --- a/src/libopenfight/gameContext.cpp
 +++ b/src/libopenfight/gameContext.cpp
 @@ -5,7 +5,11 @@
@@ -159,7 +159,7 @@ index dd0ebfb..5b6b453 100644
  }
  
  void GameContext::updateObjects() {
-@@ -94,4 +127,193 @@ void GameContext::shutdown() {
+@@ -94,4 +127,204 @@ void GameContext::shutdown() {
      object_manager->clear();
      texture_manager->clear();
      initialized = false;
@@ -324,6 +324,17 @@ index dd0ebfb..5b6b453 100644
 +    return static_cast<int>(round_time_ms);
 +}
 +
++int GameContext::getRoundTimeLimitMs() const {
++    return ROUND_TIME_MS;
++}
++
++int GameContext::getRoundSecondsLeft() const {
++    // Counts up to the limit, and a round that has already ended reads 0 rather
++    // than a negative -- a HUD should never have to clamp a clock.
++    const int remaining = ROUND_TIME_MS - static_cast<int>(round_time_ms);
++    return remaining > 0 ? (remaining + 999) / 1000 : 0;
++}
++
 +bool GameContext::isRoundOver() const {
 +    return round_over;
 +}
@@ -354,7 +365,7 @@ index dd0ebfb..5b6b453 100644
 +    events.push_back(event);
  }
 diff --git a/src/libopenfight/gameContext.h b/src/libopenfight/gameContext.h
-index 937216f..2dd7a7f 100644
+index 937216f..658c3c9 100644
 --- a/src/libopenfight/gameContext.h
 +++ b/src/libopenfight/gameContext.h
 @@ -3,6 +3,7 @@
@@ -400,7 +411,7 @@ index 937216f..2dd7a7f 100644
      GameContext();
      ~GameContext();
  
-@@ -41,6 +67,26 @@ public:
+@@ -41,6 +67,31 @@ public:
      void update(const FrameInput &input, float delta_ms);
      void render(RenderBackend &renderer);
      void shutdown();
@@ -413,6 +424,11 @@ index 937216f..2dd7a7f 100644
 +    bool isRoundOver() const;
 +    bool isMatchOver() const;
 +    int getMatchWinner() const;
++
++    // The clock's two halves, so a HUD can show a countdown without re-declaring
++    // the round length in GDScript. A duplicated game rule drifts.
++    int getRoundTimeLimitMs() const;
++    int getRoundSecondsLeft() const;
 +
 +    // Begins the next round: restores both fighters, clears projectiles and
 +    // resets the clock. Safe to call on a fresh match.
@@ -731,10 +747,10 @@ index 0c146a0..b3882b3 100644
 +    spawn_scale = scale;
  }
 diff --git a/src/platform/godot/openFightNode.cpp b/src/platform/godot/openFightNode.cpp
-index 47312c9..063b4fb 100644
+index 47312c9..e9113ec 100644
 --- a/src/platform/godot/openFightNode.cpp
 +++ b/src/platform/godot/openFightNode.cpp
-@@ -57,6 +57,27 @@ void OpenFightNode::_bind_methods() {
+@@ -57,6 +57,29 @@ void OpenFightNode::_bind_methods() {
      ADD_PROPERTY(PropertyInfo(Variant::STRING, "player_two_path"), "set_player_two_path", "get_player_two_path");
      ADD_PROPERTY(PropertyInfo(Variant::STRING, "moves_path"), "set_moves_path", "get_moves_path");
      ADD_PROPERTY(PropertyInfo(Variant::STRING, "background_path"), "set_background_path", "get_background_path");
@@ -744,6 +760,8 @@ index 47312c9..063b4fb 100644
 +    ClassDB::bind_method(D_METHOD("get_round"), &OpenFightNode::get_round);
 +    ClassDB::bind_method(D_METHOD("get_round_wins", "player"), &OpenFightNode::get_round_wins);
 +    ClassDB::bind_method(D_METHOD("get_round_time_ms"), &OpenFightNode::get_round_time_ms);
++    ClassDB::bind_method(D_METHOD("get_round_seconds_left"), &OpenFightNode::get_round_seconds_left);
++    ClassDB::bind_method(D_METHOD("get_round_time_limit_ms"), &OpenFightNode::get_round_time_limit_ms);
 +    ClassDB::bind_method(D_METHOD("is_round_over"), &OpenFightNode::is_round_over);
 +    ClassDB::bind_method(D_METHOD("is_match_over"), &OpenFightNode::is_match_over);
 +    ClassDB::bind_method(D_METHOD("get_match_winner"), &OpenFightNode::get_match_winner);
@@ -762,7 +780,7 @@ index 47312c9..063b4fb 100644
  }
  
  void OpenFightNode::_notification(int what) {
-@@ -78,6 +99,10 @@ void OpenFightNode::_notification(int what) {
+@@ -78,6 +101,10 @@ void OpenFightNode::_notification(int what) {
              update_accumulator_ms -= GAME_TIME_UPDATE_FREQ;
          }
  
@@ -773,7 +791,7 @@ index 47312c9..063b4fb 100644
          queue_redraw();
          break;
      }
-@@ -191,3 +216,76 @@ void OpenFightNode::set_background_path(const String &path) {
+@@ -191,3 +218,84 @@ void OpenFightNode::set_background_path(const String &path) {
  String OpenFightNode::get_background_path() const {
      return background_path;
  }
@@ -829,6 +847,14 @@ index 47312c9..063b4fb 100644
 +    return game != nullptr ? game->getRoundTimeMs() : 0;
 +}
 +
++int OpenFightNode::get_round_seconds_left() const {
++    return game != nullptr ? game->getRoundSecondsLeft() : 0;
++}
++
++int OpenFightNode::get_round_time_limit_ms() const {
++    return game != nullptr ? game->getRoundTimeLimitMs() : 0;
++}
++
 +bool OpenFightNode::is_round_over() const {
 +    return game != nullptr && game->isRoundOver();
 +}
@@ -851,7 +877,7 @@ index 47312c9..063b4fb 100644
 +        game->resetMatch();
 +}
 diff --git a/src/platform/godot/openFightNode.h b/src/platform/godot/openFightNode.h
-index b866ffd..e39e287 100644
+index b866ffd..a18a979 100644
 --- a/src/platform/godot/openFightNode.h
 +++ b/src/platform/godot/openFightNode.h
 @@ -29,6 +29,11 @@ private:
@@ -866,7 +892,7 @@ index b866ffd..e39e287 100644
  protected:
      static void _bind_methods();
      void _notification(int what);
-@@ -48,6 +53,21 @@ public:
+@@ -48,6 +53,25 @@ public:
      String get_moves_path() const;
      void set_background_path(const String &path);
      String get_background_path() const;
@@ -879,6 +905,10 @@ index b866ffd..e39e287 100644
 +    int get_round() const;
 +    int get_round_wins(int player) const;
 +    int get_round_time_ms() const;
++    // Seconds remaining in the round, and the round length, so a HUD does not
++    // have to re-declare the engine's rule.
++    int get_round_seconds_left() const;
++    int get_round_time_limit_ms() const;
 +    bool is_round_over() const;
 +    bool is_match_over() const;
 +    int get_match_winner() const;
