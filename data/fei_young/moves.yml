@@ -4,6 +4,10 @@ moves:
     keys: F,~D,c
   - trigger: QCF_HP
     keys: F,~D,~c
+  - trigger: QCF_LP
+    keys: F,~D,a
+  - trigger: QCF_LP
+    keys: F,~D,~a
   - trigger: DB
     keys: /D,/B
   - trigger: DB

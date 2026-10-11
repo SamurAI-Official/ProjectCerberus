@@ -163,15 +163,18 @@ ACTION_TABLE = [
     ("jump_back",    "U",             "walk_back",                          "idle"),
     ("block_low",    "HIT_L,HIT_M",   "duck_back",                          "duck_back"),
     ("block_high",   "HIT_H,HIT_M",   "walk_back",                          "idle"),
-    ("hurt_mid",     "HIT_M",         "idle,walk_forward,walk_back,1punch,2punch,kick,back_kick,special", "idle"),
-    ("hurt_high",    "HIT_H",         "idle,duck,duck_back,walk_forward,1punch,2punch,kick,back_kick,special", "idle"),
-    ("hurt_low",     "HIT_L",         "idle,walk_back,duck,1punch,2punch,kick,back_kick,special", "idle"),
+    ("hurt_mid",     "HIT_M",         "idle,walk_forward,walk_back,1punch,2punch,3punch,1kick,2kick,3kick,special,special_lite", "idle"),
+    ("hurt_high",    "HIT_H",         "idle,duck,duck_back,walk_forward,1punch,2punch,3punch,1kick,2kick,3kick,special,special_lite", "idle"),
+    ("hurt_low",     "HIT_L",         "idle,walk_back,duck,1punch,2punch,3punch,1kick,2kick,3kick,special,special_lite", "idle"),
     ("hurt_air",     "HIT_L,HIT_M,HIT_H", "knocked_down,jump,jump_back,jump_forward,hurt_air", "ground"),
-    ("1punch",       "LP",            "idle,walk_back,walk_forward",        "idle"),
-    ("2punch",       "MP",            "idle,walk_back,walk_forward,1punch", "idle"),
-    ("back_kick",    "MK",            "idle,walk_back,walk_forward",        "idle"),
-    ("kick",         "LK",            "idle,walk_back,walk_forward,2punch", "idle"),
-    ("special",      "QCF_HP",        "idle,walk_forward,1punch",           "idle"),
+    ("1punch",       "LP",            "idle,walk_back,walk_forward",              "idle"),
+    ("2punch",       "MP",            "idle,walk_back,walk_forward,1punch",       "idle"),
+    ("3punch",       "HP",            "idle,walk_back,walk_forward,1punch,2punch", "idle"),
+    ("1kick",        "LK",            "idle,walk_back,walk_forward",              "idle"),
+    ("2kick",        "MK",            "idle,walk_back,walk_forward,1kick",        "idle"),
+    ("3kick",        "HK",            "idle,walk_back,walk_forward,1kick,2kick",  "idle"),
+    ("special",      "QCF_HP",        "idle,walk_forward,1punch,2punch",          "idle"),
+    ("special_lite", "QCF_LP",        "idle,walk_forward,1punch",                 "idle"),
     ("knocked_down", "KNOCK_DOWN",    "idle,knocked_down",                  "idle"),
     ("hit_ground",   "GROUND",        "hurt_air,knocked_down",              "ground"),
     ("land",         "GROUND",        "jump,jump_back,jump_forward",        "idle"),
@@ -217,6 +220,42 @@ def _strike(extent, horizontal, vertical, lift):
             arm_near=(-22.0 + 20.0 * e, 62.0 - 14.0 * e),
             leg_far=(lift * 0.4, lift * 0.15 - 14.0),
             leg_near=(-10.0, -22.0),
+        )
+    return build
+
+
+## The kick family, which is the punch family with the leg doing the work.
+##
+## Every strike used to come out of `_strike`, which animates `arm_far` and leaves
+## `lift` -- the only parameter that moves a leg -- at 0 for the state called
+## `kick`. So the move named for a leg reached out with an arm, and the fist was
+## where the game said the foot was. `foot_far` is now the joint a kick's hitbox is
+## derived from, so the two cannot come apart again.
+##
+## The envelope is deliberately the same `sin(pi * min(t / 0.55, 1))` as `_strike`:
+## the two families should be timed alike so a player learns one cadence, and what
+## distinguishes a jab from a roundhouse should be where the limb goes, not when.
+##
+## The arms go where a kicker's arms go -- the far arm trailing back for
+## counterweight, the near arm across the chest for balance. A pose that moved only
+## the leg would read as a leg that had detached rather than a body that kicked.
+def _kick(extent, thigh, shin, lean=0.2):
+    """Builds a kick: the far leg drives out to `thigh` degrees at the hip while
+    the knee extends to `shin`, `extent` scaling how far the foot lands.
+
+    Degrees are from straight down, positive forward -- so 45/30 is a shin-height
+    kick, 85/95 is level with the hip, and 120/115 is at head height.
+    """
+    def build(i, n, profile):
+        t = i / float(max(n - 1, 1))
+        e = math.sin(math.pi * min(t / 0.55, 1.0)) * extent * profile.get("reach", 1.0)
+        return dict(
+            crouch=0.05,
+            lean=lean * e,
+            leg_far=(thigh * e, shin * e),
+            leg_near=(-12.0, -24.0),
+            arm_far=(-30.0 - 14.0 * e, 26.0),
+            arm_near=(16.0 + 10.0 * e, 78.0),
         )
     return build
 
@@ -315,9 +354,12 @@ POSES = {
     ),
     "1punch":       _strike(0.85, 88.0, 0.0, 0.0),
     "2punch":       _strike(1.0, 92.0, 0.0, 4.0),
-    "kick":         _strike(0.9, 118.0, 0.0, 0.0),
-    "back_kick":    _strike(1.0, 126.0, 6.0, 10.0),
+    "3punch":       _strike(1.15, 97.0, -5.0, 8.0),
+    "1kick":        _kick(0.8, 45.0, 30.0),
+    "2kick":        _kick(1.0, 85.0, 95.0),
+    "3kick":        _kick(1.15, 120.0, 115.0, lean=0.28),
     "special":      _strike(1.3, 96.0, 0.0, 6.0),
+    "special_lite": _strike(0.72, 84.0, 0.0, 0.0),
 }
 
 # ---------------------------------------------------------------------------
@@ -355,9 +397,12 @@ STATE_SPEC = [
     ("stand",        3,  7, BODY,  False, "stand"),
     ("1punch",       4,  8, REACH, False, "1punch"),
     ("2punch",       6,  8, REACH, False, "2punch"),
-    ("kick",         5,  8, REACH, False, "kick"),
-    ("back_kick",    6,  8, REACH, False, "back_kick"),
+    ("3punch",       8,  9, REACH, False, "3punch"),
+    ("1kick",        4,  7, REACH, False, "1kick"),
+    ("2kick",        6,  8, REACH, False, "2kick"),
+    ("3kick",        8, 10, REACH, False, "3kick"),
     ("special",      8,  8, REACH, False, "special"),
+    ("special_lite", 5,  7, REACH, False, "special_lite"),
 ]
 
 # Per-frame physics. Only the states that move are listed; the rest stand still,
@@ -369,7 +414,11 @@ MOVES = {
     "jump_forward": lambda i, n, p: (0.62, [3.0, 1.6, -0.5, -2.0, -2.6, -2.6, -2.6, -2.6][min(i, 7)]),
     "jump_back":    lambda i, n, p: (-0.5, [3.0, 1.5, -0.7, -2.2, -2.6][min(i, 4)]),
     "back_kick":    lambda i, n, p: (0.20 if 1 <= i <= 4 else 0.0, 0.0),
+    "3punch":       lambda i, n, p: (0.22 if 1 <= i <= 4 else 0.0, 0.0),
+    "2kick":        lambda i, n, p: (0.18 if 1 <= i <= 3 else 0.0, 0.0),
+    "3kick":        lambda i, n, p: (0.28 if 1 <= i <= 5 else 0.0, 0.0),
     "special":      lambda i, n, p: (0.55 if 1 <= i <= 5 else 0.0, 0.0),
+    "special_lite": lambda i, n, p: (0.34 if 1 <= i <= 3 else 0.0, 0.0),
 }
 
 # Where each strike lands: the strength handed to the defender, the joint that
@@ -402,13 +451,30 @@ MOVES = {
 # units in front of the origin. When the kick becomes a kick, this table gains
 # `foot_far` for it and the box follows the leg with nothing else to change.
 STRIKES = {
-    # state:      (trigger,      joint,       half_width, half_height)
-    "1punch":     ("HIT_M",       "hand_far",   3.5, 3.0),
-    "2punch":     ("HIT_H",       "hand_far",   4.0, 3.5),
-    "kick":       ("HIT_M",       "hand_far",   3.5, 3.0),
-    "back_kick":  ("KNOCK_DOWN",  "hand_far",   4.0, 3.5),
-    "special":    ("KNOCK_DOWN",  "hand_far",   5.0, 4.5),
+    # state:        (trigger,      joint,       half_width, half_height)
+    "1punch":       ("HIT_M",       "hand_far",   3.5, 3.0),
+    "2punch":       ("HIT_M",       "hand_far",   4.0, 3.0),
+    "3punch":       ("HIT_H",       "hand_far",   4.5, 3.5),
+    "1kick":        ("HIT_L",       "foot_far",   3.5, 3.0),
+    "2kick":        ("HIT_M",       "foot_far",   4.5, 3.5),
+    "3kick":        ("KNOCK_DOWN",  "foot_far",   5.0, 4.0),
+    "special":      ("KNOCK_DOWN",  "hand_far",   5.0, 4.5),
+    "special_lite": ("HIT_M",       "hand_far",   4.0, 3.0),
 }
+
+## The states a chain may be cancelled out of, and the reason the `from` lists
+## above name the move before them.
+##
+## The engine reads `combo: true` in `updateState`: when the current animation is a
+## combo, a command only takes effect if the opponent is in a hurt state. So the
+## chain is enforced by the engine rather than by a timer here -- a jab confirms
+## into a straight only if the jab actually connected, and a whiffed one plays out
+## and returns to idle like any other move.
+##
+## The enders are deliberately absent. `3punch` and `3kick` are the heaviest thing
+## each limb has and they complete on their own; a chain that could cancel out of
+## its own ender has no ender.
+COMBO_STATES = {"1punch", "2punch", "1kick", "2kick"}
 
 # The engine's shared hit-spark object, `type: temporary`, one frame set reused
 # by every attack. Referenced rather than copied: it is engine-owned VFX data,
@@ -511,6 +577,10 @@ def write_character_yaml(sheet, out_path):
         lines.append(f"  - name: {state}")
         if continual:
             lines.append("    continual: true")
+        # A chain may only be cancelled out of while the opponent is hurt; the
+        # engine enforces that, not this builder. See COMBO_STATES.
+        if state in COMBO_STATES:
+            lines.append("    combo: true")
         # Hitboxes are drawn by the engine when this is true. Left on during
         # development so a pose and its boxes can be checked against each other;
         # flip it off for a presentation build.
@@ -554,7 +624,13 @@ def write_moves_yaml(out_path):
     to that no key sequence ever produces is a state that can never be entered --
     the special move in particular."""
     motion = [
+        # Two specials off one motion, which is the shape the fixture already uses
+        # -- its own QCF_LP and QCF_HP are the same F,~D prefix with the punch
+        # button deciding which one fires. The `~c`/`~a` pair covers the press and
+        # the release, so a player who does not let go in the same frame, or who
+        # lets go early, still gets the move either way.
         ("F,~D,c", "QCF_HP"), ("F,~D,~c", "QCF_HP"),
+        ("F,~D,a", "QCF_LP"), ("F,~D,~a", "QCF_LP"),
     ]
     lines = ["moves:", "  move:"]
     for keys, trigger in motion:

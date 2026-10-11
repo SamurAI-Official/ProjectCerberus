@@ -78,15 +78,15 @@ character:
     to: idle
   - name: hurt_mid
     trigger: HIT_M
-    from: idle,walk_forward,walk_back,1punch,2punch,kick,back_kick,special
+    from: idle,walk_forward,walk_back,1punch,2punch,3punch,1kick,2kick,3kick,special,special_lite
     to: idle
   - name: hurt_high
     trigger: HIT_H
-    from: idle,duck,duck_back,walk_forward,1punch,2punch,kick,back_kick,special
+    from: idle,duck,duck_back,walk_forward,1punch,2punch,3punch,1kick,2kick,3kick,special,special_lite
     to: idle
   - name: hurt_low
     trigger: HIT_L
-    from: idle,walk_back,duck,1punch,2punch,kick,back_kick,special
+    from: idle,walk_back,duck,1punch,2punch,3punch,1kick,2kick,3kick,special,special_lite
     to: idle
   - name: hurt_air
     trigger: HIT_L,HIT_M,HIT_H
@@ -100,16 +100,28 @@ character:
     trigger: MP
     from: idle,walk_back,walk_forward,1punch
     to: idle
-  - name: back_kick
-    trigger: MK
+  - name: 3punch
+    trigger: HP
+    from: idle,walk_back,walk_forward,1punch,2punch
+    to: idle
+  - name: 1kick
+    trigger: LK
     from: idle,walk_back,walk_forward
     to: idle
-  - name: kick
-    trigger: LK
-    from: idle,walk_back,walk_forward,2punch
+  - name: 2kick
+    trigger: MK
+    from: idle,walk_back,walk_forward,1kick
+    to: idle
+  - name: 3kick
+    trigger: HK
+    from: idle,walk_back,walk_forward,1kick,2kick
     to: idle
   - name: special
     trigger: QCF_HP
+    from: idle,walk_forward,1punch,2punch
+    to: idle
+  - name: special_lite
+    trigger: QCF_LP
     from: idle,walk_forward,1punch
     to: idle
   - name: knocked_down
@@ -1108,6 +1120,7 @@ character:
         width: 12
         height: 31
   - name: 1punch
+    combo: true
     show_hitbox: true
     frame:
     - path: data/fei_young/1punch00.png
@@ -1158,6 +1171,7 @@ character:
         width: 12
         height: 31
   - name: 2punch
+    combo: true
     show_hitbox: true
     frame:
     - path: data/fei_young/2punch00.png
@@ -1180,12 +1194,12 @@ character:
         height: 31
       offense:
         x_pos: 27.3872
-        y_pos: 52.8893
+        y_pos: 53.3893
         width: 8
-        height: 7
+        height: 6
       collision:
         path: data/collision/collision.yml
-        opponent: HIT_H
+        opponent: HIT_M
         x_pos: 0
         y_pos: 6
         index: 2
@@ -1225,69 +1239,172 @@ character:
         y_pos: 32
         width: 12
         height: 31
-  - name: kick
+  - name: 3punch
     show_hitbox: true
     frame:
-    - path: data/fei_young/kick00.png
+    - path: data/fei_young/3punch00.png
       width: 38
       height: 64
-      delay: 8
+      delay: 9
+      move:
+        x_vel: 0
+        y_vel: 0
       defense:
         x_pos: 13
         y_pos: 32
         width: 12
         height: 31
-    - path: data/fei_young/kick01.png
+    - path: data/fei_young/3punch01.png
       width: 38
       height: 64
-      delay: 8
+      delay: 9
+      move:
+        x_vel: 0.22
+        y_vel: 0
       defense:
         x_pos: 13
         y_pos: 32
         width: 12
         height: 31
       offense:
-        x_pos: 27.357
-        y_pos: 55.3178
+        x_pos: 27.4486
+        y_pos: 52.73
+        width: 9
+        height: 7
+      collision:
+        path: data/collision/collision.yml
+        opponent: HIT_H
+        x_pos: 0
+        y_pos: 6
+        index: 2
+    - path: data/fei_young/3punch02.png
+      width: 38
+      height: 64
+      delay: 9
+      move:
+        x_vel: 0.22
+        y_vel: 0
+      defense:
+        x_pos: 13
+        y_pos: 32
+        width: 12
+        height: 31
+    - path: data/fei_young/3punch03.png
+      width: 38
+      height: 64
+      delay: 9
+      move:
+        x_vel: 0.22
+        y_vel: 0
+      defense:
+        x_pos: 13
+        y_pos: 32
+        width: 12
+        height: 31
+    - path: data/fei_young/3punch04.png
+      width: 38
+      height: 64
+      delay: 9
+      move:
+        x_vel: 0.22
+        y_vel: 0
+      defense:
+        x_pos: 13
+        y_pos: 32
+        width: 12
+        height: 31
+    - path: data/fei_young/3punch05.png
+      width: 38
+      height: 64
+      delay: 9
+      move:
+        x_vel: 0
+        y_vel: 0
+      defense:
+        x_pos: 13
+        y_pos: 32
+        width: 12
+        height: 31
+    - path: data/fei_young/3punch06.png
+      width: 38
+      height: 64
+      delay: 9
+      move:
+        x_vel: 0
+        y_vel: 0
+      defense:
+        x_pos: 13
+        y_pos: 32
+        width: 12
+        height: 31
+    - path: data/fei_young/3punch07.png
+      width: 38
+      height: 64
+      delay: 9
+      move:
+        x_vel: 0
+        y_vel: 0
+      defense:
+        x_pos: 13
+        y_pos: 32
+        width: 12
+        height: 31
+  - name: 1kick
+    combo: true
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/1kick00.png
+      width: 38
+      height: 64
+      delay: 7
+      defense:
+        x_pos: 13
+        y_pos: 32
+        width: 12
+        height: 31
+    - path: data/fei_young/1kick01.png
+      width: 38
+      height: 64
+      delay: 7
+      defense:
+        x_pos: 13
+        y_pos: 32
+        width: 12
+        height: 31
+      offense:
+        x_pos: 26.4218
+        y_pos: 32.0975
         width: 7
         height: 6
       collision:
         path: data/collision/collision.yml
-        opponent: HIT_M
+        opponent: HIT_L
         x_pos: 0
         y_pos: 6
         index: 2
-    - path: data/fei_young/kick02.png
+    - path: data/fei_young/1kick02.png
       width: 38
       height: 64
-      delay: 8
+      delay: 7
       defense:
         x_pos: 13
         y_pos: 32
         width: 12
         height: 31
-    - path: data/fei_young/kick03.png
+    - path: data/fei_young/1kick03.png
       width: 38
       height: 64
-      delay: 8
+      delay: 7
       defense:
         x_pos: 13
         y_pos: 32
         width: 12
         height: 31
-    - path: data/fei_young/kick04.png
-      width: 38
-      height: 64
-      delay: 8
-      defense:
-        x_pos: 13
-        y_pos: 32
-        width: 12
-        height: 31
-  - name: back_kick
+  - name: 2kick
+    combo: true
     show_hitbox: true
     frame:
-    - path: data/fei_young/back_kick00.png
+    - path: data/fei_young/2kick00.png
       width: 38
       height: 64
       delay: 8
@@ -1299,24 +1416,12 @@ character:
         y_pos: 32
         width: 12
         height: 31
-    - path: data/fei_young/back_kick01.png
+    - path: data/fei_young/2kick01.png
       width: 38
       height: 64
       delay: 8
       move:
-        x_vel: 0.2
-        y_vel: 0
-      defense:
-        x_pos: 13
-        y_pos: 32
-        width: 12
-        height: 31
-    - path: data/fei_young/back_kick02.png
-      width: 38
-      height: 64
-      delay: 8
-      move:
-        x_vel: 0.2
+        x_vel: 0.18
         y_vel: 0
       defense:
         x_pos: 13
@@ -1324,44 +1429,166 @@ character:
         width: 12
         height: 31
       offense:
-        x_pos: 26.3446
-        y_pos: 54.8445
-        width: 8
+        x_pos: 33.11
+        y_pos: 45.7939
+        width: 9
         height: 7
+      collision:
+        path: data/collision/collision.yml
+        opponent: HIT_M
+        x_pos: 0
+        y_pos: 6
+        index: 2
+    - path: data/fei_young/2kick02.png
+      width: 38
+      height: 64
+      delay: 8
+      move:
+        x_vel: 0.18
+        y_vel: 0
+      defense:
+        x_pos: 13
+        y_pos: 32
+        width: 12
+        height: 31
+    - path: data/fei_young/2kick03.png
+      width: 38
+      height: 64
+      delay: 8
+      move:
+        x_vel: 0.18
+        y_vel: 0
+      defense:
+        x_pos: 13
+        y_pos: 32
+        width: 12
+        height: 31
+    - path: data/fei_young/2kick04.png
+      width: 38
+      height: 64
+      delay: 8
+      move:
+        x_vel: 0
+        y_vel: 0
+      defense:
+        x_pos: 13
+        y_pos: 32
+        width: 12
+        height: 31
+    - path: data/fei_young/2kick05.png
+      width: 38
+      height: 64
+      delay: 8
+      move:
+        x_vel: 0
+        y_vel: 0
+      defense:
+        x_pos: 13
+        y_pos: 32
+        width: 12
+        height: 31
+  - name: 3kick
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/3kick00.png
+      width: 38
+      height: 64
+      delay: 10
+      move:
+        x_vel: 0
+        y_vel: 0
+      defense:
+        x_pos: 13
+        y_pos: 32
+        width: 12
+        height: 31
+    - path: data/fei_young/3kick01.png
+      width: 38
+      height: 64
+      delay: 10
+      move:
+        x_vel: 0.28
+        y_vel: 0
+      defense:
+        x_pos: 13
+        y_pos: 32
+        width: 12
+        height: 31
+    - path: data/fei_young/3kick02.png
+      width: 38
+      height: 64
+      delay: 10
+      move:
+        x_vel: 0.28
+        y_vel: 0
+      defense:
+        x_pos: 13
+        y_pos: 32
+        width: 12
+        height: 31
+    - path: data/fei_young/3kick03.png
+      width: 38
+      height: 64
+      delay: 10
+      move:
+        x_vel: 0.28
+        y_vel: 0
+      defense:
+        x_pos: 13
+        y_pos: 32
+        width: 12
+        height: 31
+      offense:
+        x_pos: 32.5703
+        y_pos: 46.6966
+        width: 10
+        height: 8
       collision:
         path: data/collision/collision.yml
         opponent: KNOCK_DOWN
         x_pos: 0
         y_pos: 6
         index: 2
-    - path: data/fei_young/back_kick03.png
+    - path: data/fei_young/3kick04.png
       width: 38
       height: 64
-      delay: 8
+      delay: 10
       move:
-        x_vel: 0.2
+        x_vel: 0.28
         y_vel: 0
       defense:
         x_pos: 13
         y_pos: 32
         width: 12
         height: 31
-    - path: data/fei_young/back_kick04.png
+    - path: data/fei_young/3kick05.png
       width: 38
       height: 64
-      delay: 8
+      delay: 10
       move:
-        x_vel: 0.2
+        x_vel: 0.28
         y_vel: 0
       defense:
         x_pos: 13
         y_pos: 32
         width: 12
         height: 31
-    - path: data/fei_young/back_kick05.png
+    - path: data/fei_young/3kick06.png
       width: 38
       height: 64
-      delay: 8
+      delay: 10
+      move:
+        x_vel: 0
+        y_vel: 0
+      defense:
+        x_pos: 13
+        y_pos: 32
+        width: 12
+        height: 31
+    - path: data/fei_young/3kick07.png
+      width: 38
+      height: 64
+      delay: 10
       move:
         x_vel: 0
         y_vel: 0
@@ -1472,6 +1699,80 @@ character:
       width: 38
       height: 64
       delay: 8
+      move:
+        x_vel: 0
+        y_vel: 0
+      defense:
+        x_pos: 13
+        y_pos: 32
+        width: 12
+        height: 31
+  - name: special_lite
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/special_lite00.png
+      width: 38
+      height: 64
+      delay: 7
+      move:
+        x_vel: 0
+        y_vel: 0
+      defense:
+        x_pos: 13
+        y_pos: 32
+        width: 12
+        height: 31
+    - path: data/fei_young/special_lite01.png
+      width: 38
+      height: 64
+      delay: 7
+      move:
+        x_vel: 0.34
+        y_vel: 0
+      defense:
+        x_pos: 13
+        y_pos: 32
+        width: 12
+        height: 31
+      offense:
+        x_pos: 27.1714
+        y_pos: 52.1824
+        width: 8
+        height: 6
+      collision:
+        path: data/collision/collision.yml
+        opponent: HIT_M
+        x_pos: 0
+        y_pos: 6
+        index: 2
+    - path: data/fei_young/special_lite02.png
+      width: 38
+      height: 64
+      delay: 7
+      move:
+        x_vel: 0.34
+        y_vel: 0
+      defense:
+        x_pos: 13
+        y_pos: 32
+        width: 12
+        height: 31
+    - path: data/fei_young/special_lite03.png
+      width: 38
+      height: 64
+      delay: 7
+      move:
+        x_vel: 0.34
+        y_vel: 0
+      defense:
+        x_pos: 13
+        y_pos: 32
+        width: 12
+        height: 31
+    - path: data/fei_young/special_lite04.png
+      width: 38
+      height: 64
+      delay: 7
       move:
         x_vel: 0
         y_vel: 0
