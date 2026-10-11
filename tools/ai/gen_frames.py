@@ -1,18 +1,37 @@
 #!/usr/bin/env python3
-"""Generate raw fighter frames with SDXL + OpenPose ControlNet, via ComfyUI.
+"""Generate raw fighter frames with ComfyUI, from our own drawings of the poses.
 
     python3 tools/ai/gen_frames.py tsu_ibano --state idle --out build/ai/tsu_ibano
-    python3 tools/ai/gen_frames.py tsu_ibano --state idle --limit 1 --seed 1234
+    python3 tools/ai/gen_frames.py tsu_ibano --state idle --mode controlnet
 
-Writes the raw renders and a `manifest.json` recording everything needed to
-reproduce them: checkpoint, control net, prompt, seed, sampler settings and the
-hash of the control image. At ~117 frames per fighter you will regenerate often,
-and a frame you cannot regenerate is a frame you cannot fix.
+Two modes, and the measurement that picked between them
+------------------------------------------------------
+`--mode controlnet` is SDXL plus an OpenPose ControlNet conditioned on the
+skeleton, and it holds the pose best -- but every frame is an independent sample,
+so it cannot hold anything else. Six idle frames from one prompt came back with
+six different backgrounds (white through near-black, from a prompt asking for
+pure white), six different outfits, and two frames with nothing usable in them at
+all. A sprite sheet cannot be built from that: the character has to be the same
+character.
 
-The one thing this does differently from the reference ControlNet workflow
------------------------------------------------------------------------
+`--mode img2img` is SD1.5 repainting `figure.render()`'s drawing of the same pose.
+The pose is looser -- at denoise 0.7 the sampler relaxes an extended arm -- but the
+backdrop, the palette and the framing come from the init image, so they are the
+same in every frame by construction. Across six idle frames the crown, the feet
+and the horizontal extent agreed to within 0.1 engine units. It also needs 2.0 GB
+of weights instead of 8.9, which on this machine is the difference between a run
+that finishes and one that does not.
+
+Both modes write the same `manifest.json`, recording everything needed to
+reproduce a frame: mode, checkpoint, control net or denoise, prompt, seed,
+sampler settings and the hash of the conditioning image. At ~117 frames per
+fighter you will regenerate often, and a frame you cannot regenerate is a frame
+you cannot fix.
+
+Why we write the control image rather than detect one
+----------------------------------------------------
 `taldor_sdxl_controlnet.json` runs `Openpose_Detector_Preprocessor` over a
-rendered picture and conditions on what the detector found. Here the control
+rendered picture and conditions on what the detector found. Here the conditioning
 image is written by `openpose_render.py` straight from `figure.pose()`, so:
 
   * the pose is the pose the engine will resolve hitboxes against, not a
@@ -22,8 +41,8 @@ image is written by `openpose_render.py` straight from `figure.pose()`, so:
     unusual (a grounded fighter, an arm crossing the body) and silently
     conditioning on nothing.
 
-Everything downstream still has to earn its place: a raw render is 1024x1024 and
-tens of thousands of colours, and the game wants 64x121 in sixteen. That is
+Everything downstream still has to earn its place: a raw render is 512x512 and
+tens of thousands of colours, and the game wants 180x384 in sixteen. That is
 `to_sprite.py`'s job, not this one's.
 """
 
@@ -41,8 +60,11 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "tools" / "ai"))
 sys.path.insert(0, str(REPO_ROOT / "tools" / "pipeline"))
 
+import build_fighter  # noqa: E402
+import figure  # noqa: E402
 import openpose_render  # noqa: E402
 from comfy_client import ComfyClient, ComfyError  # noqa: E402
+from PIL import Image  # noqa: E402
 
 SHEET_DIR = REPO_ROOT / "design_sheets"
 
@@ -51,6 +73,25 @@ SHEET_DIR = REPO_ROOT / "design_sheets"
 # checkpoint happened to be listed first is a roster that cannot be rebuilt.
 CHECKPOINT = "sd_xl_base_1.0.safetensors"
 CONTROL_NET = "xinsir-openpose-sdxl-1.0.safetensors"
+
+# The img2img mode's checkpoint: SD1.5, 2.0 GB against SDXL's 6.5, and it needs no
+# ControlNet at all, so the pair is 2.0 GB instead of 8.9. That is the difference
+# between a run this machine finishes and one it does not.
+CHECKPOINT_IMG2IMG = "DreamShaper_8_pruned.safetensors"
+
+# What the puppet init is composited on, and therefore the backdrop every img2img
+# frame inherits. A known flat colour is worth more than a pleasant one: to_sprite
+# finds the backdrop by flood filling from the border, and txt2img could not be
+# talked into a consistent background at all -- six idle frames came back as six
+# different colours, white to near-black, from one prompt asking for pure white.
+BACKDROP = (196, 208, 214)
+
+# How much of the init the sampler may repaint. This is the whole trade-off. Low
+# holds the pose and drifts on identity; high holds identity and lets the pose go.
+# Measured over six idle frames: 0.7 held identity, framing and palette together
+# but relaxed the extended arm; 0.5 kept the arm and flipped hair colour between
+# frames. 0.7 is the default because a consistent character is the harder half.
+DENOISE = 0.7
 
 # Shared across every fighter so the roster reads as one game rather than a pile
 # of commissions. "side view facing right" is the load-bearing phrase: the
@@ -88,11 +129,15 @@ DEFAULT_SIZE = 512
 MIN_FREE_BYTES = 12 * 1024 ** 3
 
 
-def preflight(size=DEFAULT_SIZE):
+def preflight(size=DEFAULT_SIZE, mode="controlnet"):
     """Refuse to start a run this machine cannot finish."""
     # The weights are the same either way, and they are the bulk of it; the
     # activations are what the render size controls, and they go as the square.
     needed = MIN_FREE_BYTES if size > 512 else MIN_FREE_BYTES // 2
+    if mode == "img2img":
+        # 2.0 GB of SD1.5 rather than 8.9 GB of SDXL plus ControlNet. The floor is
+        # those weights and enough room for the swap they still provoke.
+        needed //= 4
     free = shutil.disk_usage(REPO_ROOT).free
     if free >= needed:
         return
@@ -146,6 +191,75 @@ def build_workflow(pose_image, positive, seed, size=1024, steps=20, cfg=7.0,
     }
 
 
+def build_workflow_img2img(init_image, positive, seed, size=DEFAULT_SIZE, steps=24,
+                           cfg=7.0, denoise=DENOISE, prefix="cerberus"):
+    """The API-format graph: SD1.5, our puppet as the init, one sampler.
+
+    No ControlNet, because there is nothing left for it to constrain. The init
+    image already carries the pose, the palette and the backdrop, so what the
+    sampler can invent is bounded by what we drew rather than by what the prompt
+    asked for -- and the prompt is not a reliable place to bound anything. Six
+    txt2img frames from one prompt asking for a pure white background came back
+    with six different ones, white through near-black.
+    """
+    return {
+        "1": {"class_type": "CheckpointLoaderSimple",
+              "inputs": {"ckpt_name": CHECKPOINT_IMG2IMG}},
+        "2": {"class_type": "LoadImage", "inputs": {"image": init_image}},
+        "3": {"class_type": "CLIPTextEncode",
+              "inputs": {"clip": ["1", 1], "text": positive}},
+        "4": {"class_type": "CLIPTextEncode",
+              "inputs": {"clip": ["1", 1], "text": NEGATIVE}},
+        "5": {"class_type": "VAEEncode",
+              "inputs": {"pixels": ["2", 0], "vae": ["1", 2]}},
+        "6": {"class_type": "KSampler",
+              "inputs": {"model": ["1", 0], "positive": ["3", 0], "negative": ["4", 0],
+                         "latent_image": ["5", 0], "seed": seed, "steps": steps,
+                         "cfg": cfg, "sampler_name": "euler",
+                         "scheduler": "normal", "denoise": denoise}},
+        "7": {"class_type": "VAEDecode",
+              "inputs": {"vae": ["1", 2], "samples": ["6", 0]}},
+        "8": {"class_type": "SaveImage",
+              "inputs": {"images": ["7", 0], "filename_prefix": prefix}},
+    }
+
+
+def write_init_images(fighter_id, out_dir, states=None, size=DEFAULT_SIZE, limit=None):
+    """The puppet each img2img frame is repainted from. Returns the paths.
+
+    `figure.render` draws at the game's 6 px per unit, so it is drawn at game size
+    and scaled up rather than scaled down. That keeps one camera across both modes:
+    the ground lands on the same row of the generator's square as it does in the
+    control images, and the figure is the same height in both, so a frame generated
+    either way registers into the same place on the canvas.
+    """
+    sheet = load_sheet(fighter_id)
+    palette = figure.Palette(sheet["palette16"])
+    profile = sheet.get("profile", {})
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    game = int(figure.PX_PER_UNIT * openpose_render.FRAME_UNITS)
+    tall = (game, int(round(game * openpose_render.GROUND_FRACTION * 2)))
+    grow = size / game
+
+    written = []
+    for state, count, _delay, _box, _continual, pose_name in openpose_render.select_states(states):
+        builder = build_fighter.POSES.get(pose_name, build_fighter.POSES["idle"])
+        for index in range(count):
+            if limit is not None and len(written) >= limit:
+                return written
+            skeleton = figure.pose(**builder(index, count, profile))
+            grown = figure.render(skeleton, tall, palette).resize(
+                (size, int(round(tall[1] * grow))), Image.NEAREST)
+            init = Image.new("RGB", (size, size), BACKDROP)
+            init.paste(grown, (0, 0), grown)
+            path = out_dir / f"{state}{index:02d}.png"
+            init.save(path)
+            written.append(path)
+
+    return written
+
+
 def load_sheet(fighter_id):
     path = SHEET_DIR / f"{fighter_id}.json"
     if not path.is_file():
@@ -157,9 +271,22 @@ def _digest(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def generate(fighter_id, states, out_dir, size=1024, steps=20, cfg=7.0,
-             strength=0.9, seed=0, limit=None, host="127.0.0.1", port=8188):
-    """Write control images, generate a raw render for each, write the manifest."""
+def generate(fighter_id, states, out_dir, size=DEFAULT_SIZE, steps=20, cfg=7.0,
+             strength=0.9, seed=0, limit=None, host="127.0.0.1", port=8188,
+             mode="controlnet", denoise=DENOISE):
+    """Write the conditioning images, render each frame, write the manifest.
+
+    Two modes, differing in where the pose comes from:
+
+    * ``controlnet`` -- SDXL plus an OpenPose ControlNet, conditioned on the
+      generated skeleton. Best on pose, worst on consistency: every frame is an
+      independent sample, so the backdrop and the outfit change from frame to
+      frame and some frames come back unusable. Kept for comparison.
+    * ``img2img`` -- SD1.5 repainting our own drawing of the pose. The pose is
+      looser, but the backdrop, palette and framing are inherited from the init
+      image and therefore hold across a state. That is the property a sprite sheet
+      is made of, so this is the default for real work.
+    """
     sheet = load_sheet(fighter_id)
     appearance = sheet.get("appearance")
     if not appearance:
@@ -174,9 +301,12 @@ def generate(fighter_id, states, out_dir, size=1024, steps=20, cfg=7.0,
     raw_dir = out_dir / "raw"
     raw_dir.mkdir(parents=True, exist_ok=True)
 
-    poses = openpose_render.write_poses(fighter_id, out_dir / "poses", states, size)
-    if limit is not None:
-        poses = poses[:limit]
+    if mode == "img2img":
+        poses = write_init_images(fighter_id, out_dir / "init", states, size, limit)
+    else:
+        poses = openpose_render.write_poses(fighter_id, out_dir / "poses", states, size)
+        if limit is not None:
+            poses = poses[:limit]
     if not poses:
         raise SystemExit("no frames selected; nothing to generate")
 
@@ -188,10 +318,15 @@ def generate(fighter_id, states, out_dir, size=1024, steps=20, cfg=7.0,
     started = time.time()
     for number, pose_path in enumerate(poses, start=1):
         frame_seed = seed + number - 1
-        uploaded = client.upload_image(pose_path, subfolder="cerberus_poses")
-        prompt_id = client.queue(build_workflow(uploaded, positive, frame_seed,
-                                                size, steps, cfg, strength,
-                                                prefix=f"cerberus_{fighter_id}"))
+        uploaded = client.upload_image(pose_path, subfolder=f"cerberus_{mode}")
+        if mode == "img2img":
+            graph = build_workflow_img2img(uploaded, positive, frame_seed, size,
+                                           steps, cfg, denoise,
+                                           prefix=f"cerberus_{fighter_id}")
+        else:
+            graph = build_workflow(uploaded, positive, frame_seed, size, steps, cfg,
+                                   strength, prefix=f"cerberus_{fighter_id}")
+        prompt_id = client.queue(graph)
         print(f"  [{number}/{len(poses)}] {pose_path.stem} seed={frame_seed} "
               f"-> {prompt_id[:8]}", flush=True)
         images = client.wait(prompt_id)
@@ -213,10 +348,13 @@ def generate(fighter_id, states, out_dir, size=1024, steps=20, cfg=7.0,
         "created": time.strftime("%Y-%m-%dT%H:%M:%S"),
         "seconds": round(time.time() - started, 1),
         "settings": {
-            "checkpoint": CHECKPOINT, "control_net": CONTROL_NET,
+            "mode": mode,
+            "checkpoint": CHECKPOINT_IMG2IMG if mode == "img2img" else CHECKPOINT,
+            "control_net": None if mode == "img2img" else CONTROL_NET,
             "size": size, "steps": steps, "cfg": cfg,
-            "control_strength": strength, "sampler": "euler",
-            "scheduler": "normal", "seed_base": seed,
+            "denoise": denoise if mode == "img2img" else None,
+            "control_strength": None if mode == "img2img" else strength,
+            "sampler": "euler", "scheduler": "normal", "seed_base": seed,
         },
         "prompt": {"positive": positive, "negative": NEGATIVE},
         "frames": records,
@@ -238,8 +376,16 @@ def main(argv=None):
     parser.add_argument("--size", type=int, default=DEFAULT_SIZE)
     parser.add_argument("--steps", type=int, default=20)
     parser.add_argument("--cfg", type=float, default=7.0)
+    parser.add_argument("--mode", choices=("img2img", "controlnet"),
+                        default="img2img",
+                        help="where the pose comes from; img2img inherits the "
+                             "backdrop, palette and framing from our own drawing "
+                             "(default), controlnet pins the skeleton harder")
+    parser.add_argument("--denoise", type=float, default=DENOISE,
+                        help="img2img only: how much of our drawing the sampler may "
+                             "repaint; low holds the pose, high holds identity")
     parser.add_argument("--strength", type=float, default=0.9,
-                        help="ControlNet strength; 1.0 pins hardest to the skeleton")
+                        help="controlnet only: 1.0 pins hardest to the skeleton")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--host", default="127.0.0.1")
@@ -250,9 +396,10 @@ def main(argv=None):
         name.strip() for name in args.state.split(",") if name.strip()]
 
     try:
-        preflight(args.size)
+        preflight(args.size, args.mode)
         generate(args.fighter, states, Path(args.out), args.size, args.steps,
-                 args.cfg, args.strength, args.seed, args.limit, args.host, args.port)
+                 args.cfg, args.strength, args.seed, args.limit, args.host, args.port,
+                 mode=args.mode, denoise=args.denoise)
     except ComfyError as error:
         print(f"\n{error}", file=sys.stderr)
         return 1
