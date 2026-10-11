@@ -92,7 +92,7 @@ where it should have:
 PASS: hitboxes and hurtboxes connect in the engine
 ```
 
-All nine scenes pass:
+All ten scenes pass:
 
 ```
   m0_smoke      PASS      m0_render     PASS
@@ -100,7 +100,61 @@ All nine scenes pass:
   m2_hud        PASS      m3_boxes      PASS
   m2_flow       PASS      video_options PASS
   m3_roster     PASS
+  walls         PASS
 ```
+
+### Movesets
+
+Six normals — light, medium and heavy for each limb — two specials, and a chain
+per limb.
+
+| | LP | MP | HP | LK | MK | HK |
+|---|---|---|---|---|---|---|
+| state | `1punch` | `2punch` | `3punch` | `1kick` | `2kick` | `3kick` |
+| lands on | hand | hand | hand | **foot** | **foot** | **foot** |
+| world y | 20–26 | 21–27 | 21–28 | **−1–5** | **10–17** | **14–22** |
+| strength | HIT_M | HIT_M | HIT_H | **HIT_L** | HIT_M | KNOCK_DOWN |
+
+Damage follows the strength, out of the engine's own table (`actions.cpp`): 4 / 7 /
+11 / 10. The kicks come off `foot_far` and the punches off `hand_far`, so a move
+named for a leg reaches with a leg. Every strike used to be `_strike`, which
+animates the arm and leaves `lift` — the only parameter that moves a leg — at 0
+for the state called `kick`: the move named for a leg reached out with an arm, and
+the hitbox was a fist the game called a foot. The three kicks are a shin kick, a
+hip-height kick and a chest-height kick, which is what those hip and knee angles
+actually produce rather than what they were named.
+
+**Combos** are the engine's own `combo: true`: while the current animation is a
+combo, a command only takes effect if the opponent is hurt. The chain is therefore
+confirmed by the hit rather than by a timer — `LP → MP → HP` and `LK → MK → HK`,
+with the heavies as enders that cannot themselves be cancelled out of, because a
+chain with no ender is not a chain. A whiffed jab plays out and returns to idle
+like any other move.
+
+**Specials** are two off one motion, which is the shape the fixture already uses —
+its own `QCF_LP` and `QCF_HP` are the same `F,~D` prefix with the punch button
+choosing: `QCF+HP` is the field (`KNOCK_DOWN`), `QCF+LP` a lighter, faster version
+of it (`HIT_M`).
+
+`tools/strike_strip.py` composes every strike on the frame its hitbox is live, so
+what can be checked by eye is what the game will actually test.
+
+### The pushbox has no answer for a wall
+
+The engine's pushbox is two velocities — the mover is shoved back half its speed,
+the opponent twice it. That is fine while the opponent has somewhere to be shoved
+to. A fighter clamped against a wall does not, so the mover walks into the space it
+is standing in: measured with walls and nothing else changed, p1 reached 107.83
+against p2's 108.00, fully overlapped, after which its own punch began 8.7 units
+*past* the opponent and the fight never connected again.
+
+Patch `0004` resolves the remainder of the separation in steps — and only when the
+opponent is at a wall, which is the case the shove cannot handle. Running it
+always also separates a free opponent, and that is not an improvement: the
+fixture's own match test went from 20 hits to 6 and stopped reaching a decision,
+because two fighters that never touch cannot shove each other across the stage
+either. The shove is the engine's design; the patch repairs the one situation it
+has no answer for rather than replacing it.
 
 ### Stage walls
 

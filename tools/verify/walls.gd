@@ -14,12 +14,21 @@ extends Control
 ##   /Applications/Godot.app/Contents/MacOS/Godot --headless --path . \
 ##       res://tools/verify/walls.tscn
 
-## How long to hold a direction before deciding the fighter has stopped. Sized for
-## the longer of the two walks: from the left wall to the right wall is the whole
-## arena, about 118 units, which at 0.34 units a frame is roughly 350 engine ticks
-## -- and the engine runs those at 100 a second while Godot runs at 60, so a frame
-## budget of 240 leaves margin on both walks rather than only the short one.
-const PUSH_FRAMES := 240
+## Frame budgets, per phase, and they are large because walking is slow.
+##
+## `walk_forward` declares `x_vel: 0.34` and the engine applies a move once per
+## ANIMATION FRAME, not once per tick -- at delay 7 that is one step every eight
+## ticks, so a fighter crosses about 4.25 units a second. The arena is 118 units
+## wide. This test used to pass with a 240-frame budget only because the engine's
+## pushbox shoves the opponent at twice the walk speed, so the far wall arrived by
+## accident rather than by walking; patch 0004 stopped the shove from carrying the
+## opponent, and the real rate showed up.
+##
+## The left wall is close and the right wall is the whole arena away, so they get
+## different budgets rather than one that is wasteful at one end and short at the
+## other.
+const LEFT_FRAMES := 700
+const RIGHT_FRAMES := 1800
 
 var _failures: Array = []
 var _phase := "setup"
@@ -88,13 +97,13 @@ func _process(_delta: float) -> void:
 	match _phase:
 		"left":
 			_walk("p1_left", "p1_right")
-			if _frames > PUSH_FRAMES:
+			if _frames > LEFT_FRAMES:
 				_check_edge("left", _bounds.x)
 				_phase = "right"
 				_frames = 0
 		"right":
 			_walk("p1_right", "p1_left")
-			if _frames > PUSH_FRAMES:
+			if _frames > RIGHT_FRAMES:
 				_check_edge("right", _bounds.y)
 				_phase = "arena"
 				_frames = 0

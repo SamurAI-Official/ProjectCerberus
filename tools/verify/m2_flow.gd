@@ -30,7 +30,12 @@ const RESULT_GRACE_SECONDS := 18.0
 ## tools/verify/m3_boxes.tscn at PUNCH_PERIOD_FRAMES = 24: round 1 KOs, round 2
 ## runs its full timer with the fighters adjacent and no hitbox drawn.
 const PUNCH_PERIOD_FRAMES := 14
-const PUNCH_HOLD_FRAMES := 4
+## Long enough to span an engine tick. The engine steps every 10 ms
+## (GAME_TIME_UPDATE_FREQ) while a Godot frame in a headless run is about a
+## millisecond, so a press held for four frames can begin and end between two
+## ticks and never be read at all -- which looks exactly like an attack that does
+## not work. Eight frames is a press the engine cannot miss.
+const PUNCH_HOLD_FRAMES := 8
 
 var _frames := 0
 var _elapsed := 0.0
@@ -100,6 +105,12 @@ func _sample_health() -> void:
 	var engine_node = _match_node.get_node_or_null("OpenFight")
 	if engine_node == null:
 		return
+	# Where they are, not just how they are. A fight that stops connecting is a
+	# fight whose geometry changed, and health alone cannot tell that from a fight
+	# whose input stopped arriving.
+	if _frames % 120 == 0 and engine_node.has_method("get_player_x"):
+		print("  t=%.1fs  p1 x=%7.2f  p2 x=%7.2f" % [_elapsed,
+				float(engine_node.get_player_x(0)), float(engine_node.get_player_x(1))])
 	for index in [0, 1]:
 		var health: int = engine_node.get_health(index)
 		if health != _last_health[index]:

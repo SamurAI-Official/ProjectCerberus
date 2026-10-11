@@ -1,0 +1,51 @@
+diff --git a/src/libopenfight/player.cpp b/src/libopenfight/player.cpp
+index c035168..2f1ca76 100644
+--- a/src/libopenfight/player.cpp
++++ b/src/libopenfight/player.cpp
+@@ -281,7 +281,7 @@ void Player::checkCollisions(float action_x_vel) {
+         // deep the overlap is. That was survivable for as long as the opponent
+         // could always be shoved further along; it stopped being survivable the
+         // moment a stage had an edge, because an opponent against a wall cannot
+-        // move at all and the mover walks straight through the space it is
++        // move at all and the mover then walks straight through the space it is
+         // standing in.
+         //
+         // Measured, with walls and nothing else changed: p1 walked to 107.83 with
+@@ -289,17 +289,29 @@ void Player::checkCollisions(float action_x_vel) {
+         // units *past* the opponent, so the fight lands five hits and never
+         // connects again -- which reads as a moveset bug and is not one.
+         //
+-        // The rest of the separation therefore happens here, in steps, with a
++        // The remainder of the separation therefore happens here, in steps, with a
+         // bound. The bound matters rather than being defensive: two fighters both
+         // against the same wall cannot be pulled apart, and a pushbox that loops
+         // forever is worse than one that gives up.
+-        const float step = 0.25f;   // units
+-        const int max_steps = 64;   // 16 units, wider than a hurtbox
+-        const float away = action_x_vel > 0 ? -step : step;
+-        for (int i = 0; i < max_steps; i++) {
+-            if (!this->getDefense()->overlaps(opponent->getDefense()))
+-                break;
+-            moveXpos(away);
++        //
++        // Deliberately only when the opponent is AT a wall, which is the case the
++        // shove cannot handle. Running it always also separates a free opponent,
++        // and that is not an improvement -- the fixture's own match test went from
++        // 20 hits to 6 and stopped reaching a decision, because two fighters that
++        // never touch cannot shove each other across the stage either. The shove is
++        // the engine's design; this is a repair for the one situation it has no
++        // answer for, not a replacement for it.
++        const bool opponent_pinned = opponent->getXpos() <= opponent->getBoundsMinX() ||
++                                     opponent->getXpos() >= opponent->getBoundsMaxX();
++        if (opponent_pinned) {
++            const float step = 0.25f; // units
++            const int max_steps = 64; // 16 units, wider than a hurtbox
++            const float away = action_x_vel > 0 ? -step : step;
++            for (int i = 0; i < max_steps; i++) {
++                if (!this->getDefense()->overlaps(opponent->getDefense()))
++                    break;
++                moveXpos(away);
++            }
+         }
+     }
+ }
