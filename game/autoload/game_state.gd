@@ -26,6 +26,12 @@ const SCREENS := {
 const FIGHTER_MANIFEST := "res://data/fighters/manifest.json"
 const STAGE_MANIFEST := "res://data/stages/manifest.json"
 
+## Where the walls go when a stage declares none. A stage without bounds is a data
+## bug, but a bounded arena is a better failure than two fighters walking to
+## infinity, so the fallback is the same pair the shipped stage uses rather than
+## an unbounded range.
+const FALLBACK_BOUNDS := Vector2(-10.0, 108.0)
+
 var fighters: Array = []
 var stages: Array = []
 
@@ -110,6 +116,25 @@ func stage_background() -> String:
 
 func stage_name() -> String:
 	return get_stage().get("name", "?")
+
+## The stage's walls in world x, as a Vector2(min_x, max_x).
+##
+## Authored per stage rather than derived, because the right answer depends on how
+## much of the world the camera shows -- and this engine's camera does not move.
+## Nothing in it has ever moved the camera: `Camera` is constructed, read by the
+## renderer and never written, so the arena a player can see is fixed, and a stage
+## wider than that view would put its far wall somewhere nobody can see. (The
+## backgrounds are 200 units wide and the view is about 130, so they already
+## overflow it on both sides.) A follow camera turns these back into "the stage's
+## real edges" rather than "the screen's"; until then they are the screen's.
+##
+## The numbers are the visible window's edges inset by half a fighter's hurtbox,
+## which is where a fighter should stop: body fully on screen, with an extended
+## arm allowed to leave it.
+func stage_bounds() -> Vector2:
+	var bounds: Dictionary = get_stage().get("bounds", {})
+	return Vector2(float(bounds.get("min_x", FALLBACK_BOUNDS.x)),
+			float(bounds.get("max_x", FALLBACK_BOUNDS.y)))
 
 func record_result(winner: int, wins: Array, rounds: int) -> void:
 	last_result = {

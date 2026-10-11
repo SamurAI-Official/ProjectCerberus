@@ -1,0 +1,284 @@
+diff --git a/src/libopenfight/gameContext.cpp b/src/libopenfight/gameContext.cpp
+index c8965d8..7ac46b5 100644
+--- a/src/libopenfight/gameContext.cpp
++++ b/src/libopenfight/gameContext.cpp
+@@ -44,6 +44,12 @@ bool GameContext::setup(const GameSetup &setup, RenderBackend &renderer, const R
+     p1->setPlayerNumber(0);
+     p2->setPlayerNumber(1);
+ 
++    // The stage's walls. Set before resetMatch(), which is what places both
++    // fighters -- so the edges are in force from the first frame of round one
++    // rather than from whenever a host got round to mentioning them.
++    p1->setBounds(setup.stage_min_x, setup.stage_max_x);
++    p2->setBounds(setup.stage_min_x, setup.stage_max_x);
++
+     auto listener = [this](const MatchEvent &event) { pushEvent(event); };
+     p1->setMatchListener(listener);
+     p2->setMatchListener(listener);
+@@ -263,6 +269,16 @@ void GameContext::resetMatch() {
+ // Project Cerberus: accessors and the event queue
+ // ---------------------------------------------------------------------------
+ 
++float GameContext::getPlayerX(int player) const {
++    if (player == 0 && player_one.getPlayer() != nullptr)
++        return player_one.getPlayer()->getXpos();
++
++    if (player == 1 && player_two.getPlayer() != nullptr)
++        return player_two.getPlayer()->getXpos();
++
++    return 0.0f;
++}
++
+ int GameContext::getHealth(int player) const {
+     if (player == 0 && player_one.getPlayer() != nullptr)
+         return player_one.getPlayer()->getHealth();
+diff --git a/src/libopenfight/gameContext.h b/src/libopenfight/gameContext.h
+index 658c3c9..c97e41d 100644
+--- a/src/libopenfight/gameContext.h
++++ b/src/libopenfight/gameContext.h
+@@ -17,6 +17,13 @@ struct GameSetup {
+     std::string player_two_path;
+     std::string moves_path;
+     std::string background_path;
++
++    // Project Cerberus: the stage's walls, in world x. Defaulted wider than any
++    // stage rather than to zero, so a caller that has not been taught about
++    // stages gets the old unbounded behaviour instead of both fighters being
++    // snapped to the same point by an unset field.
++    float stage_min_x = -1000000.0f;
++    float stage_max_x = 1000000.0f;
+ };
+ 
+ struct FrameInput {
+@@ -70,6 +77,17 @@ public:
+ 
+     // ---- Project Cerberus: what OpenFightNode exposes to Godot ------------
+     int getHealth(int player) const;
++
++    // Project Cerberus: where a fighter is, horizontally. Added for two callers
++    // that need it for the same reason -- a host framing a camera on the action,
++    // and a check asking whether a wall actually stopped something. Neither
++    // question can be answered from outside without it: the node exposed no
++    // position at all.
++    //
++    // X only, deliberately. The engine's camera is a one-dimensional follow --
++    // nothing in it reads a camera y -- so a get_player_y would be a binding
++    // with no caller, which is the kind of thing that rots.
++    float getPlayerX(int player) const;
+     int getRound() const;
+     int getRoundWins(int player) const;
+     int getRoundTimeMs() const;
+diff --git a/src/libopenfight/player.cpp b/src/libopenfight/player.cpp
+index ed5edfc..5aa0d21 100644
+--- a/src/libopenfight/player.cpp
++++ b/src/libopenfight/player.cpp
+@@ -16,6 +16,11 @@ Player::Player() {
+     spawn_alpha = 1.0f;
+     spawn_scale = 1.0f;
+ 
++    // Wider than any stage, so "no walls" is the default and a match that never
++    // sets them behaves exactly as it did before walls existed.
++    bounds_min_x = -1000000.0f;
++    bounds_max_x = 1000000.0f;
++
+     animation_manager = new ObjectManager<Animation>();
+     objects = new ObjectManager<Player>();
+ }
+@@ -46,6 +51,8 @@ Player::Player(const Player &p) {
+     spawn_y = p.spawn_y;
+     spawn_alpha = p.spawn_alpha;
+     spawn_scale = p.spawn_scale;
++    bounds_min_x = p.bounds_min_x;
++    bounds_max_x = p.bounds_max_x;
+     match_listener = p.match_listener;
+ 
+     current_state = p.current_state;
+@@ -277,6 +284,14 @@ void Player::moveXpos(float value) {
+         x_pos -= value;
+     else
+         x_pos += value;
++
++    // The stage's walls. Enforced here rather than at each caller -- walking,
++    // the pushbox, and the pushbox's shove of the opponent all come through this
++    // one function -- so there is exactly one place for an edge to be got wrong.
++    if (x_pos < bounds_min_x)
++        x_pos = bounds_min_x;
++    else if (x_pos > bounds_max_x)
++        x_pos = bounds_max_x;
+ }
+ 
+ void Player::setCurrentState(string state) {
+@@ -340,6 +355,23 @@ void Player::notifyMatch(const MatchEvent &event) {
+         match_listener(event);
+ }
+ 
++// ---------------------------------------------------------------------------
++// Project Cerberus: the stage walls
++// ---------------------------------------------------------------------------
++
++void Player::setBounds(float min_x, float max_x) {
++    bounds_min_x = min_x;
++    bounds_max_x = max_x;
++}
++
++float Player::getBoundsMinX() const {
++    return bounds_min_x;
++}
++
++float Player::getBoundsMaxX() const {
++    return bounds_max_x;
++}
++
+ void Player::resetForRound() {
+     health = max_health;
+     is_hurt = false;
+diff --git a/src/libopenfight/player.h b/src/libopenfight/player.h
+index e68aa0c..4c25065 100644
+--- a/src/libopenfight/player.h
++++ b/src/libopenfight/player.h
+@@ -47,6 +47,20 @@ private:
+     float spawn_y;
+     float spawn_alpha;
+     float spawn_scale;
++
++    // Project Cerberus: the stage's walls, in world x.
++    //
++    // A fighting game has edges and this engine had none: nothing anywhere
++    // bounded a fighter's x, so both of them walked off the stage and kept
++    // going until the round ended. Set once per match from the stage's own
++    // data, and applied inside moveXpos() so that walking, the pushbox and the
++    // pushbox's shove all meet the same edge instead of three separate ones.
++    //
++    // Defaulted to a range wider than any stage so that a caller which has not
++    // been taught about stages keeps the old unbounded behaviour, rather than
++    // having both fighters snapped to x=0 by an uninitialised field.
++    float bounds_min_x;
++    float bounds_max_x;
+     std::function<void(const MatchEvent &)> match_listener;
+ 
+     std::string current_state;
+@@ -103,6 +117,14 @@ public:
+     // re-parsing the character YAML.
+     void resetForRound();
+ 
++    // ---- Project Cerberus: the stage walls ---------------------------------
++    // Called once per match, before the first round. The range is stored as
++    // given rather than sorted: a caller that hands in min > max has a data
++    // bug, and quietly swapping the pair would hide which half of it was wrong.
++    void setBounds(float min_x, float max_x);
++    float getBoundsMinX() const;
++    float getBoundsMaxX() const;
++
+     void initialize(std::string file_name, bool player_one, float x_pos, float y_pos,
+                     const ReadTextFileCallback &read_text_file = ReadTextFileCallback());
+     void setOpponent(Player *opponent);
+diff --git a/src/platform/godot/openFightNode.cpp b/src/platform/godot/openFightNode.cpp
+index e9113ec..bec2eab 100644
+--- a/src/platform/godot/openFightNode.cpp
++++ b/src/platform/godot/openFightNode.cpp
+@@ -18,6 +18,11 @@ OpenFightNode::OpenFightNode() : running(false), update_accumulator_ms(0.0f) {
+     player_two_path = "res://data/ryu/ryu.yml";
+     moves_path = "res://data/ryu/moves.yml";
+     background_path = "res://data/background.png";
++
++    // Wider than any stage: a scene that never sets these gets the engine's old
++    // unbounded behaviour rather than both fighters pinned to one point.
++    stage_min_x = -1000000.0f;
++    stage_max_x = 1000000.0f;
+ }
+ 
+ OpenFightNode::~OpenFightNode() {
+@@ -58,6 +63,16 @@ void OpenFightNode::_bind_methods() {
+     ADD_PROPERTY(PropertyInfo(Variant::STRING, "moves_path"), "set_moves_path", "get_moves_path");
+     ADD_PROPERTY(PropertyInfo(Variant::STRING, "background_path"), "set_background_path", "get_background_path");
+ 
++    // ---- Project Cerberus: the stage walls and where a fighter is ----------
++    ClassDB::bind_method(D_METHOD("set_stage_min_x", "value"), &OpenFightNode::set_stage_min_x);
++    ClassDB::bind_method(D_METHOD("get_stage_min_x"), &OpenFightNode::get_stage_min_x);
++    ClassDB::bind_method(D_METHOD("set_stage_max_x", "value"), &OpenFightNode::set_stage_max_x);
++    ClassDB::bind_method(D_METHOD("get_stage_max_x"), &OpenFightNode::get_stage_max_x);
++    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "stage_min_x"), "set_stage_min_x", "get_stage_min_x");
++    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "stage_max_x"), "set_stage_max_x", "get_stage_max_x");
++
++    ClassDB::bind_method(D_METHOD("get_player_x", "player"), &OpenFightNode::get_player_x);
++
+     // ---- Project Cerberus: match API --------------------------------------
+     ClassDB::bind_method(D_METHOD("get_health", "player"), &OpenFightNode::get_health);
+     ClassDB::bind_method(D_METHOD("get_round"), &OpenFightNode::get_round);
+@@ -153,7 +168,7 @@ void OpenFightNode::setup_game() {
+                          *renderer);
+ 
+     GameSetup setup = {toResourcePath(player_one_path), toResourcePath(player_two_path), toResourcePath(moves_path),
+-                       toResourcePath(background_path)};
++                       toResourcePath(background_path), stage_min_x, stage_max_x};
+ 
+     ReadTextFileCallback read_text_file = [](const std::string &path, std::string &contents) {
+         String godot_path = String::utf8(path.c_str());
+@@ -219,6 +234,30 @@ String OpenFightNode::get_background_path() const {
+     return background_path;
+ }
+ 
++// ---------------------------------------------------------------------------
++// Project Cerberus: the stage walls and where a fighter is
++// ---------------------------------------------------------------------------
++
++void OpenFightNode::set_stage_min_x(float value) {
++    stage_min_x = value;
++}
++
++float OpenFightNode::get_stage_min_x() const {
++    return stage_min_x;
++}
++
++void OpenFightNode::set_stage_max_x(float value) {
++    stage_max_x = value;
++}
++
++float OpenFightNode::get_stage_max_x() const {
++    return stage_max_x;
++}
++
++float OpenFightNode::get_player_x(int player) const {
++    return game != nullptr ? game->getPlayerX(player) : 0.0f;
++}
++
+ // ---------------------------------------------------------------------------
+ // Project Cerberus: match state
+ // ---------------------------------------------------------------------------
+diff --git a/src/platform/godot/openFightNode.h b/src/platform/godot/openFightNode.h
+index a18a979..a00943e 100644
+--- a/src/platform/godot/openFightNode.h
++++ b/src/platform/godot/openFightNode.h
+@@ -25,6 +25,12 @@ private:
+     String moves_path;
+     String background_path;
+ 
++    // Project Cerberus: the stage's walls in world x, held as two plain floats
++    // so a host sets them the same way it sets the paths -- before add_child(),
++    // which is when setup_game() runs and reads them.
++    float stage_min_x;
++    float stage_max_x;
++
+     static std::string toFilePath(const String &value);
+     static std::string toResourcePath(const String &value);
+     FrameInput readFrameInput() const;
+@@ -54,6 +60,19 @@ public:
+     void set_background_path(const String &path);
+     String get_background_path() const;
+ 
++    // Project Cerberus: the stage's walls. A fighting game has edges, and this
++    // engine had none -- a fighter walked off the stage and kept going, because
++    // nothing anywhere bounded an x.
++    void set_stage_min_x(float value);
++    float get_stage_min_x() const;
++    void set_stage_max_x(float value);
++    float get_stage_max_x() const;
++
++    // Where a fighter is. Exposed because two things need it and neither could
++    // have it: a host framing a camera on the action, and a check asking whether
++    // a wall actually stopped something.
++    float get_player_x(int player) const;
++
+     // ---- Project Cerberus: match state exposed to Godot -------------------
+     // Before this, the extension's entire Godot surface was four settable
+     // strings: no health, no rounds, and no signals, so a host could not build a

@@ -4,14 +4,16 @@
     "name": "GIJUTSU GYM",
     "detail": "The academy training hall: a glass observation wall with the class watching through it, ice-shard set dressing from \"The Clouds of Frozen Tears\", and a bright training floor.",
     "universe": "yokai_honno_academy",
-    "background": "res://data/stages/gijutsu_gym/background.png"
+    "background": "res://data/stages/gijutsu_gym/background.png",
+    "bounds": {"min_x": -10, "max_x": 108}
   },
   {
     "id": "training_alley",
     "name": "TRAINING ALLEY",
     "detail": "The vendored engine's placeholder background: one flat 376x248 image. Kept as the fixture the M0 and M1 verification scenes run against.",
     "universe": "fixture",
-    "background": "res://data/background.png"
+    "background": "res://data/background.png",
+    "bounds": {"min_x": -10, "max_x": 108}
   }
 ]
 

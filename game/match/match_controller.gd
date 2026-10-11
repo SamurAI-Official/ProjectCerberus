@@ -18,6 +18,10 @@ const DRAW := -1
 const FALLBACK_FIGHTER := "res://data/ryu/ryu.yml"
 const FALLBACK_MOVES := "res://data/ryu/moves.yml"
 const FALLBACK_BACKGROUND := "res://data/background.png"
+## Where the walls go when there is no flow host to ask. Same pair GameState falls
+## back to; kept here too so F6 on match.tscn gets a bounded arena rather than an
+## unbounded one.
+const FALLBACK_BOUNDS := Vector2(-10.0, 108.0)
 
 const PAUSE_LAYER := 10
 const RESULT_DELAY := 2.6
@@ -65,6 +69,12 @@ func _spawn_fighter_node() -> void:
 	_fight.player_two_path = _fighter_yaml(1)
 	_fight.moves_path = _moves_yaml(0)
 	_fight.background_path = _background()
+	# The stage's walls, set here rather than after add_child: _ready() runs
+	# setup_game(), which reads them, so anything set afterwards arrives a match
+	# too late.
+	var bounds := _bounds()
+	_fight.stage_min_x = bounds.x
+	_fight.stage_max_x = bounds.y
 
 	add_child(_fight)
 	move_child(_fight, 0)
@@ -99,6 +109,15 @@ func _moves_yaml(index: int) -> String:
 
 func _background() -> String:
 	return _from_state("stage_background", FALLBACK_BACKGROUND)
+
+## The stage's walls, as Vector2(min_x, max_x). Read from the flow host for the
+## same reason the paths are: the stage is chosen in stage select, and a wall
+## derived from anything else would be a second opinion about where the arena ends.
+func _bounds() -> Vector2:
+	var state := get_node_or_null("/root/GameState")
+	if state != null and state.has_method("stage_bounds"):
+		return state.call("stage_bounds")
+	return FALLBACK_BOUNDS
 
 
 func _process(_delta: float) -> void:

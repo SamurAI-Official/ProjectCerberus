@@ -102,6 +102,38 @@ All nine scenes pass:
   m3_roster     PASS
 ```
 
+### Stage walls
+
+A fighting game has edges; openfight had none. Nothing anywhere in it bounded a
+fighter's x, so both of them walked off the stage and kept going until the round
+ended — visible as a fighter strolling past the opponent and out of the picture.
+
+Patch `0003` clamps x inside `Player::moveXpos`, which is the single function
+every position change goes through — walking, the pushbox, and the pushbox's shove
+of the opponent — so there is one edge rather than three. The bounds are stage
+data (`bounds` in the stage manifest) rather than constants, because the right
+answer depends on how much of the world is on screen, and this engine's camera has
+never moved: `Camera` is constructed, read by the renderer, and never written. The
+backgrounds are 200 units wide against a view of about 130, so they already
+overflow it — a follow camera is what turns these bounds from "the screen's edges"
+back into "the stage's".
+
+The patch also exposes `get_player_x`, without which none of this is checkable:
+the node published no position at all, which is exactly why "walked off the stage"
+went unnoticed. `walls` drives a fighter into each edge and asserts the pair
+stops there:
+
+```
+  left wall  : furthest   -10.00 (edge   -10.0)   p1  -10.00  p2   70.00
+  right wall : furthest   108.00 (edge   108.0)   p1  100.84  p2  108.00
+PASS: the stage has edges and the fighters stop at them
+```
+
+p1 stops at the left wall exactly. On the right it stops at 100.8 rather than 108
+because walking right drives p1 into p2, and the pushbox carries p2 to the wall
+and pins it there — which is the correct interaction, and why the check asserts
+the *pair* reaches the edge rather than one fighter.
+
 ### The render path
 
 The game draws at 768x432 and enlarges that to whatever the window is, and *how*
