@@ -71,6 +71,10 @@ if [[ "${GODOT_HEADLESS_ONLY:-0}" == "1" ]]; then
 else
     run m0_render "${GODOT}" --path . res://tools/verify/m0_render.tscn
     run m2_render "${GODOT}" --path . res://tools/verify/m2_render.tscn
+    # The only check that fails when hitboxes and hurtboxes stop overlapping. The
+    # headless roster test notices too, but it reports it as a 120-second timeout
+    # rather than as a box problem, which is a much longer walk to the same place.
+    run m3_boxes "${GODOT}" --path . res://tools/verify/m3_boxes.tscn
 fi
 
 echo

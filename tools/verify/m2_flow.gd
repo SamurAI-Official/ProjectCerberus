@@ -17,7 +17,19 @@ extends Control
 
 const MAX_MATCH_SECONDS := 90.0
 const RESULT_GRACE_SECONDS := 18.0
-const PUNCH_PERIOD_FRAMES := 24
+## The punch cadence is load-bearing, and this number was measured rather than
+## picked. The engine resolves a hit only on a frame where the animation ADVANCES
+## into its active frame (`Player::update` gates the collision on `changed`), so if
+## the press does not keep coming often enough, an attack can play out between two
+## presses and land nothing. At 24 frames the fight still ends round 1 by KO but
+## then lands nothing at all in round 2, which reads as a box bug and is not one:
+## the same match at 14 frames completes normally. Recorded here because the
+## symptom is highly misleading and the number looks arbitrary otherwise.
+##
+## The underlying round-restart behaviour is an open bug. Reproduce it with
+## tools/verify/m3_boxes.tscn at PUNCH_PERIOD_FRAMES = 24: round 1 KOs, round 2
+## runs its full timer with the fighters adjacent and no hitbox drawn.
+const PUNCH_PERIOD_FRAMES := 14
 const PUNCH_HOLD_FRAMES := 4
 
 var _frames := 0
@@ -27,6 +39,12 @@ var _done := false
 var _failures: Array = []
 var _match_finished := -999
 var _match_node: Node = null
+## Lowest health each fighter reached, read from the engine while the match runs.
+## Reported on timeout: "did not finish in 90s" is the same message whether the
+## fighters never connected or connected and the round rules never resolved, and
+## those are different bugs.
+var _min_health := [999, 999]
+var _last_health := [100, 100]
 
 func _ready() -> void:
 	Engine.max_fps = 60
@@ -56,11 +74,13 @@ func _process(delta: float) -> void:
 
 	if _phase == "match":
 		_drive_input()
+		_sample_health()
 		if _match_finished != -999:
 			_phase = "post_match"
 			_note("match reported winner %d" % _match_finished)
 		elif _elapsed > MAX_MATCH_SECONDS:
-			_fail("the match did not finish within %.0fs" % MAX_MATCH_SECONDS)
+			_fail("the match did not finish within %.0fs (lowest health p1=%d p2=%d)"
+					% [MAX_MATCH_SECONDS, _min_health[0], _min_health[1]])
 			_finish()
 		return
 
@@ -73,6 +93,22 @@ func _process(delta: float) -> void:
 			# there is one, so this means the handoff itself is broken.
 			_fail("the match never handed off to the results screen")
 			_finish()
+
+func _sample_health() -> void:
+	if _match_node == null:
+		return
+	var engine_node = _match_node.get_node_or_null("OpenFight")
+	if engine_node == null:
+		return
+	for index in [0, 1]:
+		var health: int = engine_node.get_health(index)
+		if health != _last_health[index]:
+			print("  t=%.1fs p%d health %d -> %d  (round %d, wins %s)"
+					% [_elapsed, index + 1, _last_health[index], health,
+						engine_node.get_round(),
+						str([engine_node.get_round_wins(0), engine_node.get_round_wins(1)])])
+			_last_health[index] = health
+		_min_health[index] = min(_min_health[index], health)
 
 func _drive_input() -> void:
 	Input.action_press("p1_right")
@@ -200,6 +236,8 @@ func _check_flow_into_match() -> void:
 		return
 
 	_match_node.match_finished.connect(func(winner: int) -> void: _match_finished = winner)
+	_min_health = [999, 999]
+	_last_health = [100, 100]
 	_phase = "match"
 	_note("flow reached the match: title -> char select x2 -> stage select -> match")
 

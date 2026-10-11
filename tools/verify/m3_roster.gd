@@ -13,33 +13,51 @@ extends Control
 ##   /Applications/Godot.app/Contents/MacOS/Godot --headless --path . \
 ##       res://tools/verify/m3_roster.tscn
 ##
-## KNOWN ISSUE (open, unresolved)
-## ------------------------------
-## Every landed hit reports strength HIT_H, and HIT_H is emitted by exactly one
-## state in the generated YAML: `2punch`, whose trigger is MP. But this test
-## presses only the LP button (`p1_a`), plus forward. So a light punch is
-## resolving to the medium punch somewhere in the input path.
+## RESOLVED: the "HIT_H while pressing LP" anomaly
+## -----------------------------------------------
+## This test used to report every landed hit as HIT_H, which exactly one state in
+## the generated YAML emits -- `2punch`, whose trigger is MP -- while pressing only
+## the LP button. The obvious reading was that something in the input path
+## resolved a light punch to a medium one, and the previous version of this header
+## listed what had been ruled out in pursuit of that: the YAML, the moves table,
+## the fixture. All three were correctly ruled out, and the conclusion was still
+## wrong, because the thing at fault was not on the list.
 ##
-## What has been ruled out:
-##   * the generated YAML is correct -- `grep opponent: data/tsu_ibano/*.yml`
-##     gives 1punch HIT_M, 2punch HIT_H, kick HIT_M, back_kick/special KNOCK_DOWN
-##   * the moves table is correct -- `keys: a` maps to LP and `keys: b` to MP
-##   * the fixture is unrelated -- this run does not load ryu at all
+## It was the box anchoring. `Animation::updateCollisions` puts a collision box on
+## the sprite's bounding-box corner rather than on the player origin, and the YAML
+## had been written as if it were the origin -- so the hurtbox was authored 32
+## units below the fighter's feet. With no hurtbox anywhere near the hitboxes, the
+## only hits that landed were the ones that happened to coincide by accident, and
+## which state those came from was nobody's design. Fixing the anchoring fixed the
+## anomaly: this now reports HIT_M from `1punch`, which is what pressing LP was
+## always supposed to produce.
 ##
-## What is known, from reading Moves::getTrigger and KeyState::operator==:
-##   * the three passes over `moves` take the LAST match in file order, with no
-##     early exit, so the ORDER of entries in moves.yml is load-bearing
-##   * `keys` accumulates across passes rather than being reset, so pass 3 sees
-##     the held-direction keys and the held-attack keys as well as the queue
-##   * KeyState equality needs key, pressed and held to match AND
-##     `this->time_held >= c->time_held`
+## The lesson worth keeping in the file is about method rather than about boxes.
+## The anomaly was argued about for a while from source; what settled it was a
+## measurement. `tools/verify/m3_boxes.tscn` turns on the engine's own box overlay
+## and screenshots a live match, which shows in one frame what reading
+## `getTrigger` could not.
+
+## What this asserts about the input mapping
+## -----------------------------------------
+## The pattern below drives the light punch only, and asserts the defender is hit
+## for HIT_M and enters `hurt_mid`. That is a specific claim -- LP -> `1punch` ->
+## HIT_M -> `hurt_mid`, which is exactly what the design sheet says a light punch
+## is -- and it is the claim that was false for as long as the anomaly above
+## lasted, so it is worth pinning.
 ##
-## The next step is to instrument getTrigger to print its chosen trigger and the
-## `keys` vector for the frame a punch is pressed, rather than to keep reasoning
-## about it. Until then this test proves playability and reports the anomaly
-## without failing on it.
+## Driving light and medium together would prove nothing and does not work:
+## `2punch` can be entered *from* `1punch` and not the reverse, so a medium punch
+## started while a light one is still playing simply replaces it, and only HIT_H
+## ever reaches the defender. Both can be exercised, but only by phasing them in
+## time, which belongs in a move-list test rather than a playability one.
 
 const MAX_SECONDS := 120.0
+## The light punch's cadence. Not arbitrary, and worth knowing: the engine only
+## lands a hit on a frame where the animation ADVANCES into its active frame
+## (`Player::update` gates the collision on `changed`), so the press has to keep
+## coming often enough that an active frame is reached while the fighter is in
+## range. This cadence does that.
 const PUNCH_PERIOD_FRAMES := 22
 const PUNCH_HOLD_FRAMES := 4
 const KICK_PERIOD_FRAMES := 53
@@ -205,17 +223,12 @@ func _check() -> void:
 		_fail("the defender never took damage")
 	if _min_health[0] < 100:
 		_fail("the attacker lost health while the opponent was idle")
-	if _states_seen.size() < 2:
-		# NOT a hard failure, deliberately. Every landed hit carried HIT_H, which
-		# only `2punch` emits, while this test pressed only the LP button -- so
-		# something in the input path resolves a light punch to the medium one and
-		# I have not explained it. See the KNOWN ISSUE block in the header. Making
-		# this fail would either block the suite on an unproven theory or force me
-		# to weaken it silently; reporting it is the honest middle.
-		_note("KNOWN ISSUE: the defender only entered %s; expected hurt_mid and hurt_high "
+	if not _skyline.has("HIT_M"):
+		_fail("the light punch did not land as HIT_M; strengths seen were %s"
+				% str(_skyline.keys()))
+	if not _states_seen.has("hurt_mid"):
+		_fail("a mid-strength hit did not put the defender in hurt_mid; it entered %s"
 				% str(_states_seen.keys()))
-		_note("             every hit reported HIT_H, which only 2punch (MP) emits, "
-				+ "yet only LP was pressed")
 	if _winner != 0:
 		_fail("expected player 1 to win an uncontested match, winner was %d" % _winner)
 
