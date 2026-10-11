@@ -1,0 +1,3 @@
+[submodule "vendor/openfight"]
+	path = vendor/openfight
+	url = https://github.com/nonameentername/openfight

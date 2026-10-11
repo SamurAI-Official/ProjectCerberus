@@ -1,0 +1,14 @@
+[gd_scene format=3]
+
+[node name="Match" type="Node2D"]
+
+[node name="OpenFight" type="OpenFightNode" parent="."]
+scale = Vector2(4, 4)
+player_one_path = "res://data/ryu/ryu.yml"
+player_two_path = "res://data/ryu/ryu.yml"
+moves_path = "res://data/ryu/moves.yml"
+background_path = "res://data/background.png"
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(198, 208)
+zoom = Vector2(1.5, 1.5)

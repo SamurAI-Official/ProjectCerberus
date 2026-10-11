@@ -1,0 +1,26 @@
+# ---- Godot 4 ----
+# The import cache is machine-local and regenerated on open; the .import files
+# themselves ARE committed, because they carry the per-texture import settings
+# (lossless, no alpha filtering) that openfight's magenta key (#fa00fa) depends on.
+.godot/
+/android/
+*.translation
+
+# ---- GDExtension build output ----
+# Built from vendor/openfight and vendor/nrr; never committed.
+/addons/openfight/bin/
+/addons/nrr/bin/
+*.dSYM/
+
+# ---- tools ----
+__pycache__/
+*.pyc
+/tools/**/out/
+/design_sheets/out/
+
+# ---- build logs / scratch ----
+/build/
+*.log
+
+# ---- macOS ----
+.DS_Store
