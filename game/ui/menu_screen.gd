@@ -56,9 +56,45 @@ func set_footer(text: String) -> void:
 		_footer_label.text = text
 
 ## For options screens, whose labels show current state rather than a fixed name.
+##
+## Writes back into `items` as well as onto the button, which is not an
+## optimisation: `_configure()` runs before `_build()`, so a label set there has no
+## button to land on yet and would be silently dropped, leaving the item showing
+## whatever was in the list. Keeping the list authoritative means a label can be
+## set at either time, and it matches set_item_detail, which has no choice but to
+## work this way.
 func set_item_label(id: String, text: String) -> void:
+	for item in items:
+		if str(item.get("id", "")) == id:
+			item["label"] = text
+			break
 	if _buttons.has(id):
 		_buttons[id].text = text
+
+## The detail line an item would show, read from `items` rather than remembered.
+func detail_of(id: String) -> String:
+	for item in items:
+		if str(item.get("id", "")) == id:
+			return str(item.get("detail", ""))
+	return ""
+
+## The label an item is showing, read from the button rather than from `items`,
+## because the button is what the player reads.
+func label_of(id: String) -> String:
+	if _buttons.has(id):
+		return _buttons[id].text
+	return ""
+
+## For options screens, whose detail line explains the current value. Updates the
+## panel too when the changed item is the one being looked at, so the screen cannot
+## say one thing and show another.
+func set_item_detail(id: String, text: String) -> void:
+	for item in items:
+		if str(item.get("id", "")) == id:
+			item["detail"] = text
+			if _buttons.has(id) and _buttons[id].has_focus():
+				_show_detail(text)
+			return
 
 func focus_first() -> void:
 	_focus_first()
@@ -102,7 +138,11 @@ func _build() -> void:
 		button.disabled = bool(item.get("disabled", false))
 		var detail := str(item.get("detail", ""))
 		button.pressed.connect(func() -> void: _activate(id))
-		button.focus_entered.connect(func() -> void: _show_detail(detail))
+		# Read from `items` when focus arrives rather than captured here, so that
+		# set_item_detail() can change what an item says without rebuilding the
+		# screen -- which is what an options page needs, because the line explaining
+		# an upscaler reads differently after the upscaler has changed.
+		button.focus_entered.connect(func() -> void: _show_detail(detail_of(id)))
 		list.add_child(button)
 		_buttons[id] = button
 
