@@ -7,11 +7,22 @@
   "profile": {
     "reach": 1.12
   },
-  "palette": {
-    "skin": [222, 176, 132],
-    "torso": [122, 36, 32],
-    "near_limb": [182, 70, 48],
-    "far_limb": [92, 26, 24],
-    "accent": [250, 210, 120]
+  "palette16": {
+    "outline": [0, 0, 0],
+    "skin_light": [240, 202, 158],
+    "skin": [214, 168, 118],
+    "skin_shadow": [158, 112, 74],
+    "cloth_light": [176, 74, 52],
+    "cloth": [126, 40, 34],
+    "cloth_shadow": [84, 22, 22],
+    "limb_light": [206, 104, 66],
+    "limb": [172, 70, 44],
+    "limb_shadow": [120, 42, 30],
+    "far": [96, 32, 26],
+    "far_shadow": [62, 18, 18],
+    "accent": [252, 214, 118],
+    "accent_shadow": [188, 142, 60],
+    "highlight": [255, 248, 232],
+    "eye": [44, 24, 20]
   }
 }

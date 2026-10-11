@@ -32,7 +32,17 @@ from PIL import Image, ImageDraw
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 WIDTH, HEIGHT = 800, 400
-HORIZON = 258  # where the wall meets the floor
+
+# Where the wall meets the floor, in image rows. This is not a free choice.
+#
+# The engine draws the background into a fixed 200x100 logical box at world
+# (200,200) -- 800x400 world pixels -- so image row == world y. The match camera
+# at (198,279), zoom 1.5, shows rows 135..423, and the fighters' feet land at
+# world 402 (measured off a spawn capture; see SPAWN_Y for why the spawn height
+# cannot move them). Putting the boundary at 360 leaves the floor reading as a
+# receding surface under their feet, with the wall behind them, which is the
+# composition a fighting game wants.
+HORIZON = 360
 
 
 def gijutsu_gym() -> Image.Image:
@@ -47,7 +57,7 @@ def gijutsu_gym() -> Image.Image:
 
     # The glass observation wall: panels with a frame, and a faint highlight
     # running down each one so the glass reads as glass.
-    panel_w, panel_h, top = 88, 168, 46
+    panel_w, panel_h, top = 88, 200, 96
     for index, x in enumerate(range(18, WIDTH - 18, panel_w)):
         shade = 12 if index % 2 else 0
         draw.rectangle([x, top, x + panel_w - 8, top + panel_h],
@@ -75,19 +85,22 @@ def gijutsu_gym() -> Image.Image:
 
     # Training floor: a tile grid receding to the horizon.
     draw.rectangle([0, HORIZON, WIDTH, HEIGHT], fill=(58, 62, 70))
-    for row in range(HORIZON, HEIGHT, 22):
+    for row in range(HORIZON, HEIGHT, 18):
         draw.line([(0, row), (WIDTH, row)], fill=(48, 52, 60), width=1)
     for column in range(0, WIDTH, 46):
         draw.line([(column, HORIZON), (column, HEIGHT)], fill=(48, 52, 60), width=1)
 
-    # The bright edge where the floor meets the wall -- the line the fighters
-    # read as the ground.
-    draw.line([(0, HORIZON), (WIDTH, HORIZON)], fill=(150, 206, 226), width=3)
+    # The lit edge where the floor meets the wall -- the line the fighters stand
+    # on. It has to be crisp: it is the only thing telling the eye where the
+    # ground is.
+    draw.line([(0, HORIZON), (WIDTH, HORIZON)], fill=(170, 226, 246), width=3)
 
-    # Foreground, kept dark so it blends with the clear colour below the
-    # background's extent (see the header note).
-    draw.rectangle([0, 340, WIDTH, HEIGHT], fill=(14, 16, 22))
-    draw.line([(0, 340), (WIDTH, 340)], fill=(30, 34, 44), width=2)
+    # Darken toward the bottom of the frame so the floor has depth. There is no
+    # clear-colour band to blend into any more -- the camera change removed it --
+    # so this is purely a vignette now rather than damage control.
+    for y in range(HEIGHT - 44, HEIGHT):
+        shade = int(58 - 30 * ((y - (HEIGHT - 44)) / 44.0))
+        draw.line([(0, y), (WIDTH, y)], fill=(shade, shade + 4, shade + 10))
 
     return image
 

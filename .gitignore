@@ -24,3 +24,7 @@ __pycache__/
 
 # ---- macOS ----
 .DS_Store
+
+# The reference disc image (Guilty Gear, PS1) is a study benchmark, not an asset.
+# 332 MB of third-party copyrighted game data must never be committed.
+reference/

@@ -138,11 +138,11 @@ character:
     frame:
     - path: data/tsu_ibano/start00.png
       width: 16
-      height: 32
+      height: 64
       delay: 10
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
   - name: idle
@@ -151,56 +151,56 @@ character:
     frame:
     - path: data/tsu_ibano/idle00.png
       width: 16
-      height: 32
+      height: 64
       delay: 10
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/idle01.png
       width: 16
-      height: 32
+      height: 64
       delay: 10
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/idle02.png
       width: 16
-      height: 32
+      height: 64
       delay: 10
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/idle03.png
       width: 16
-      height: 32
+      height: 64
       delay: 10
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/idle04.png
       width: 16
-      height: 32
+      height: 64
       delay: 10
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/idle05.png
       width: 16
-      height: 32
+      height: 64
       delay: 10
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
   - name: turn
@@ -208,29 +208,29 @@ character:
     frame:
     - path: data/tsu_ibano/turn00.png
       width: 16
-      height: 32
+      height: 64
       delay: 8
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/turn01.png
       width: 16
-      height: 32
+      height: 64
       delay: 8
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/turn02.png
       width: 16
-      height: 32
+      height: 64
       delay: 8
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
   - name: walk_forward
@@ -239,98 +239,98 @@ character:
     frame:
     - path: data/tsu_ibano/walk_forward00.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       move:
         x_vel: 0.34
         y_vel: 0
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/walk_forward01.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       move:
         x_vel: 0.34
         y_vel: 0
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/walk_forward02.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       move:
         x_vel: 0.34
         y_vel: 0
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/walk_forward03.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       move:
         x_vel: 0.34
         y_vel: 0
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/walk_forward04.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       move:
         x_vel: 0.34
         y_vel: 0
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/walk_forward05.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       move:
         x_vel: 0.34
         y_vel: 0
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/walk_forward06.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       move:
         x_vel: 0.34
         y_vel: 0
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/walk_forward07.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       move:
         x_vel: 0.34
         y_vel: 0
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
   - name: walk_back
@@ -339,98 +339,98 @@ character:
     frame:
     - path: data/tsu_ibano/walk_back00.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       move:
         x_vel: -0.3
         y_vel: 0
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/walk_back01.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       move:
         x_vel: -0.3
         y_vel: 0
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/walk_back02.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       move:
         x_vel: -0.3
         y_vel: 0
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/walk_back03.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       move:
         x_vel: -0.3
         y_vel: 0
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/walk_back04.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       move:
         x_vel: -0.3
         y_vel: 0
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/walk_back05.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       move:
         x_vel: -0.3
         y_vel: 0
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/walk_back06.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       move:
         x_vel: -0.3
         y_vel: 0
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/walk_back07.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       move:
         x_vel: -0.3
         y_vel: 0
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
   - name: stop_walk
@@ -438,20 +438,20 @@ character:
     frame:
     - path: data/tsu_ibano/stop_walk00.png
       width: 16
-      height: 32
+      height: 64
       delay: 8
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/stop_walk01.png
       width: 16
-      height: 32
+      height: 64
       delay: 8
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
   - name: start_duck
@@ -459,20 +459,20 @@ character:
     frame:
     - path: data/tsu_ibano/start_duck00.png
       width: 16
-      height: 32
+      height: 64
       delay: 6
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/start_duck01.png
       width: 16
-      height: 32
+      height: 64
       delay: 6
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
   - name: end_duck
@@ -480,20 +480,20 @@ character:
     frame:
     - path: data/tsu_ibano/end_duck00.png
       width: 16
-      height: 32
+      height: 64
       delay: 6
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/end_duck01.png
       width: 16
-      height: 32
+      height: 64
       delay: 6
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
   - name: duck
@@ -502,20 +502,20 @@ character:
     frame:
     - path: data/tsu_ibano/duck00.png
       width: 16
-      height: 32
+      height: 64
       delay: 12
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/duck01.png
       width: 16
-      height: 32
+      height: 64
       delay: 12
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
   - name: duck_back
@@ -524,20 +524,20 @@ character:
     frame:
     - path: data/tsu_ibano/duck_back00.png
       width: 16
-      height: 32
+      height: 64
       delay: 12
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/duck_back01.png
       width: 16
-      height: 32
+      height: 64
       delay: 12
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
   - name: jump
@@ -545,62 +545,62 @@ character:
     frame:
     - path: data/tsu_ibano/jump00.png
       width: 16
-      height: 32
+      height: 64
       delay: 8
       move:
         x_vel: 0
         y_vel: 3
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/jump01.png
       width: 16
-      height: 32
+      height: 64
       delay: 8
       move:
         x_vel: 0
         y_vel: 1.5
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/jump02.png
       width: 16
-      height: 32
+      height: 64
       delay: 8
       move:
         x_vel: 0
         y_vel: -0.7
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/jump03.png
       width: 16
-      height: 32
+      height: 64
       delay: 8
       move:
         x_vel: 0
         y_vel: -2.2
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/jump04.png
       width: 16
-      height: 32
+      height: 64
       delay: 8
       move:
         x_vel: 0
         y_vel: -2.6
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
   - name: jump_forward
@@ -608,98 +608,98 @@ character:
     frame:
     - path: data/tsu_ibano/jump_forward00.png
       width: 16
-      height: 32
+      height: 64
       delay: 6
       move:
         x_vel: 0.62
         y_vel: 3
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/jump_forward01.png
       width: 16
-      height: 32
+      height: 64
       delay: 6
       move:
         x_vel: 0.62
         y_vel: 1.6
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/jump_forward02.png
       width: 16
-      height: 32
+      height: 64
       delay: 6
       move:
         x_vel: 0.62
         y_vel: -0.5
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/jump_forward03.png
       width: 16
-      height: 32
+      height: 64
       delay: 6
       move:
         x_vel: 0.62
         y_vel: -2
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/jump_forward04.png
       width: 16
-      height: 32
+      height: 64
       delay: 6
       move:
         x_vel: 0.62
         y_vel: -2.6
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/jump_forward05.png
       width: 16
-      height: 32
+      height: 64
       delay: 6
       move:
         x_vel: 0.62
         y_vel: -2.6
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/jump_forward06.png
       width: 16
-      height: 32
+      height: 64
       delay: 6
       move:
         x_vel: 0.62
         y_vel: -2.6
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/jump_forward07.png
       width: 16
-      height: 32
+      height: 64
       delay: 6
       move:
         x_vel: 0.62
         y_vel: -2.6
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
   - name: jump_back
@@ -707,62 +707,62 @@ character:
     frame:
     - path: data/tsu_ibano/jump_back00.png
       width: 16
-      height: 32
+      height: 64
       delay: 6
       move:
         x_vel: -0.5
         y_vel: 3
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/jump_back01.png
       width: 16
-      height: 32
+      height: 64
       delay: 6
       move:
         x_vel: -0.5
         y_vel: 1.5
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/jump_back02.png
       width: 16
-      height: 32
+      height: 64
       delay: 6
       move:
         x_vel: -0.5
         y_vel: -0.7
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/jump_back03.png
       width: 16
-      height: 32
+      height: 64
       delay: 6
       move:
         x_vel: -0.5
         y_vel: -2.2
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/jump_back04.png
       width: 16
-      height: 32
+      height: 64
       delay: 6
       move:
         x_vel: -0.5
         y_vel: -2.6
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
   - name: block_high
@@ -771,20 +771,20 @@ character:
     frame:
     - path: data/tsu_ibano/block_high00.png
       width: 16
-      height: 32
+      height: 64
       delay: 12
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/block_high01.png
       width: 16
-      height: 32
+      height: 64
       delay: 12
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
   - name: block_low
@@ -793,20 +793,20 @@ character:
     frame:
     - path: data/tsu_ibano/block_low00.png
       width: 16
-      height: 32
+      height: 64
       delay: 12
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/block_low01.png
       width: 16
-      height: 32
+      height: 64
       delay: 12
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
   - name: hurt_mid
@@ -814,38 +814,38 @@ character:
     frame:
     - path: data/tsu_ibano/hurt_mid00.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/hurt_mid01.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/hurt_mid02.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/hurt_mid03.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
   - name: hurt_high
@@ -853,38 +853,38 @@ character:
     frame:
     - path: data/tsu_ibano/hurt_high00.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/hurt_high01.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/hurt_high02.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/hurt_high03.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
   - name: hurt_low
@@ -892,38 +892,38 @@ character:
     frame:
     - path: data/tsu_ibano/hurt_low00.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/hurt_low01.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/hurt_low02.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/hurt_low03.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
   - name: hurt_air
@@ -931,38 +931,38 @@ character:
     frame:
     - path: data/tsu_ibano/hurt_air00.png
       width: 32
-      height: 32
+      height: 64
       delay: 7
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/hurt_air01.png
       width: 32
-      height: 32
+      height: 64
       delay: 7
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/hurt_air02.png
       width: 32
-      height: 32
+      height: 64
       delay: 7
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/hurt_air03.png
       width: 32
-      height: 32
+      height: 64
       delay: 7
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
   - name: knocked_down
@@ -970,38 +970,38 @@ character:
     frame:
     - path: data/tsu_ibano/knocked_down00.png
       width: 32
-      height: 32
+      height: 64
       delay: 9
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/knocked_down01.png
       width: 32
-      height: 32
+      height: 64
       delay: 9
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/knocked_down02.png
       width: 32
-      height: 32
+      height: 64
       delay: 9
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/knocked_down03.png
       width: 32
-      height: 32
+      height: 64
       delay: 9
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
   - name: hit_ground
@@ -1009,29 +1009,29 @@ character:
     frame:
     - path: data/tsu_ibano/hit_ground00.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/hit_ground01.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/hit_ground02.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
   - name: land
@@ -1039,29 +1039,29 @@ character:
     frame:
     - path: data/tsu_ibano/land00.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/land01.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/land02.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
   - name: ground
@@ -1070,11 +1070,11 @@ character:
     frame:
     - path: data/tsu_ibano/ground00.png
       width: 32
-      height: 32
+      height: 64
       delay: 20
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
   - name: stand
@@ -1082,29 +1082,29 @@ character:
     frame:
     - path: data/tsu_ibano/stand00.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/stand01.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/stand02.png
       width: 16
-      height: 32
+      height: 64
       delay: 7
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
   - name: 1punch
@@ -1112,29 +1112,29 @@ character:
     frame:
     - path: data/tsu_ibano/1punch00.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/1punch01.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/1punch02.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
       offense:
@@ -1150,11 +1150,11 @@ character:
         index: 2
     - path: data/tsu_ibano/1punch03.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
   - name: 2punch
@@ -1162,38 +1162,38 @@ character:
     frame:
     - path: data/tsu_ibano/2punch00.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/2punch01.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/2punch02.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/2punch03.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
       offense:
@@ -1209,20 +1209,20 @@ character:
         index: 2
     - path: data/tsu_ibano/2punch04.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/2punch05.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
   - name: kick
@@ -1230,29 +1230,29 @@ character:
     frame:
     - path: data/tsu_ibano/kick00.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/kick01.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/kick02.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
       offense:
@@ -1268,20 +1268,20 @@ character:
         index: 2
     - path: data/tsu_ibano/kick03.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/kick04.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
   - name: back_kick
@@ -1289,50 +1289,50 @@ character:
     frame:
     - path: data/tsu_ibano/back_kick00.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       move:
         x_vel: 0
         y_vel: 0
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/back_kick01.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       move:
         x_vel: 0.2
         y_vel: 0
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/back_kick02.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       move:
         x_vel: 0.2
         y_vel: 0
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/back_kick03.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       move:
         x_vel: 0.2
         y_vel: 0
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
       offense:
@@ -1348,26 +1348,26 @@ character:
         index: 2
     - path: data/tsu_ibano/back_kick04.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       move:
         x_vel: 0.2
         y_vel: 0
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/back_kick05.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       move:
         x_vel: 0
         y_vel: 0
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
   - name: special
@@ -1375,62 +1375,62 @@ character:
     frame:
     - path: data/tsu_ibano/special00.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       move:
         x_vel: 0
         y_vel: 0
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/special01.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       move:
         x_vel: 0.55
         y_vel: 0
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/special02.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       move:
         x_vel: 0.55
         y_vel: 0
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/special03.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       move:
         x_vel: 0.55
         y_vel: 0
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/special04.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       move:
         x_vel: 0.55
         y_vel: 0
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
       offense:
@@ -1446,37 +1446,37 @@ character:
         index: 2
     - path: data/tsu_ibano/special05.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       move:
         x_vel: 0.55
         y_vel: 0
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/special06.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       move:
         x_vel: 0
         y_vel: 0
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0
     - path: data/tsu_ibano/special07.png
       width: 32
-      height: 32
+      height: 64
       delay: 8
       move:
         x_vel: 0
         y_vel: 0
       defense:
         x_pos: -6
-        y_pos: -16.0
+        y_pos: 31.0
         width: 12
         height: 31.0

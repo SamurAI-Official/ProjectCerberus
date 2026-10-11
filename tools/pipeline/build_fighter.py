@@ -15,15 +15,16 @@ The shipped fixture gets this wrong: the same idle00.png is declared `20x40` in
 box. Its character therefore changes size between states.
 
 This builder uses one rule instead: **4 px per engine unit, everywhere.**
-Locomotion frames are a 16x32 box on a 64x128 canvas; frames that need the width
-of an extended limb are a 32x32 box on a 128x128 canvas. Both canvas aspects
-equal their declared box exactly (0.5 and 1.0), both render the figure at the
-same scale, and neither can squash.
+Locomotion frames are a 16x64 box on a 96x384 canvas; frames that need the width
+of an extended limb are a 32x64 box on a 192x384 canvas. Both canvas aspects
+equal their declared box exactly, both render the figure at the same scale, and
+neither can squash. At 6 px per engine unit the art also lands 1:1 on screen:
+node scale 4 times camera zoom 1.5 is exactly the 6 px the canvas already uses.
 
 Hitboxes are therefore authored in our own convention rather than inherited:
-a symmetric full-body hurtbox `x_pos=-6, y_pos=-16, 12x30`, which spans the
-figure from the feet (-16) to the crown (+15). Upstream's boxes are offset
-forward of the origin, which does not line up with their own centred art.
+a symmetric full-body hurtbox `x_pos=-6, y_pos=0, 12x31`, which spans the figure
+from the feet (0, the engine's ground) to the crown (+31). Upstream's boxes are
+offset forward of the origin, which does not line up with their own centred art.
 """
 
 from __future__ import annotations
@@ -41,12 +42,35 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 SHEET_DIR = REPO_ROOT / "design_sheets"
 
 # Box sizes, in engine units. Canvas = box * figure.PX_PER_UNIT.
-BODY_BOX = (16, 32)   # 64x128 canvas
-REACH_BOX = (32, 32)  # 128x128 canvas
+#
+# The height is 64, not 32, because the engine centres the texture on the player
+# origin and the origin is the ground. The figure stands 31 units tall *above*
+# the origin, so the box has to reach at least 62 units to contain it. The lower
+# half of each canvas is therefore below-ground space -- the visible price of the
+# engine's centring, and far better than sinking through the floor.
+BODY_BOX = (16, 64)   # 96x384 canvas
+REACH_BOX = (32, 64)  # 192x384 canvas
 
-FEET = -16.0
-CROWN = 15.0
-HURTBOX = {"x_pos": -6, "y_pos": FEET, "width": 12, "height": CROWN - FEET}
+FEET = figure.GROUND_Y  # 0.0 -- feet on the origin, which is the engine's ground
+CROWN = 31.0
+# `y_pos` is where the box's far edge sits in engine units. Empirically (measured
+# off a render, not derived -- the engine's own vertical constants disagree with
+# each other, see docs/pipeline/sprite-spec.md) a positive `y_pos` moves the box
+# UP, so CROWN puts its near edge at the crown and it extends back down through
+# the body to the feet.
+HURTBOX = {"x_pos": -6, "y_pos": CROWN, "width": 12, "height": CROWN - FEET}
+
+# Spawn height, in engine units. It is the engine's ground: Player::move snaps
+# y_pos back to y_initial on landing, and y_initial comes from this value.
+#
+# It does NOT control where a fighter appears on screen. That was measured, not
+# assumed: changing this from 30 to 48 to 66 moved the captured silhouette by
+# exactly zero rows. GodotRenderBackend::drawSprite computes the draw position as
+# `logical_height - (camera_y + y)`, and the engine's camera tracks the fighters'
+# y, so the two terms cancel. Anyone trying to frame the game by editing this
+# number is editing a value with no visual effect -- adjust the Camera2D and the
+# stage's floor line instead.
+SPAWN_Y = 30.0
 
 # The engine's trigger vocabulary, as `(state, trigger, from, to)`. `to` is the
 # state a non-continual animation falls through to when it completes. This is
@@ -106,8 +130,9 @@ def _walk(i, n, profile, direction):
         lean=0.12 * direction,
         leg_far=(swing, swing - 18.0),
         leg_near=(-swing, -swing - 18.0),
-        arm_far=(14.0 - swing * 0.4, 26.0),
-        arm_near=(-10.0 + swing * 0.4, 44.0),
+        # Arms stay up in a guard and counter-swing, rather than hanging.
+        arm_far=(48.0 - swing * 0.4, 76.0),
+        arm_near=(36.0 + swing * 0.4, 88.0),
     )
 
 
@@ -130,21 +155,24 @@ def _strike(extent, horizontal, vertical, lift):
 
 
 POSES = {
-    "start":        lambda i, n, p: dict(crouch=0.06, arm_far=(12.0, 26.0), arm_near=(-10.0, 44.0)),
+    "start":        lambda i, n, p: dict(crouch=0.06, arm_far=(54.0, 80.0), arm_near=(40.0, 92.0)),
     "idle":         lambda i, n, p: dict(
-        crouch=0.05 + 0.035 * _wave(i, n),
+        crouch=0.06 + 0.035 * _wave(i, n),
         lean=0.05 * _wave(i, n),
-        arm_far=(16.0 + 3.0 * _wave(i, n), 28.0),
-        arm_near=(-14.0 + 3.0 * _wave(i, n), 46.0),
+        # A guard, not a hang. Arms left straight down disappear into the torso at
+        # this size, which is the difference between a fighter and a mannequin.
+        arm_far=(58.0 + 3.0 * _wave(i, n), 84.0),
+        arm_near=(44.0 + 3.0 * _wave(i, n), 96.0),
         leg_far=(6.0, -12.0), leg_near=(-6.0, -24.0),
     ),
     "turn":         lambda i, n, p: dict(
         lean=-0.22 + 0.1 * i, crouch=0.12,
-        arm_far=(4.0, 34.0), arm_near=(-18.0, 58.0),
+        arm_far=(34.0, 66.0), arm_near=(20.0, 80.0),
     ),
     "walk_forward": lambda i, n, p: _walk(i, n, p, 1.0),
     "walk_back":    lambda i, n, p: _walk(i, n, p, -1.0),
-    "stop_walk":    lambda i, n, p: dict(crouch=0.16, lean=-0.1, leg_far=(10.0, -8.0), leg_near=(-12.0, -26.0)),
+    "stop_walk":    lambda i, n, p: dict(crouch=0.16, lean=-0.1, leg_far=(10.0, -8.0),
+                                         leg_near=(-12.0, -26.0), arm_far=(50.0, 78.0), arm_near=(38.0, 90.0)),
     "start_duck":   lambda i, n, p: dict(crouch=0.75 * (i + 1) / n, leg_far=(22.0, 4.0), leg_near=(-6.0, -30.0)),
     "end_duck":     lambda i, n, p: dict(crouch=0.75 * (1.0 - (i + 1) / n), leg_far=(18.0, 2.0), leg_near=(-6.0, -26.0)),
     "duck":         lambda i, n, p: dict(
@@ -227,8 +255,8 @@ POSES = {
 
 # ---------------------------------------------------------------------------
 # Animation spec: (state, frames, delay, box, continual, pose). `box` picks the
-# canvas: BODY is a 64x128 canvas in a 16x32 box, REACH a 128x128 canvas in a
-# 32x32 box, both at 4 px per unit.
+# canvas: BODY is a 96x384 canvas in a 16x64 box, REACH a 192x384 canvas in a
+# 32x64 box, both at 6 px per unit.
 # ---------------------------------------------------------------------------
 
 BODY, REACH = "body", "reach"
@@ -303,7 +331,7 @@ BOXES = {"body": BODY_BOX, "reach": REACH_BOX}
 
 def render_frames(sheet, frames_dir):
     """Writes every frame of every state. Returns how many were written."""
-    palette = {key: tuple(value) for key, value in sheet["palette"].items()}
+    palette = figure.Palette(sheet["palette16"])
     profile = sheet.get("profile", {})
     frames_dir.mkdir(parents=True, exist_ok=True)
 
@@ -338,7 +366,7 @@ def write_character_yaml(sheet, out_path):
         f"  health: {sheet.get('health', 100)}",
         "  position:",
         "    x_pos: 0",
-        "    y_pos: 30",
+        f"    y_pos: {_num(SPAWN_Y)}",
         "    alpha: 1.0",
         "    scale: 1",
         "  action:",

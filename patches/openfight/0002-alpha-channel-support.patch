@@ -1,0 +1,60 @@
+diff --git a/src/platform/godot/godotRenderBackend.cpp b/src/platform/godot/godotRenderBackend.cpp
+index 5bf5d2f..1653965 100644
+--- a/src/platform/godot/godotRenderBackend.cpp
++++ b/src/platform/godot/godotRenderBackend.cpp
+@@ -66,19 +66,46 @@ unsigned int GodotRenderBackend::loadTexture(const std::string &file_name, bool
+         if (image.is_null() || image->is_empty())
+             return 0;
+ 
++        // Whether the art carries its own transparency, sampled *before* the
++        // conversion below: convert() hands every image an alpha channel,
++        // including one that never had anything in it, which would erase the
++        // very distinction this decision rests on.
++        const Image::AlphaMode source_alpha = image->detect_alpha();
++
+         image->convert(Image::FORMAT_RGBA8);
+-        for (int row = 0; row < image->get_height(); row++) {
+-            for (int column = 0; column < image->get_width(); column++) {
+-                Color pixel = image->get_pixel(column, row);
+-                if (pixel.r == 0.0f && pixel.g == 0.0f && pixel.b == 0.0f)
+-                    pixel.a = 0.0f;
+-                else
+-                    pixel.a = 1.0f;
+-
+-                image->set_pixel(column, row, pixel);
++
++        if (source_alpha == Image::ALPHA_NONE) {
++            // No transparency in the source, so the source cannot be trusted to
++            // say what is solid and the black key decides instead: black is
++            // transparent, everything else opaque.
++            //
++            // This is the behaviour the vendored fixture art depends on and it is
++            // unchanged. It is also why outlined art could not be rendered at
++            // all before this patch -- black line work was keyed straight
++            // through, leaving holes in the character.
++            for (int row = 0; row < image->get_height(); row++) {
++                for (int column = 0; column < image->get_width(); column++) {
++                    Color pixel = image->get_pixel(column, row);
++                    if (pixel.r == 0.0f && pixel.g == 0.0f && pixel.b == 0.0f)
++                        pixel.a = 0.0f;
++                    else
++                        pixel.a = 1.0f;
++
++                    image->set_pixel(column, row, pixel);
++                }
+             }
+         }
+ 
++        // Otherwise the artist has already declared what is solid, so keep it:
++        // black line work stays visible and partial transparency survives
++        // instead of being flattened to 0 or 1.
++        //
++        // The consequence is worth stating plainly: an RGBA source whose alpha is
++        // entirely opaque reports ALPHA_NONE and therefore still takes the black
++        // key path. That is deliberate -- such an asset has declared no
++        // transparency whatsoever, and falling back keeps it rendering exactly as
++        // it did before this patch existed.
++
+         texture = ImageTexture::create_from_image(image);
+         if (texture.is_null())
+             return 0;

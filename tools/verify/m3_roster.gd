@@ -44,6 +44,13 @@ const PUNCH_PERIOD_FRAMES := 22
 const PUNCH_HOLD_FRAMES := 4
 const KICK_PERIOD_FRAMES := 53
 
+## When to grab the screenshot, in seconds. Kept very small deliberately: at ~0.1s
+## the fighters are still standing on their spawn positions, which makes the
+## capture a *deterministic* measurement of where the engine puts a fighter. A
+## later capture catches them mid-approach and the positions become a function of
+## how the AI happened to mash, which is useless for calibrating geometry.
+const CAPTURE_AT := 0.1
+
 ## Set false to press ONLY the light punch, which isolates which attack state
 ## a single input actually reaches.
 const USE_KICK := false
@@ -143,7 +150,7 @@ func _process(delta: float) -> void:
 
 	_drive_input()
 
-	if not _captured and _elapsed > 1.5 and DisplayServer.get_name() != "headless":
+	if not _captured and _elapsed > CAPTURE_AT and DisplayServer.get_name() != "headless":
 		_captured = true
 		_capture.call_deferred()
 

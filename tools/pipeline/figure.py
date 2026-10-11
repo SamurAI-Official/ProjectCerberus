@@ -29,17 +29,40 @@ import math
 
 from PIL import Image, ImageDraw
 
-PX_PER_UNIT = 4
+# 6 px per engine unit, not 4. The engine draws at node scale 4 and the match
+# camera is at zoom 1.5, so one engine unit is exactly 6 screen pixels.
+# Authoring at 6 px per unit therefore lands every art pixel on exactly one
+# screen pixel. The old 4 px per unit meant each art pixel straddled 1.5 screen
+# pixels, which no filter setting can make crisp.
+PX_PER_UNIT = 6
 
-FEET_Y = -16.0
-PELVIS_Y = 1.0
-CHEST_Y = 7.0
-NECK_Y = 9.5
-HEAD_Y = 12.2
-HEAD_R = 2.9
-SHOULDER_Y = 8.2
-SHOULDER_X = 3.6
-HIP_X = 2.2
+# Feet sit ON the origin. The engine centres the texture on the player origin,
+# and while standing that origin IS the ground (Player::move snaps y_pos back to
+# y_initial). Art hanging below the origin therefore sinks through the floor --
+# which is precisely what the previous 16-units-below arrangement did, and why
+# the fighters rendered clipped off the bottom of the screen.
+#
+# Feet at 0 and a crown at ~31 means the figure occupies the upper half of the
+# canvas and the lower half is below-ground space. That is the price of the
+# engine centring the texture; the alternative is sinking through the floor.
+GROUND_Y = 0.0
+FEET_Y = GROUND_Y
+PELVIS_Y = 17.0
+CHEST_Y = 23.0
+# The neck reaches ABOVE the head's centre-line minus its radius, so the head and
+# torso overlap by ~1.1 units (~7 px). They used to meet with just over a pixel to
+# spare, which rendered as a hairline of pure ink -- technically attached, but it
+# read as a floating head at this size.
+NECK_Y = 26.2
+HEAD_Y = 27.8
+HEAD_R = 2.7
+SHOULDER_Y = 24.2
+# Half-width of the chest, in engine units. At 3.6 the torso came out ~32% of the
+# figure's height, which reads as a box rather than a body; 3.0 brings it to ~27%,
+# which is roughly life proportion and leaves room for the arms to be visible
+# against it rather than merging into it.
+SHOULDER_X = 3.0
+HIP_X = 2.4
 
 UPPER_ARM = 4.6
 FOREARM = 4.6
@@ -126,36 +149,173 @@ def _to_px(point, size):
             size[1] / 2.0 - point[1] * PX_PER_UNIT)
 
 
-def render(skeleton, canvas, palette):
-    """Draws the skeleton into an RGB image of `canvas` pixels.
+OUTLINE_PX = 2
 
-    The background is pure black, which is the engine's transparency key (see
-    GodotRenderBackend::loadTexture). No anti-aliasing: the key is an exact
-    match on r==g==b==0, and near-black edge pixels would survive as a dark
-    fringe.
+# The sixteen tones a fighter is allowed, addressed by role rather than by index
+# so the renderer never needs to know what shade of teal "cloth" happens to be.
+#
+# Sixteen is not nostalgia. Guilty Gear's PS1 characters are 16-colour 64x121
+# sprites (Ishiwatari / Abe, NDC18), and that budget is a large part of why they
+# read as one character instead of a pile of parts. Enforcing it *structurally*
+# -- the renderer can only ask for a role -- means the count cannot drift, and a
+# 2P palette swap becomes a table substitution rather than a re-render. A
+# post-hoc quantiser would instead silently merge whichever two tones happened
+# to be closest, which is the one thing you cannot recover.
+PALETTE_ROLES = (
+    "outline",
+    "skin_light", "skin", "skin_shadow",
+    "cloth_light", "cloth", "cloth_shadow",
+    "limb_light", "limb", "limb_shadow",
+    "far", "far_shadow",
+    "accent", "accent_shadow",
+    "highlight", "eye",
+)
+
+
+class Palette:
+    """A fighter's 16 colours, addressed by role.
+
+    The ink is always pure black and is not negotiable: outlines are what make a
+    low-colour figure legible, and they are only drawable at all now that the
+    renderer honours source alpha (patches/openfight/0002). Under the black key
+    that preceded it, "black" and "nothing" were the same value.
     """
-    image = Image.new("RGB", canvas, (0, 0, 0))
+
+    def __init__(self, colours):
+        """`colours` maps role -> [r, g, b]; every role must be present.
+
+        Keyed rather than positional so that a design sheet states which tone is
+        which. A bare list of sixteen triples is unreadable and unreviewable, and
+        the whole point of the budget is that a human can hold it in their head.
+        """
+        missing = [role for role in PALETTE_ROLES if role not in colours]
+        unknown = [role for role in colours if role not in PALETTE_ROLES]
+        if missing or unknown:
+            raise ValueError(
+                "palette must define exactly the %d known roles (missing: %s; unknown: %s)"
+                % (len(PALETTE_ROLES), ", ".join(missing) or "none", ", ".join(unknown) or "none"))
+
+        self.colours = {role: tuple(int(c) for c in colours[role]) for role in PALETTE_ROLES}
+        self.colours["outline"] = (0, 0, 0)
+
+    def __getitem__(self, role):
+        try:
+            return self.colours[role]
+        except KeyError:
+            raise KeyError("unknown palette role %r; known: %s"
+                           % (role, ", ".join(PALETTE_ROLES))) from None
+
+    def rgba(self, role):
+        return self[role] + (255,)
+
+    def unique_count(self):
+        return len(set(self.colours.values()))
+
+
+def _ink_and_fill(draw, points, colour, width):
+    """Strokes a segment as ink-then-fill so every limb carries its own outline.
+
+    Overdrawing a thicker black stroke beneath the colour is the cheap version of
+    the separate inking pass hand-drawn sprite art uses, and it is what keeps a
+    flat figure reading against a busy background.
+    """
+    draw.line(points, fill=(0, 0, 0, 255), width=width + OUTLINE_PX * 2, joint="curve")
+    draw.line(points, fill=tuple(colour) + (255,), width=width, joint="curve")
+
+
+def _torso_shape(skeleton, canvas):
+    """The torso as a quad: narrow at the hips, broad at the shoulders.
+
+    A stroked line of uniform width gives the body no silhouette, and at this
+    size silhouette is most of what makes a character identifiable.
+    """
+    pelvis = _to_px(skeleton["pelvis"], canvas)
+    neck = _to_px(skeleton["neck"], canvas)
+    half_hips = HIP_X * PX_PER_UNIT * 1.2
+    half_chest = SHOULDER_X * PX_PER_UNIT * 1.35
+    return [(pelvis[0] - half_hips, pelvis[1]),
+            (neck[0] - half_chest, neck[1]),
+            (neck[0] + half_chest, neck[1]),
+            (pelvis[0] + half_hips, pelvis[1])]
+
+
+def _panel(quad, scale, shift_x=0.0):
+    """Scales a quad toward its own centre and slides it sideways.
+
+    Used to drop the lit and shadowed panels inside the torso so the body has a
+    light direction rather than being one flat tone.
+    """
+    centre_x = sum(point[0] for point in quad) / len(quad)
+    centre_y = sum(point[1] for point in quad) / len(quad)
+    span = abs(quad[2][1] - quad[0][1]) or 1.0
+    return [(centre_x + (x - centre_x) * scale + shift_x * span,
+             centre_y + (y - centre_y) * scale) for x, y in quad]
+
+
+def render(skeleton, canvas, palette):
+    """Draws the skeleton into an RGBA image of `canvas` pixels.
+
+    Fully transparent background, pure black ink. Both are only safe because
+    patches/openfight/0002 makes the renderer honour a source alpha channel; the
+    black key it replaced made black and nothing the same value, so ink and
+    shadow could not be drawn at all -- black outlines were punched straight
+    through the character.
+    """
+    image = Image.new("RGBA", canvas, (0, 0, 0, 0))
     draw = ImageDraw.Draw(image)
 
-    limbs = [
-        ("hip_near", "knee_near", "foot_near", palette["far_limb"], 3),
-        ("shoulder_near", "elbow_near", "hand_near", palette["far_limb"], 3),
-        ("hip_far", "knee_far", "foot_far", palette["near_limb"], 4),
-        ("shoulder_far", "elbow_far", "hand_far", palette["near_limb"], 4),
-    ]
-    for a, b, c, colour, width in limbs:
-        draw.line([_to_px(skeleton[a], canvas), _to_px(skeleton[b], canvas)], fill=colour, width=width)
-        draw.line([_to_px(skeleton[b], canvas), _to_px(skeleton[c], canvas)], fill=colour, width=width)
+    def at(name):
+        return _to_px(skeleton[name], canvas)
 
-    # Torso last among the body so it overlaps the limb roots.
-    draw.line([_to_px(skeleton["pelvis"], canvas), _to_px(skeleton["chest"], canvas)],
-              fill=palette["torso"], width=9)
-    draw.line([_to_px(skeleton["chest"], canvas), _to_px(skeleton["neck"], canvas)],
-              fill=palette["torso"], width=8)
+    # Back to front. Far side in the darker tones, near side in the lighter ones:
+    # that contrast is what reads as depth on a flat sprite.
+    #
+    # Stroke widths are per-limb and generous -- at 6 px per unit an arm is a
+    # little over a unit thick, and anything thinner than ~8 px stops reading as
+    # a limb once the 2 px ink is subtracted from it.
+    _ink_and_fill(draw, [at("shoulder_near"), at("elbow_near"), at("hand_near")],
+                  palette["far_shadow"], 8)
+    _ink_and_fill(draw, [at("hip_near"), at("knee_near"), at("foot_near")],
+                  palette["far"], 10)
 
-    head = _to_px(skeleton["head"], canvas)
+    # Torso, then the lit panel down the front edge and the shadow down the back.
+    torso = _torso_shape(skeleton, canvas)
+    draw.polygon(torso, fill=palette.rgba("cloth"),
+                 outline=palette.rgba("outline"), width=OUTLINE_PX)
+    draw.polygon(_panel(torso, 0.78, -0.16), fill=palette.rgba("cloth_light"))
+    draw.polygon(_panel(torso, 0.68, 0.26), fill=palette.rgba("cloth_shadow"))
+
+    # Near leg, then the shin in the shadow tone so the knee bend is readable --
+    # one flat tone turns a limb into a pipe.
+    knee_far = at("knee_far")
+    _ink_and_fill(draw, [at("hip_far"), knee_far], palette["limb"], 11)
+    _ink_and_fill(draw, [knee_far, at("foot_far")], palette["limb_shadow"], 11)
+    _ink_and_fill(draw, [at("shoulder_far"), at("elbow_far"), at("hand_far")],
+                  palette["limb_light"], 9)
+
+    # Head: highlight, jaw shadow, eye, catchlight, accent band across the brow.
+    # At this size a face is a handful of pixels, and those pixels carry most of
+    # the character.
+    head = at("head")
     radius = HEAD_R * PX_PER_UNIT
-    draw.ellipse([head[0] - radius, head[1] - radius, head[0] + radius, head[1] + radius],
-                 fill=palette["skin"], outline=palette["accent"], width=2)
+    box = [head[0] - radius, head[1] - radius, head[0] + radius, head[1] + radius]
+    draw.ellipse(box, fill=palette.rgba("skin"),
+                 outline=palette.rgba("outline"), width=OUTLINE_PX)
+    draw.ellipse([box[0] + 2, box[1] + 2, head[0] + radius * 0.4, head[1] + radius * 0.3],
+                 fill=palette.rgba("skin_light"))
+    draw.rectangle([box[0] + 2, head[1] + radius * 0.5, box[2] - 2, box[3] - 3],
+                   fill=palette.rgba("skin_shadow"))
+
+    eye_x = head[0] + radius * 0.25
+    draw.rectangle([eye_x, head[1] - 2, eye_x + 3, head[1] + 2], fill=palette.rgba("eye"))
+    draw.rectangle([eye_x + 1, head[1] - 2, eye_x + 2, head[1] - 1],
+                   fill=palette.rgba("highlight"))
+
+    brow = head[1] - radius * 0.55
+    draw.line([(head[0] - radius, brow), (head[0] + radius, brow)],
+              fill=palette.rgba("accent"), width=3)
+    draw.line([(head[0] - radius, brow + 3), (head[0] + radius, brow + 3)],
+              fill=palette.rgba("accent_shadow"), width=2)
 
     return image
+
