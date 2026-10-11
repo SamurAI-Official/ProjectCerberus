@@ -48,8 +48,23 @@ SHEET_DIR = REPO_ROOT / "design_sheets"
 # the origin, so the box has to reach at least 62 units to contain it. The lower
 # half of each canvas is therefore below-ground space -- the visible price of the
 # engine's centring, and far better than sinking through the floor.
-BODY_BOX = (16, 64)   # 96x384 canvas
-REACH_BOX = (32, 64)  # 192x384 canvas
+#
+# The widths are measured, not chosen, and they were wrong. tools/validate/
+# validate_boxes.py renders every frame into an oversized canvas and reports the
+# furthest the art actually reaches: 13.5 units forward of the origin for the body
+# poses (hurt_high) and 17.5 for the reach poses (hurt_air). Against the old 16 and
+# 32 the textures were narrower than the drawings, and PIL clips at the canvas
+# edge, so 86 of 117 frames had art sliced off flat at the boundary -- the idle
+# guard arm lost its hand entirely. The reference Ryu art clips on 4 frames of
+# 143, so a margin is what the engine expects; this was a regression, not a
+# limitation of the renderer.
+#
+# Widening cannot move anything. GodotRenderBackend::drawSprite draws the texture
+# into a rect centred on the player origin, and figure._to_px centres the canvas on
+# that same origin, so the added units are transparent margin on both sides. The
+# widths below leave the same ~1.5 units of margin the reference keeps.
+BODY_BOX = (30, 64)   # 180x384 canvas
+REACH_BOX = (38, 64)  # 228x384 canvas
 
 FEET = figure.GROUND_Y  # 0.0 -- feet on the origin, which is the engine's ground
 CROWN = 31.0

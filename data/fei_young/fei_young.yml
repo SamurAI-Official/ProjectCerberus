@@ -137,7 +137,7 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/start00.png
-      width: 16
+      width: 30
       height: 64
       delay: 10
       defense:
@@ -150,7 +150,7 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/idle00.png
-      width: 16
+      width: 30
       height: 64
       delay: 10
       defense:
@@ -159,7 +159,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/idle01.png
-      width: 16
+      width: 30
       height: 64
       delay: 10
       defense:
@@ -168,7 +168,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/idle02.png
-      width: 16
+      width: 30
       height: 64
       delay: 10
       defense:
@@ -177,7 +177,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/idle03.png
-      width: 16
+      width: 30
       height: 64
       delay: 10
       defense:
@@ -186,7 +186,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/idle04.png
-      width: 16
+      width: 30
       height: 64
       delay: 10
       defense:
@@ -195,7 +195,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/idle05.png
-      width: 16
+      width: 30
       height: 64
       delay: 10
       defense:
@@ -207,7 +207,7 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/turn00.png
-      width: 16
+      width: 30
       height: 64
       delay: 8
       defense:
@@ -216,7 +216,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/turn01.png
-      width: 16
+      width: 30
       height: 64
       delay: 8
       defense:
@@ -225,7 +225,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/turn02.png
-      width: 16
+      width: 30
       height: 64
       delay: 8
       defense:
@@ -238,7 +238,7 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/walk_forward00.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       move:
@@ -250,7 +250,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/walk_forward01.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       move:
@@ -262,7 +262,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/walk_forward02.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       move:
@@ -274,7 +274,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/walk_forward03.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       move:
@@ -286,7 +286,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/walk_forward04.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       move:
@@ -298,7 +298,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/walk_forward05.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       move:
@@ -310,7 +310,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/walk_forward06.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       move:
@@ -322,7 +322,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/walk_forward07.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       move:
@@ -338,7 +338,7 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/walk_back00.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       move:
@@ -350,7 +350,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/walk_back01.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       move:
@@ -362,7 +362,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/walk_back02.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       move:
@@ -374,7 +374,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/walk_back03.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       move:
@@ -386,7 +386,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/walk_back04.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       move:
@@ -398,7 +398,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/walk_back05.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       move:
@@ -410,7 +410,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/walk_back06.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       move:
@@ -422,7 +422,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/walk_back07.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       move:
@@ -437,7 +437,7 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/stop_walk00.png
-      width: 16
+      width: 30
       height: 64
       delay: 8
       defense:
@@ -446,7 +446,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/stop_walk01.png
-      width: 16
+      width: 30
       height: 64
       delay: 8
       defense:
@@ -458,7 +458,7 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/start_duck00.png
-      width: 16
+      width: 30
       height: 64
       delay: 6
       defense:
@@ -467,7 +467,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/start_duck01.png
-      width: 16
+      width: 30
       height: 64
       delay: 6
       defense:
@@ -479,7 +479,7 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/end_duck00.png
-      width: 16
+      width: 30
       height: 64
       delay: 6
       defense:
@@ -488,7 +488,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/end_duck01.png
-      width: 16
+      width: 30
       height: 64
       delay: 6
       defense:
@@ -501,7 +501,7 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/duck00.png
-      width: 16
+      width: 30
       height: 64
       delay: 12
       defense:
@@ -510,7 +510,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/duck01.png
-      width: 16
+      width: 30
       height: 64
       delay: 12
       defense:
@@ -523,7 +523,7 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/duck_back00.png
-      width: 16
+      width: 30
       height: 64
       delay: 12
       defense:
@@ -532,7 +532,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/duck_back01.png
-      width: 16
+      width: 30
       height: 64
       delay: 12
       defense:
@@ -544,7 +544,7 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/jump00.png
-      width: 16
+      width: 30
       height: 64
       delay: 8
       move:
@@ -556,7 +556,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/jump01.png
-      width: 16
+      width: 30
       height: 64
       delay: 8
       move:
@@ -568,7 +568,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/jump02.png
-      width: 16
+      width: 30
       height: 64
       delay: 8
       move:
@@ -580,7 +580,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/jump03.png
-      width: 16
+      width: 30
       height: 64
       delay: 8
       move:
@@ -592,7 +592,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/jump04.png
-      width: 16
+      width: 30
       height: 64
       delay: 8
       move:
@@ -607,7 +607,7 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/jump_forward00.png
-      width: 16
+      width: 30
       height: 64
       delay: 6
       move:
@@ -619,7 +619,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/jump_forward01.png
-      width: 16
+      width: 30
       height: 64
       delay: 6
       move:
@@ -631,7 +631,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/jump_forward02.png
-      width: 16
+      width: 30
       height: 64
       delay: 6
       move:
@@ -643,7 +643,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/jump_forward03.png
-      width: 16
+      width: 30
       height: 64
       delay: 6
       move:
@@ -655,7 +655,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/jump_forward04.png
-      width: 16
+      width: 30
       height: 64
       delay: 6
       move:
@@ -667,7 +667,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/jump_forward05.png
-      width: 16
+      width: 30
       height: 64
       delay: 6
       move:
@@ -679,7 +679,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/jump_forward06.png
-      width: 16
+      width: 30
       height: 64
       delay: 6
       move:
@@ -691,7 +691,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/jump_forward07.png
-      width: 16
+      width: 30
       height: 64
       delay: 6
       move:
@@ -706,7 +706,7 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/jump_back00.png
-      width: 16
+      width: 30
       height: 64
       delay: 6
       move:
@@ -718,7 +718,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/jump_back01.png
-      width: 16
+      width: 30
       height: 64
       delay: 6
       move:
@@ -730,7 +730,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/jump_back02.png
-      width: 16
+      width: 30
       height: 64
       delay: 6
       move:
@@ -742,7 +742,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/jump_back03.png
-      width: 16
+      width: 30
       height: 64
       delay: 6
       move:
@@ -754,7 +754,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/jump_back04.png
-      width: 16
+      width: 30
       height: 64
       delay: 6
       move:
@@ -770,7 +770,7 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/block_high00.png
-      width: 16
+      width: 30
       height: 64
       delay: 12
       defense:
@@ -779,7 +779,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/block_high01.png
-      width: 16
+      width: 30
       height: 64
       delay: 12
       defense:
@@ -792,7 +792,7 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/block_low00.png
-      width: 16
+      width: 30
       height: 64
       delay: 12
       defense:
@@ -801,7 +801,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/block_low01.png
-      width: 16
+      width: 30
       height: 64
       delay: 12
       defense:
@@ -813,7 +813,7 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/hurt_mid00.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       defense:
@@ -822,7 +822,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/hurt_mid01.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       defense:
@@ -831,7 +831,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/hurt_mid02.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       defense:
@@ -840,7 +840,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/hurt_mid03.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       defense:
@@ -852,7 +852,7 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/hurt_high00.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       defense:
@@ -861,7 +861,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/hurt_high01.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       defense:
@@ -870,7 +870,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/hurt_high02.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       defense:
@@ -879,7 +879,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/hurt_high03.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       defense:
@@ -891,7 +891,7 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/hurt_low00.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       defense:
@@ -900,7 +900,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/hurt_low01.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       defense:
@@ -909,7 +909,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/hurt_low02.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       defense:
@@ -918,7 +918,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/hurt_low03.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       defense:
@@ -930,7 +930,7 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/hurt_air00.png
-      width: 32
+      width: 38
       height: 64
       delay: 7
       defense:
@@ -939,7 +939,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/hurt_air01.png
-      width: 32
+      width: 38
       height: 64
       delay: 7
       defense:
@@ -948,7 +948,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/hurt_air02.png
-      width: 32
+      width: 38
       height: 64
       delay: 7
       defense:
@@ -957,7 +957,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/hurt_air03.png
-      width: 32
+      width: 38
       height: 64
       delay: 7
       defense:
@@ -969,7 +969,7 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/knocked_down00.png
-      width: 32
+      width: 38
       height: 64
       delay: 9
       defense:
@@ -978,7 +978,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/knocked_down01.png
-      width: 32
+      width: 38
       height: 64
       delay: 9
       defense:
@@ -987,7 +987,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/knocked_down02.png
-      width: 32
+      width: 38
       height: 64
       delay: 9
       defense:
@@ -996,7 +996,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/knocked_down03.png
-      width: 32
+      width: 38
       height: 64
       delay: 9
       defense:
@@ -1008,7 +1008,7 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/hit_ground00.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       defense:
@@ -1017,7 +1017,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/hit_ground01.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       defense:
@@ -1026,7 +1026,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/hit_ground02.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       defense:
@@ -1038,7 +1038,7 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/land00.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       defense:
@@ -1047,7 +1047,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/land01.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       defense:
@@ -1056,7 +1056,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/land02.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       defense:
@@ -1069,7 +1069,7 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/ground00.png
-      width: 32
+      width: 38
       height: 64
       delay: 20
       defense:
@@ -1081,7 +1081,7 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/stand00.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       defense:
@@ -1090,7 +1090,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/stand01.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       defense:
@@ -1099,7 +1099,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/stand02.png
-      width: 16
+      width: 30
       height: 64
       delay: 7
       defense:
@@ -1111,7 +1111,7 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/1punch00.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       defense:
@@ -1120,7 +1120,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/1punch01.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       defense:
@@ -1129,7 +1129,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/1punch02.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       defense:
@@ -1149,7 +1149,7 @@ character:
         y_pos: 6
         index: 2
     - path: data/fei_young/1punch03.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       defense:
@@ -1161,7 +1161,7 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/2punch00.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       defense:
@@ -1170,7 +1170,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/2punch01.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       defense:
@@ -1179,7 +1179,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/2punch02.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       defense:
@@ -1188,7 +1188,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/2punch03.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       defense:
@@ -1208,7 +1208,7 @@ character:
         y_pos: 6
         index: 2
     - path: data/fei_young/2punch04.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       defense:
@@ -1217,7 +1217,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/2punch05.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       defense:
@@ -1229,7 +1229,7 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/kick00.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       defense:
@@ -1238,7 +1238,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/kick01.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       defense:
@@ -1247,7 +1247,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/kick02.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       defense:
@@ -1267,7 +1267,7 @@ character:
         y_pos: 6
         index: 2
     - path: data/fei_young/kick03.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       defense:
@@ -1276,7 +1276,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/kick04.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       defense:
@@ -1288,7 +1288,7 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/back_kick00.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       move:
@@ -1300,7 +1300,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/back_kick01.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       move:
@@ -1312,7 +1312,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/back_kick02.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       move:
@@ -1324,7 +1324,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/back_kick03.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       move:
@@ -1347,7 +1347,7 @@ character:
         y_pos: 6
         index: 2
     - path: data/fei_young/back_kick04.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       move:
@@ -1359,7 +1359,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/back_kick05.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       move:
@@ -1374,7 +1374,7 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/special00.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       move:
@@ -1386,7 +1386,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/special01.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       move:
@@ -1398,7 +1398,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/special02.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       move:
@@ -1410,7 +1410,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/special03.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       move:
@@ -1422,7 +1422,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/special04.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       move:
@@ -1445,7 +1445,7 @@ character:
         y_pos: 6
         index: 2
     - path: data/fei_young/special05.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       move:
@@ -1457,7 +1457,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/special06.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       move:
@@ -1469,7 +1469,7 @@ character:
         width: 12
         height: 31.0
     - path: data/fei_young/special07.png
-      width: 32
+      width: 38
       height: 64
       delay: 8
       move:
