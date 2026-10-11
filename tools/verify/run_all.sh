@@ -51,10 +51,19 @@ run() {
 echo "importing assets..."
 "${GODOT}" --headless --path . --import >"${LOG_DIR}/import.log" 2>&1 || true
 
+echo "validating manifests..."
+if python3 "${REPO_ROOT}/tools/validate/validate_manifest.py"; then
+    echo "  OK"
+else
+    echo "  FAIL"
+    failed=1
+fi
+
 echo "running verification scenes:"
 run m0_smoke "${GODOT}" --headless --path . res://tools/verify/m0_smoke.tscn
 run m1_match "${GODOT}" --headless --path . res://tools/verify/m1_match.tscn
 run m2_hud "${GODOT}" --headless --path . res://tools/verify/m2_hud.tscn
+run m2_flow "${GODOT}" --headless --path . res://tools/verify/m2_flow.tscn
 
 if [[ "${GODOT_HEADLESS_ONLY:-0}" == "1" ]]; then
     echo "  (render scenes skipped: GODOT_HEADLESS_ONLY=1)"

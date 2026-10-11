@@ -12,8 +12,17 @@ config_version=5
 
 config/name="Project Cerberus"
 config/description="2D fighting game. Multi-universe crossover built on the openfight GDExtension."
-run/main_scene="res://game/screens/boot/boot.tscn"
+run/main_scene="res://game/main.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
+
+[autoload]
+
+; Order matters: settings must be applied before anything draws, and the joypad
+; bindings must exist before the engine reads input. GameState loads the
+; manifests, so it goes last.
+UserSettings="*res://game/autoload/user_settings.gd"
+InputBindings="*res://game/autoload/input_bindings.gd"
+GameState="*res://game/autoload/game_state.gd"
 
 [display]
 

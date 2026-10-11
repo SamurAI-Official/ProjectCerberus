@@ -19,9 +19,39 @@ horror), **Us vs. The Clowns** (1992 biker), and **Yokai Hon'nō Academy**
 |---|---|
 | ✅ M0 | openfight GDExtension builds natively on macOS arm64 and loads in Godot 4.7.2; class registers; 600-frame headless smoke test; Metal render test |
 | ✅ M1 | health, damage, best-of-three rounds and 4 Godot signals patched into the engine — a full match runs headless and passes its assertions |
-| 🟡 M2 | **match shell done** — health bars, round clock, announcer and results, driven entirely by engine signals (verified headless). **Still open:** title, character select, stage select, options, gamepad bindings |
+| ✅ M2 | full menu flow — title, fighter select, stage select, match, results, options and an in-match pause menu; gamepad bindings; settings persisted to disk. Walked end to end headless. |
 | ⏳ M3 | art + YAML pipeline, the two vertical-slice fighters |
 | ⏳ M4 | vertical slice lock |
+
+### M2, verified
+
+`tools/verify/m2_flow.tscn` drives the whole flow the way the UI does and
+asserts on where it lands:
+
+```
+  roster: 1 entr(ies), first is 'RYU'
+  stages: 1 entr(ies), first is 'TRAINING ALLEY'
+  gamepad bindings present on all 12 sampled actions
+  InputBindings is idempotent (second run added 0 events)
+  settings round-trip through user://settings.cfg
+  flow reached the match: title -> char select x2 -> stage select -> match
+  match reported winner 0
+  last_result agrees with the signal: winner 0
+  round wins total 2: [2, 0]
+  results screen heading: 'PLAYER 1 WINS'
+  rematch re-entered the match
+PASS: full menu flow with no dead ends
+```
+
+The match shell itself is covered by `m2_hud.tscn`:
+
+```
+  round labels  : ["ROUND 1", "ROUND 2"]
+  announcements : ["ROUND 1", "FIGHT!", "K.O.", "ROUND 2", "PLAYER 1 WINS"]
+  bar target min: p1=100 p2=0
+  result label  : 'PLAYER 1 WINS'
+```
+
 
 ### M1, verified
 
@@ -89,10 +119,19 @@ project.godot            Godot 4.7 host; input map names are load-bearing
 addons/openfight/        built GDExtension (bin/ is gitignored)
 vendor/openfight/        pinned submodule + godot-cpp
 patches/openfight/       our patch series + apply.sh
-game/                    GDScript: screens, match, autoloads
-data/                    openfight YAML + sprite frames (res://data)
+game/
+  main.gd/.tscn          entry point: checks the world is playable, hands off to GameState
+  autoload/              GameState (flow + match config + result), UserSettings, InputBindings
+  ui/menu_screen.gd      shared menu chrome; screens are scripts so they are testable
+  screens/               title, char_select, stage_select, match, results, options, boot
+  match/                 MatchController, HealthBar, Announcer, PauseMenu
+data/
+  fighters/manifest.json roster (name, detail, yaml, moves)
+  stages/manifest.json   stages (name, detail, background)
+  ryu/, background.png   the vendored engine fixture
 tools/build/             build_openfight.sh
-tools/verify/            headless smoke tests
+tools/validate/          validate_manifest.py -- roster + YAML + frame files resolve
+tools/verify/            run_all.sh + the verification scenes
 docs/pipeline/           sprite spec, findings
 docs/lore/               canon reference
 ```
@@ -101,6 +140,13 @@ docs/lore/               canon reference
 is written as `data/<fighter>/<anim>NN.png` and resolved through
 `ResourceLoader` with a `res://` fallback, so the directory name is part of the
 data contract.
+
+The roster and stage manifests are hand-authored rather than generated from the
+directory tree, because a generator cannot know a fighter's display name, its
+detail line, or which universe it belongs to. `tools/validate/validate_manifest.py`
+is what keeps them honest — it resolves every `res://` path, rejects duplicate
+ids, and checks that each character YAML declares a `start` state and references
+no missing frame files.
 
 ## Building
 
@@ -113,23 +159,23 @@ pip3 install --user scons
 ./tools/build/build_openfight.sh   # build + install addons/openfight/
 ```
 
-Then verify:
+Then verify everything:
 
 ```sh
-/Applications/Godot.app/Contents/MacOS/Godot --headless --path . --import
-/Applications/Godot.app/Contents/MacOS/Godot --headless --path . res://tools/verify/m0_smoke.tscn
-/Applications/Godot.app/Contents/MacOS/Godot --headless --path . res://tools/verify/m1_match.tscn
+./tools/verify/run_all.sh              # validator + all six scenes
+GODOT_HEADLESS_ONLY=1 ./tools/verify/run_all.sh   # skip the two that need a GPU
 ```
 
 and play:
 
 ```sh
-/Applications/Godot.app/Contents/MacOS/Godot --path . res://game/screens/match/match.tscn
+/Applications/Godot.app/Contents/MacOS/Godot --path .        # title screen
 ```
 
 Controls are the upstream layout. P1: `S`/`Z`/`X`/`C` to move, `J`/`K`/`L` and
-`M`/`,`/`.` for attacks. P2: arrows and the numeric keypad. Gamepad bindings
-arrive in M2.
+`M`/`,`/`.` for light/medium/heavy punch and kick. P2: arrows and the numeric
+keypad. Gamepads: P1 uses pad 1, P2 uses pad 2; face buttons are light and
+medium, shoulders are heavy. `ESC` pauses a match.
 
 ### Known build caveat
 

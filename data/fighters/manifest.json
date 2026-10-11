@@ -1,0 +1,11 @@
+[
+  {
+    "id": "stock_ryu",
+    "name": "RYU",
+    "detail": "The engine's own reference fighter. This is the vendored dev fixture, not a Project Cerberus character -- it is here because it is the only complete frame set that exists, and it is what proves the pipeline end to end. The vertical-slice roster (Tsu Ibano and Fei Young) replaces it in M3.",
+    "universe": "fixture",
+    "health": 100,
+    "yaml": "res://data/ryu/ryu.yml",
+    "moves": "res://data/ryu/moves.yml"
+  }
+]

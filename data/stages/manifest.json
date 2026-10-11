@@ -1,0 +1,9 @@
+[
+  {
+    "id": "training_alley",
+    "name": "TRAINING ALLEY",
+    "detail": "The engine's placeholder background: one flat 376x248 image. It does not cover a 768x432 viewport, which is why the project's clear colour is dark rather than grey. Authored stages that fill the frame arrive in M3.",
+    "universe": "fixture",
+    "background": "res://data/background.png"
+  }
+]
