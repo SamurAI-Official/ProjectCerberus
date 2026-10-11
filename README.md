@@ -3,8 +3,9 @@
 A 2D fighting game in **Godot 4.7**, built on the
 [openfight](https://github.com/nonameentername/openfight) fighting-game engine
 (GDExtension, LGPL-3.0), with
-[NRR](https://github.com/SamurAI-Official/NRR) planned as an optional upscaling
-pass.
+[NRR](https://github.com/SamurAI-Official/NRR) vendored as the default upscaler —
+installed, loading, running, and declining every frame for a reason it states out
+loud. See [The render path](#the-render-path) below.
 
 The roster and stages come from the *ZERO's Universe* lore bible — five
 properties that share one anthology: **Conquest of Verelin / Diaporia** (high
@@ -91,15 +92,54 @@ where it should have:
 PASS: hitboxes and hurtboxes connect in the engine
 ```
 
-All eight scenes pass:
+All nine scenes pass:
 
 ```
-  m0_smoke   PASS      m0_render  PASS
-  m1_match   PASS      m2_render  PASS
-  m2_hud     PASS      m3_boxes   PASS
-  m2_flow    PASS
-  m3_roster  PASS
+  m0_smoke      PASS      m0_render     PASS
+  m1_match      PASS      m2_render     PASS
+  m2_hud        PASS      m3_boxes      PASS
+  m2_flow       PASS      video_options PASS
+  m3_roster     PASS
 ```
+
+### The render path
+
+The game draws at 768x432 and enlarges that to whatever the window is, and *how*
+it enlarges is a setting: **NRR** (neural, the default), **Nearest**
+(pixel-perfect) or **Smooth** (interpolated). The options screen offers all three
+and shows which one is actually in force.
+
+NRR is vendored at `addons/nrr` with its native binding built for macOS arm64, and
+it genuinely loads: `video_options` reports
+
+```
+  nrr vendored=true binding=true model=true
+  nrr backend    : CPU
+  nrr model      : res://addons/nrr/models/upscale_msreal_scale.onnx
+  nrr last error : 'nrr_render: model input 'color' resolution 768x432 conflicts
+                    with the model's static input shape'
+  nrr frames out : 0
+```
+
+**It is not upscaling, and the game says so rather than pretending.** The
+published model takes exactly 512x512 — `tools/verify/nrr_probe.tscn` asks it
+size by size, and of twelve candidate sizes only that one is accepted, returning
+the same size it was given. Our canvas is 768x432, so every frame is declined.
+The model card describes something different ("dynamic H/W", "2x the input"), and
+where a card and an artifact disagree the artifact is what ran.
+
+That is why the options screen prints the runtime's own words and not a summary of
+the file listing: *"NRR is running but declining every frame: nrr_render: model
+input 'color' resolution 768x432 conflicts with the model's static input shape."*
+An upscaler that is selected, installed and silently not running is
+indistinguishable from a working one unless somebody asks it, so `video_options`
+asks it and asserts that the screen agrees with the answer.
+
+To make it actually upscale, either the game renders at 512x512 — which throws
+away the 1:1 pixel mapping the art was built for — or NRR publishes a model whose
+input is not square. Neither is a configuration change, so the shipped default
+stays NRR and the shipped behaviour is an honest pixel-perfect picture.
+
 
 ### Open bug: a round restart can stop the fight connecting
 
@@ -176,22 +216,28 @@ never drawn. Those shape the art pipeline, so they are worth having on record.
 ```
 project.godot            Godot 4.7 host; input map names are load-bearing
 addons/openfight/        built GDExtension (bin/ is gitignored)
+addons/nrr/              the NRR upscaler addon, vendored; bin/ is built, not
+                         committed -- tools/build_nrr_macos.sh builds it
 vendor/openfight/        pinned submodule + godot-cpp
 patches/openfight/       our patch series + apply.sh
 game/
   main.gd/.tscn          entry point: checks the world is playable, hands off to GameState
   autoload/              GameState (flow + match config + result), UserSettings, InputBindings
   ui/menu_screen.gd      shared menu chrome; screens are scripts so they are testable
+  ui/upscaler.gd         NRR / nearest / smooth, and what this machine can do
+  ui/fps_counter.gd      the corner frame rate, off by default
   screens/               title, char_select, stage_select, match, results, options, boot
   match/                 MatchController, HealthBar, Announcer, PauseMenu
 data/
   fighters/manifest.json roster (name, detail, yaml, moves)
   stages/manifest.json   stages (name, detail, background)
   ryu/, background.png   the vendored engine fixture
-tools/build/             build_openfight.sh
+tools/build/             build_openfight.sh, build_nrr_macos.sh
 tools/validate/          validate_manifest.py -- roster + YAML + frame files resolve
-tools/verify/            run_all.sh + the verification scenes (m3_boxes is the
-                         box-overlay check; it needs a window, not --headless)
+tools/verify/            run_all.sh + the verification scenes. m3_boxes (the box
+                         overlay) and video_options (the render path) need a
+                         window; nrr_probe is a tool, not a check -- it reports
+                         which frame sizes the released NRR model accepts
 docs/pipeline/           sprite spec, findings
 docs/lore/               canon reference
 ```
