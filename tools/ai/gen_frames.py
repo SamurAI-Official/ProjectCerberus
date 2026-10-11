@@ -64,6 +64,18 @@ NEGATIVE = ("3/4 view, front view, multiple characters, cropped, cut off, "
             "blurry, soft gradient, photorealistic, 3d render, text, watermark, "
             "signature, background scenery, ground shadow, border, frame")
 
+# Render size, in pixels per side.
+#
+# 512 rather than 1024, and not as a compromise. `to_sprite.py` scales whatever
+# comes out of here into a 240-pixel square window at game scale, because 240 is
+# the size the game's 6 px/unit actually draws (PX_PER_UNIT * FRAME_UNITS, and
+# that product is independent of the render size -- see to_sprite). Rendering at
+# 1024 therefore throws away three quarters of the pixels, and their time and
+# memory, before anything looks at them. 512 still resolves the 240 window with
+# headroom to spare, and on a 16 GB machine the difference between the two is the
+# difference between a run that finishes and one that swaps the disk full.
+DEFAULT_SIZE = 512
+
 # Headroom a run is required to have before it will start, in bytes.
 #
 # This is not a nicety. The checkpoint is 6.5 GB and the ControlNet 2.4 GB, and
@@ -76,15 +88,18 @@ NEGATIVE = ("3/4 view, front view, multiple characters, cropped, cut off, "
 MIN_FREE_BYTES = 12 * 1024 ** 3
 
 
-def preflight(size=1024):
+def preflight(size=DEFAULT_SIZE):
     """Refuse to start a run this machine cannot finish."""
+    # The weights are the same either way, and they are the bulk of it; the
+    # activations are what the render size controls, and they go as the square.
+    needed = MIN_FREE_BYTES if size > 512 else MIN_FREE_BYTES // 2
     free = shutil.disk_usage(REPO_ROOT).free
-    if free >= MIN_FREE_BYTES:
+    if free >= needed:
         return
 
     raise SystemExit(
         f"only {free / 1024 ** 3:.1f} GB free; a {size}px SDXL run wants "
-        f"{MIN_FREE_BYTES / 1024 ** 3:.0f} GB of headroom.\n"
+        f"{needed / 1024 ** 3:.0f} GB of headroom.\n"
         "The checkpoints alone are ~8.9 GB. Where they do not fit in RAM the "
         "overflow becomes swapfiles on the boot volume, so a run that is short of\n"
         "disk does not fail fast -- it fills the disk while you are waiting for "
@@ -220,7 +235,7 @@ def main(argv=None):
     parser.add_argument("fighter", help="design sheet id, e.g. tsu_ibano")
     parser.add_argument("--state", default=None, help="comma-separated states")
     parser.add_argument("--out", required=True, help="output directory")
-    parser.add_argument("--size", type=int, default=1024)
+    parser.add_argument("--size", type=int, default=DEFAULT_SIZE)
     parser.add_argument("--steps", type=int, default=20)
     parser.add_argument("--cfg", type=float, default=7.0)
     parser.add_argument("--strength", type=float, default=0.9,
