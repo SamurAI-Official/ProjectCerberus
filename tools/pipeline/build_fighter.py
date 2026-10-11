@@ -68,12 +68,64 @@ REACH_BOX = (38, 64)  # 228x384 canvas
 
 FEET = figure.GROUND_Y  # 0.0 -- feet on the origin, which is the engine's ground
 CROWN = 31.0
-# `y_pos` is where the box's far edge sits in engine units. Empirically (measured
-# off a render, not derived -- the engine's own vertical constants disagree with
-# each other, see docs/pipeline/sprite-spec.md) a positive `y_pos` moves the box
-# UP, so CROWN puts its near edge at the crown and it extends back down through
-# the body to the feet.
-HURTBOX = {"x_pos": -6, "y_pos": CROWN, "width": 12, "height": CROWN - FEET}
+
+# ---------------------------------------------------------------------------
+# Collision boxes are anchored on the sprite's corner, not on the origin
+# ---------------------------------------------------------------------------
+# `Animation::updateCollisions` does this to every box on every frame:
+#
+#     float width  = inverted ? sprites[current]->getWidth() / 2
+#                             : -sprites[current]->getWidth() / 2;
+#     float height = sprites[current]->getHeight();
+#     offense[current]->update(x_pos + width, y_pos - height / 2, inverted);
+#     defense[current]->update(x_pos + width, y_pos - height / 2, inverted);
+#
+# So a YAML box's base is the sprite's bottom-left corner when the fighter faces
+# right -- `(player_x - sprite_w/2, player_y - sprite_h/2)` -- and the `x_pos` and
+# `y_pos` in the file are measured from THAT, not from the player origin. Both
+# consequences are load-bearing:
+#
+#   * The base moves with the DECLARED sprite size, so one `x_pos` means different
+#     things in a 30-wide body frame and a 38-wide reach frame. This is visible in
+#     the fixture itself: `defense.x_pos` is 4 in `idle`, which declares 20x40,
+#     and 14 in `1punch`, which declares 40x40. Both put the box at
+#     player_x - 6..+6. The convention below is read from that pair, not inferred
+#     from the name `x_pos`, which suggests the origin and is wrong.
+#   * The sprite is centred on the player origin and the origin is the ground, so
+#     the base sits half a sprite BELOW the ground. `y_pos` therefore has to carry
+#     `sprite_h / 2` before it measures anything the art can be checked against.
+#
+# `box_at` converts a box expressed from the ORIGIN -- the only frame of reference
+# in which "feet at 0, crown at 31" is a true statement -- into the file's units.
+# It is mirror-safe: `inverted` reflects `x_pos` about the same base this adds, so
+# these numbers place the box in front of a fighter facing either way.
+#
+# Getting this wrong is exactly what the M3.5 regression did. With `y_pos` treated
+# as origin-relative and set to CROWN, the hurtbox landed below the fighter's feet
+# and nothing could ever connect -- visible in the engine as two blue rectangles
+# drawn under the floor, and as a 120-second fight with zero hits. Neither
+# validator could see it: validate_boxes.py checks the art against its declared
+# canvas, which was right, and never against the engine's anchoring, which was not.
+def box_at(canvas, x, y, width, height):
+    """A box CENTRED on `(x, y)`, in origin units -> in the file's corner units."""
+    box_width, box_height = canvas
+    return {
+        "x_pos": box_width / 2.0 + x - width / 2.0,
+        "y_pos": box_height / 2.0 + y - height / 2.0,
+        "width": float(width),
+        "height": float(height),
+    }
+
+
+# The full-body hurtbox: feet to crown, centred on the origin. `x` is 0, and
+# box_at's mirror symmetry keeps it centred when the fighter turns round.
+HURTBOX_WIDTH = 12.0
+
+
+def hurtbox_for(canvas):
+    height = CROWN - FEET
+    return box_at(canvas, 0.0, FEET + height / 2.0, HURTBOX_WIDTH, height)
+
 
 # Spawn height, in engine units. It is the engine's ground: Player::move snaps
 # y_pos back to y_initial on landing, and y_initial comes from this value.
@@ -320,20 +372,42 @@ MOVES = {
     "special":      lambda i, n, p: (0.55 if 1 <= i <= 5 else 0.0, 0.0),
 }
 
-# Where each strike lands: (frame_index, trigger, offensive box). The trigger is
-# the strength handed to the defender, and the DEFENDER's own state machine
-# decides whether it becomes a hit or a block -- damage is applied by the engine
+# Where each strike lands: the strength handed to the defender, the joint that
+# does the hitting, and how big the box is. The DEFENDER's own state machine
+# decides whether that becomes a hit or a block -- damage is applied by the engine
 # at that single resolution point (see patches/openfight/0001).
 #
-# Boxes are in the frame's own units, measured from the player origin, extending
-# forward. A punching hand lands near x=13 and a kick near x=18, so these are
-# sized to the poses in POSES rather than guessed.
-HITS = {
-    "1punch":    [(2, "HIT_M", {"x_pos": 7, "y_pos": 5, "width": 7, "height": 6})],
-    "2punch":    [(3, "HIT_H", {"x_pos": 7, "y_pos": 4, "width": 9, "height": 7})],
-    "kick":      [(2, "HIT_M", {"x_pos": 11, "y_pos": -4, "width": 8, "height": 6})],
-    "back_kick": [(3, "KNOCK_DOWN", {"x_pos": 11, "y_pos": -2, "width": 9, "height": 8})],
-    "special":   [(4, "KNOCK_DOWN", {"x_pos": 9, "y_pos": 2, "width": 9, "height": 8})],
+# Nothing here is a position, and nothing here is a frame number. Both are derived
+# from the pose by `strike_box` below:
+#
+#   * the active frame is the frame where `joint` reaches furthest forward;
+#   * the box is centred on that joint at that frame.
+#
+# The previous version of this table hand-authored both, and both were wrong.
+# Every `y_pos` in it was written as if y were measured DOWN from the crown rather
+# than up from the feet, so `1punch` declared a hitbox at y 5..11 -- shin height --
+# while its pose holds the punching hand at y 23.3. The frames were wrong in the
+# same direction: POSES builds all five strikes with `_strike`, whose envelope is
+# `sin(pi * min(t / 0.55, 1))` -- a sine *of* a value that itself reaches 1 at
+# t=0.55, where the sine is zero again -- so the extension peaks at 27.5% of the
+# animation and is fully retracted by 55%. `2punch` declared frame 3 of 6, a frame
+# on which the arm has already come back. The result was a hitbox floating beside
+# a withdrawn arm, and any later re-timing of an animation would have silently
+# re-timed the hitbox away from the limb again. Derived, it cannot.
+#
+# Every joint named here is a hand, and that is not a copy-paste: `_strike`
+# animates `arm_far` toward `horizontal` degrees and `lift` -- the only parameter
+# that moves a leg -- is 0 for `kick` and only 6 for `back_kick` and `special`. So
+# `kick` presently extends a forward arm to y 25.6 with both feet planted 0.5
+# units in front of the origin. When the kick becomes a kick, this table gains
+# `foot_far` for it and the box follows the leg with nothing else to change.
+STRIKES = {
+    # state:      (trigger,      joint,       half_width, half_height)
+    "1punch":     ("HIT_M",       "hand_far",   3.5, 3.0),
+    "2punch":     ("HIT_H",       "hand_far",   4.0, 3.5),
+    "kick":       ("HIT_M",       "hand_far",   3.5, 3.0),
+    "back_kick":  ("KNOCK_DOWN",  "hand_far",   4.0, 3.5),
+    "special":    ("KNOCK_DOWN",  "hand_far",   5.0, 4.5),
 }
 
 # The engine's shared hit-spark object, `type: temporary`, one frame set reused
@@ -342,6 +416,39 @@ HITS = {
 HIT_VFX = "data/collision/collision.yml"
 
 BOXES = {"body": BODY_BOX, "reach": REACH_BOX}
+
+
+def strike_box(state, count, profile, canvas):
+    """The active frame and the offensive box for a strike, both taken from the pose.
+
+    The frame is the one on which `state`'s striking joint is furthest forward;
+    the box is centred on that joint there. `rest` is the joint's position on
+    frame 0, and the pose has to beat it, so naming a joint that a pose never
+    moves is a build error instead of a hitbox parked on a stationary limb.
+
+    `canvas` is the frame's declared box, because the engine anchors collision
+    boxes on the sprite's corner and the declared size is part of that (see
+    `box_at`). The joint's position is in origin units; box_at converts.
+    """
+    trigger, joint, half_width, half_height = STRIKES[state]
+    build = POSES[state]
+
+    rest = figure.pose(**build(0, count, profile))[joint][0]
+
+    best_index, best_point = 0, None
+    for index in range(count):
+        point = figure.pose(**build(index, count, profile))[joint]
+        if best_point is None or point[0] > best_point[0]:
+            best_index, best_point = index, point
+
+    if best_point[0] <= rest:
+        raise ValueError(
+            "%s: %s never moves forward (rest x=%.1f, best x=%.1f)"
+            % (state, joint, rest, best_point[0])
+        )
+
+    box = box_at(canvas, best_point[0], best_point[1], 2.0 * half_width, 2.0 * half_height)
+    return best_index, trigger, box
 
 
 def render_frames(sheet, frames_dir):
@@ -374,6 +481,7 @@ def _num(value):
 
 def write_character_yaml(sheet, out_path):
     identifier = sheet["id"]
+    profile = sheet.get("profile", {})
     lines = [
         "character:",
         f"  name: {identifier}",
@@ -395,7 +503,10 @@ def write_character_yaml(sheet, out_path):
 
     for state, count, delay, box, continual, _pose in STATE_SPEC:
         box_width, box_height = BOXES[box]
-        hits = {index: (trigger, offsets) for index, trigger, offsets in HITS.get(state, [])}
+        defense = hurtbox_for(BOXES[box])
+        # A strike's active frame and its box both come from its pose (see
+        # STRIKES), so the hitbox is wherever the striking limb actually is.
+        strike = strike_box(state, count, profile, BOXES[box]) if state in STRIKES else None
 
         lines.append(f"  - name: {state}")
         if continual:
@@ -417,19 +528,15 @@ def write_character_yaml(sheet, out_path):
                 x_vel, y_vel = move(index, count, sheet.get("profile", {}))
                 lines += ["      move:", f"        x_vel: {_num(x_vel)}", f"        y_vel: {_num(y_vel)}"]
 
-            lines += [
-                "      defense:",
-                f"        x_pos: {HURTBOX['x_pos']}",
-                f"        y_pos: {HURTBOX['y_pos']}",
-                f"        width: {HURTBOX['width']}",
-                f"        height: {HURTBOX['height']}",
-            ]
+            lines.append("      defense:")
+            for key in ("x_pos", "y_pos", "width", "height"):
+                lines.append(f"        {key}: {_num(defense[key])}")
 
-            if index in hits:
-                trigger, offsets = hits[index]
+            if strike is not None and index == strike[0]:
+                _, trigger, offsets = strike
                 lines.append("      offense:")
                 for key in ("x_pos", "y_pos", "width", "height"):
-                    lines.append(f"        {key}: {offsets[key]}")
+                    lines.append(f"        {key}: {_num(offsets[key])}")
                 lines += [
                     "      collision:",
                     f"        path: {HIT_VFX}",
