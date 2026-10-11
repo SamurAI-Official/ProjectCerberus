@@ -1,11 +1,10 @@
 ; Engine configuration file.
-; Project Cerberus - 2D fighting game.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
 ;
-; Godot 4.7 host for the openfight fighting-game core (GDExtension).
-; The input map below matches the action names openfight reads internally
-; (readFrameInput() -> p1_up/p1_down/.../p2_z), so the names are load-bearing:
-; renaming them silently breaks the engine's input. Joypad bindings are added
-; in M2 once the boot path is verified.
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
 
 config_version=5
 
