@@ -27,6 +27,12 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
+sys.path.insert(0, str(REPO_ROOT / "tools" / "pipeline"))
+
+from PIL import Image  # noqa: E402
+
+import figure  # noqa: E402
+
 FIGHTER_MANIFEST = "data/fighters/manifest.json"
 STAGE_MANIFEST = "data/stages/manifest.json"
 
@@ -160,6 +166,92 @@ def check_character_yaml(relative: str, entries: list) -> int:
     return failures
 
 
+def frame_colours(path: Path) -> set:
+    """Every distinct RGB value in a frame that is not fully transparent."""
+    with Image.open(path) as image:
+        colours = image.convert("RGBA").getcolors(maxcolors=1 << 24) or []
+    return {pixel[:3] for _count, pixel in colours if pixel[3] > 0}
+
+
+def check_palettes(relative: str, entries: list) -> int:
+    """Design sheets declare exactly the sixteen roles, and their frames use only them.
+
+    Two distinct failures, both invisible at runtime:
+
+      * **A design sheet with a missing or renamed role.** `figure.Palette` raises
+        on this, but only when something builds that fighter -- a sheet nobody
+        builds is a sheet nothing checks, and a 2P palette swap is keyed by role,
+        so a typo here is a tone that quietly goes missing.
+      * **A frame with more than sixteen colours.** The engine renders it happily.
+        The budget *is* the art direction (Guilty Gear's PS1 sprites are 16-colour
+        64x121), and while frames come from `figure.render` the count is
+        structural -- but once frames come from `tools/ai/to_sprite.py` they are
+        quantised, and a quantiser that merges one tone too few produces a
+        17-colour frame that nothing else would ever notice.
+    """
+    failures = 0
+
+    for index, entry in enumerate(entries):
+        if not isinstance(entry, dict):
+            continue
+
+        fighter_id = entry.get("id")
+        if not isinstance(fighter_id, str) or not fighter_id:
+            continue
+
+        sheet_path = REPO_ROOT / "design_sheets" / f"{fighter_id}.json"
+        if not sheet_path.is_file():
+            # The vendored fixture has no design sheet. It is not built by
+            # build_fighter.py, so there is no palette here to hold it to.
+            continue
+
+        label = f"{relative}[{index}] ({fighter_id})"
+        try:
+            sheet = json.loads(sheet_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as error:
+            fail(f"{label} design sheet is not valid JSON: {error}")
+            failures += 1
+            continue
+
+        try:
+            palette = figure.Palette(sheet.get("palette16", {}))
+        except ValueError as error:
+            fail(f"{label} {error}")
+            failures += 1
+            continue
+
+        budget = len(figure.PALETTE_ROLES)
+        if palette.unique_count() != budget:
+            fail(f"{label} declares {palette.unique_count()} distinct colour(s), "
+                 f"the budget is {budget}")
+            failures += 1
+
+        allowed = set(palette.colours.values())
+        frames_dir = REPO_ROOT / "data" / fighter_id
+        if not frames_dir.is_dir():
+            continue
+
+        offenders = []
+        for frame in sorted(frames_dir.glob("*.png")):
+            used = frame_colours(frame)
+            outside = len(used - allowed)
+            if outside or len(used) > budget:
+                offenders.append(f"{frame.name} ({len(used)} colours, "
+                                 f"{outside} outside the palette)")
+
+        if offenders:
+            shown = ", ".join(offenders[:3])
+            more = f" (+{len(offenders) - 3} more)" if len(offenders) > 3 else ""
+            fail(f"{label} has {len(offenders)} frame(s) over the {budget}-colour "
+                 f"budget: {shown}{more}")
+            failures += 1
+        elif (frames_dir / "moves.yml").is_file():
+            print(f"  OK    {label} {palette.unique_count()} colours, "
+                  f"every frame within budget")
+
+    return failures
+
+
 def main() -> int:
     print(f"validating manifests under {REPO_ROOT}")
     failures = 0
@@ -169,6 +261,7 @@ def main() -> int:
         failures += check_entries(FIGHTER_MANIFEST, fighters, ["id", "name", "yaml", "moves"])
         failures += check_res_paths(FIGHTER_MANIFEST, fighters, ["yaml", "moves"])
         failures += check_character_yaml(FIGHTER_MANIFEST, fighters)
+        failures += check_palettes(FIGHTER_MANIFEST, fighters)
 
     stages = load_manifest(STAGE_MANIFEST)
     if stages is not None:
