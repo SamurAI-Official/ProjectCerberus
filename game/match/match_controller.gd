@@ -69,17 +69,36 @@ func _spawn_fighter_node() -> void:
 	add_child(_fight)
 	move_child(_fight, 0)
 
+## Reads a path from the flow host.
+##
+## This used `Engine.has_singleton("GameState")` as its guard, which is ALWAYS
+## false here: has_singleton only reports singletons registered natively
+## (GDExtension / Engine.register_singleton), while GameState is a GDScript
+## autoload -- a Node under /root. So the guard failed, every path came back
+## empty, and both players silently loaded FALLBACK_FIGHTER along with the
+## fallback background. That was invisible for as long as ryu was the only entry
+## in the roster, because the fallback was indistinguishable from the selection.
+##
+## get_node_or_null is the correct lookup for an autoload. has_method guards
+## against a scene run with no host at all, where a designer pressing F6 on
+## match.tscn should still get something on screen.
+func _from_state(method: String, fallback: String, argument = null) -> String:
+	var state := get_node_or_null("/root/GameState")
+	var path: String = ""
+
+	if state != null and state.has_method(method):
+		path = state.call(method) if argument == null else state.call(method, argument)
+
+	return path if not path.is_empty() else fallback
+
 func _fighter_yaml(index: int) -> String:
-	var path := GameState.fighter_yaml(index) if Engine.has_singleton("GameState") else ""
-	return path if not path.is_empty() else FALLBACK_FIGHTER
+	return _from_state("fighter_yaml", FALLBACK_FIGHTER, index)
 
 func _moves_yaml(index: int) -> String:
-	var path := GameState.fighter_moves(index) if Engine.has_singleton("GameState") else ""
-	return path if not path.is_empty() else FALLBACK_MOVES
+	return _from_state("fighter_moves", FALLBACK_MOVES, index)
 
 func _background() -> String:
-	var path := GameState.stage_background() if Engine.has_singleton("GameState") else ""
-	return path if not path.is_empty() else FALLBACK_BACKGROUND
+	return _from_state("stage_background", FALLBACK_BACKGROUND)
 
 
 func _process(_delta: float) -> void:

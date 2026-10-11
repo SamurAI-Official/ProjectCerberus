@@ -1,0 +1,1482 @@
+character:
+  name: fei_young
+  type: player
+  health: 100
+  position:
+    x_pos: 0
+    y_pos: 30
+    alpha: 1.0
+    scale: 1
+  action:
+  - name: start
+    trigger: NONE
+    from: start
+    to: idle
+  - name: idle
+    trigger: NONE
+    from: start
+    to: idle
+  - name: turn
+    trigger: INVERT
+    from: idle,walk_back,walk_forward
+    to: idle
+  - name: walk_back
+    trigger: B
+    from: idle
+    to: idle
+  - name: walk_forward
+    trigger: F
+    from: idle
+    to: idle
+  - name: stop_walk
+    trigger: ~F,~B
+    from: walk_forward,walk_back
+    to: idle
+  - name: start_duck
+    trigger: DB,D
+    from: idle,walk_back,walk_forward
+    to: duck
+  - name: end_duck
+    trigger: NONE,~D
+    from: duck,duck_back
+    to: idle
+  - name: duck
+    trigger: D
+    from: duck_back
+    to: idle
+  - name: duck_back
+    trigger: DB
+    from: duck
+    to: idle
+  - name: jump
+    trigger: U
+    from: idle,walk_back,walk_forward,duck
+    to: idle
+  - name: jump_forward
+    trigger: UF
+    from: idle,walk_forward,duck
+    to: idle
+  - name: jump_forward
+    trigger: U
+    from: walk_forward
+    to: idle
+  - name: jump_back
+    trigger: UB
+    from: idle,walk_back,duck
+    to: idle
+  - name: jump_back
+    trigger: U
+    from: walk_back
+    to: idle
+  - name: block_low
+    trigger: HIT_L,HIT_M
+    from: duck_back
+    to: duck_back
+  - name: block_high
+    trigger: HIT_H,HIT_M
+    from: walk_back
+    to: idle
+  - name: hurt_mid
+    trigger: HIT_M
+    from: idle,walk_forward,walk_back,1punch,2punch,kick,back_kick,special
+    to: idle
+  - name: hurt_high
+    trigger: HIT_H
+    from: idle,duck,duck_back,walk_forward,1punch,2punch,kick,back_kick,special
+    to: idle
+  - name: hurt_low
+    trigger: HIT_L
+    from: idle,walk_back,duck,1punch,2punch,kick,back_kick,special
+    to: idle
+  - name: hurt_air
+    trigger: HIT_L,HIT_M,HIT_H
+    from: knocked_down,jump,jump_back,jump_forward,hurt_air
+    to: ground
+  - name: 1punch
+    trigger: LP
+    from: idle,walk_back,walk_forward
+    to: idle
+  - name: 2punch
+    trigger: MP
+    from: idle,walk_back,walk_forward,1punch
+    to: idle
+  - name: back_kick
+    trigger: MK
+    from: idle,walk_back,walk_forward
+    to: idle
+  - name: kick
+    trigger: LK
+    from: idle,walk_back,walk_forward,2punch
+    to: idle
+  - name: special
+    trigger: QCF_HP
+    from: idle,walk_forward,1punch
+    to: idle
+  - name: knocked_down
+    trigger: KNOCK_DOWN
+    from: idle,knocked_down
+    to: idle
+  - name: hit_ground
+    trigger: GROUND
+    from: hurt_air,knocked_down
+    to: ground
+  - name: land
+    trigger: GROUND
+    from: jump,jump_back,jump_forward
+    to: idle
+  - name: ground
+    trigger: 
+    from: hurt_air
+    to: stand
+  - name: stand
+    trigger: 
+    from: ground
+    to: idle
+  animation:
+  - name: start
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/start00.png
+      width: 16
+      height: 32
+      delay: 10
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+  - name: idle
+    continual: true
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/idle00.png
+      width: 16
+      height: 32
+      delay: 10
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/idle01.png
+      width: 16
+      height: 32
+      delay: 10
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/idle02.png
+      width: 16
+      height: 32
+      delay: 10
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/idle03.png
+      width: 16
+      height: 32
+      delay: 10
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/idle04.png
+      width: 16
+      height: 32
+      delay: 10
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/idle05.png
+      width: 16
+      height: 32
+      delay: 10
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+  - name: turn
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/turn00.png
+      width: 16
+      height: 32
+      delay: 8
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/turn01.png
+      width: 16
+      height: 32
+      delay: 8
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/turn02.png
+      width: 16
+      height: 32
+      delay: 8
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+  - name: walk_forward
+    continual: true
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/walk_forward00.png
+      width: 16
+      height: 32
+      delay: 7
+      move:
+        x_vel: 0.34
+        y_vel: 0
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/walk_forward01.png
+      width: 16
+      height: 32
+      delay: 7
+      move:
+        x_vel: 0.34
+        y_vel: 0
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/walk_forward02.png
+      width: 16
+      height: 32
+      delay: 7
+      move:
+        x_vel: 0.34
+        y_vel: 0
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/walk_forward03.png
+      width: 16
+      height: 32
+      delay: 7
+      move:
+        x_vel: 0.34
+        y_vel: 0
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/walk_forward04.png
+      width: 16
+      height: 32
+      delay: 7
+      move:
+        x_vel: 0.34
+        y_vel: 0
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/walk_forward05.png
+      width: 16
+      height: 32
+      delay: 7
+      move:
+        x_vel: 0.34
+        y_vel: 0
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/walk_forward06.png
+      width: 16
+      height: 32
+      delay: 7
+      move:
+        x_vel: 0.34
+        y_vel: 0
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/walk_forward07.png
+      width: 16
+      height: 32
+      delay: 7
+      move:
+        x_vel: 0.34
+        y_vel: 0
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+  - name: walk_back
+    continual: true
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/walk_back00.png
+      width: 16
+      height: 32
+      delay: 7
+      move:
+        x_vel: -0.3
+        y_vel: 0
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/walk_back01.png
+      width: 16
+      height: 32
+      delay: 7
+      move:
+        x_vel: -0.3
+        y_vel: 0
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/walk_back02.png
+      width: 16
+      height: 32
+      delay: 7
+      move:
+        x_vel: -0.3
+        y_vel: 0
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/walk_back03.png
+      width: 16
+      height: 32
+      delay: 7
+      move:
+        x_vel: -0.3
+        y_vel: 0
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/walk_back04.png
+      width: 16
+      height: 32
+      delay: 7
+      move:
+        x_vel: -0.3
+        y_vel: 0
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/walk_back05.png
+      width: 16
+      height: 32
+      delay: 7
+      move:
+        x_vel: -0.3
+        y_vel: 0
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/walk_back06.png
+      width: 16
+      height: 32
+      delay: 7
+      move:
+        x_vel: -0.3
+        y_vel: 0
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/walk_back07.png
+      width: 16
+      height: 32
+      delay: 7
+      move:
+        x_vel: -0.3
+        y_vel: 0
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+  - name: stop_walk
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/stop_walk00.png
+      width: 16
+      height: 32
+      delay: 8
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/stop_walk01.png
+      width: 16
+      height: 32
+      delay: 8
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+  - name: start_duck
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/start_duck00.png
+      width: 16
+      height: 32
+      delay: 6
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/start_duck01.png
+      width: 16
+      height: 32
+      delay: 6
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+  - name: end_duck
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/end_duck00.png
+      width: 16
+      height: 32
+      delay: 6
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/end_duck01.png
+      width: 16
+      height: 32
+      delay: 6
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+  - name: duck
+    continual: true
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/duck00.png
+      width: 16
+      height: 32
+      delay: 12
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/duck01.png
+      width: 16
+      height: 32
+      delay: 12
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+  - name: duck_back
+    continual: true
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/duck_back00.png
+      width: 16
+      height: 32
+      delay: 12
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/duck_back01.png
+      width: 16
+      height: 32
+      delay: 12
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+  - name: jump
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/jump00.png
+      width: 16
+      height: 32
+      delay: 8
+      move:
+        x_vel: 0
+        y_vel: 3
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/jump01.png
+      width: 16
+      height: 32
+      delay: 8
+      move:
+        x_vel: 0
+        y_vel: 1.5
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/jump02.png
+      width: 16
+      height: 32
+      delay: 8
+      move:
+        x_vel: 0
+        y_vel: -0.7
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/jump03.png
+      width: 16
+      height: 32
+      delay: 8
+      move:
+        x_vel: 0
+        y_vel: -2.2
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/jump04.png
+      width: 16
+      height: 32
+      delay: 8
+      move:
+        x_vel: 0
+        y_vel: -2.6
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+  - name: jump_forward
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/jump_forward00.png
+      width: 16
+      height: 32
+      delay: 6
+      move:
+        x_vel: 0.62
+        y_vel: 3
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/jump_forward01.png
+      width: 16
+      height: 32
+      delay: 6
+      move:
+        x_vel: 0.62
+        y_vel: 1.6
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/jump_forward02.png
+      width: 16
+      height: 32
+      delay: 6
+      move:
+        x_vel: 0.62
+        y_vel: -0.5
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/jump_forward03.png
+      width: 16
+      height: 32
+      delay: 6
+      move:
+        x_vel: 0.62
+        y_vel: -2
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/jump_forward04.png
+      width: 16
+      height: 32
+      delay: 6
+      move:
+        x_vel: 0.62
+        y_vel: -2.6
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/jump_forward05.png
+      width: 16
+      height: 32
+      delay: 6
+      move:
+        x_vel: 0.62
+        y_vel: -2.6
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/jump_forward06.png
+      width: 16
+      height: 32
+      delay: 6
+      move:
+        x_vel: 0.62
+        y_vel: -2.6
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/jump_forward07.png
+      width: 16
+      height: 32
+      delay: 6
+      move:
+        x_vel: 0.62
+        y_vel: -2.6
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+  - name: jump_back
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/jump_back00.png
+      width: 16
+      height: 32
+      delay: 6
+      move:
+        x_vel: -0.5
+        y_vel: 3
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/jump_back01.png
+      width: 16
+      height: 32
+      delay: 6
+      move:
+        x_vel: -0.5
+        y_vel: 1.5
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/jump_back02.png
+      width: 16
+      height: 32
+      delay: 6
+      move:
+        x_vel: -0.5
+        y_vel: -0.7
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/jump_back03.png
+      width: 16
+      height: 32
+      delay: 6
+      move:
+        x_vel: -0.5
+        y_vel: -2.2
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/jump_back04.png
+      width: 16
+      height: 32
+      delay: 6
+      move:
+        x_vel: -0.5
+        y_vel: -2.6
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+  - name: block_high
+    continual: true
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/block_high00.png
+      width: 16
+      height: 32
+      delay: 12
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/block_high01.png
+      width: 16
+      height: 32
+      delay: 12
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+  - name: block_low
+    continual: true
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/block_low00.png
+      width: 16
+      height: 32
+      delay: 12
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/block_low01.png
+      width: 16
+      height: 32
+      delay: 12
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+  - name: hurt_mid
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/hurt_mid00.png
+      width: 16
+      height: 32
+      delay: 7
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/hurt_mid01.png
+      width: 16
+      height: 32
+      delay: 7
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/hurt_mid02.png
+      width: 16
+      height: 32
+      delay: 7
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/hurt_mid03.png
+      width: 16
+      height: 32
+      delay: 7
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+  - name: hurt_high
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/hurt_high00.png
+      width: 16
+      height: 32
+      delay: 7
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/hurt_high01.png
+      width: 16
+      height: 32
+      delay: 7
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/hurt_high02.png
+      width: 16
+      height: 32
+      delay: 7
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/hurt_high03.png
+      width: 16
+      height: 32
+      delay: 7
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+  - name: hurt_low
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/hurt_low00.png
+      width: 16
+      height: 32
+      delay: 7
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/hurt_low01.png
+      width: 16
+      height: 32
+      delay: 7
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/hurt_low02.png
+      width: 16
+      height: 32
+      delay: 7
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/hurt_low03.png
+      width: 16
+      height: 32
+      delay: 7
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+  - name: hurt_air
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/hurt_air00.png
+      width: 32
+      height: 32
+      delay: 7
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/hurt_air01.png
+      width: 32
+      height: 32
+      delay: 7
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/hurt_air02.png
+      width: 32
+      height: 32
+      delay: 7
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/hurt_air03.png
+      width: 32
+      height: 32
+      delay: 7
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+  - name: knocked_down
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/knocked_down00.png
+      width: 32
+      height: 32
+      delay: 9
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/knocked_down01.png
+      width: 32
+      height: 32
+      delay: 9
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/knocked_down02.png
+      width: 32
+      height: 32
+      delay: 9
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/knocked_down03.png
+      width: 32
+      height: 32
+      delay: 9
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+  - name: hit_ground
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/hit_ground00.png
+      width: 32
+      height: 32
+      delay: 8
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/hit_ground01.png
+      width: 32
+      height: 32
+      delay: 8
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/hit_ground02.png
+      width: 32
+      height: 32
+      delay: 8
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+  - name: land
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/land00.png
+      width: 16
+      height: 32
+      delay: 7
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/land01.png
+      width: 16
+      height: 32
+      delay: 7
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/land02.png
+      width: 16
+      height: 32
+      delay: 7
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+  - name: ground
+    continual: true
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/ground00.png
+      width: 32
+      height: 32
+      delay: 20
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+  - name: stand
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/stand00.png
+      width: 16
+      height: 32
+      delay: 7
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/stand01.png
+      width: 16
+      height: 32
+      delay: 7
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/stand02.png
+      width: 16
+      height: 32
+      delay: 7
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+  - name: 1punch
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/1punch00.png
+      width: 32
+      height: 32
+      delay: 8
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/1punch01.png
+      width: 32
+      height: 32
+      delay: 8
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/1punch02.png
+      width: 32
+      height: 32
+      delay: 8
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+      offense:
+        x_pos: 7
+        y_pos: 5
+        width: 7
+        height: 6
+      collision:
+        path: data/collision/collision.yml
+        opponent: HIT_M
+        x_pos: 0
+        y_pos: 6
+        index: 2
+    - path: data/fei_young/1punch03.png
+      width: 32
+      height: 32
+      delay: 8
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+  - name: 2punch
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/2punch00.png
+      width: 32
+      height: 32
+      delay: 8
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/2punch01.png
+      width: 32
+      height: 32
+      delay: 8
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/2punch02.png
+      width: 32
+      height: 32
+      delay: 8
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/2punch03.png
+      width: 32
+      height: 32
+      delay: 8
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+      offense:
+        x_pos: 7
+        y_pos: 4
+        width: 9
+        height: 7
+      collision:
+        path: data/collision/collision.yml
+        opponent: HIT_H
+        x_pos: 0
+        y_pos: 6
+        index: 2
+    - path: data/fei_young/2punch04.png
+      width: 32
+      height: 32
+      delay: 8
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/2punch05.png
+      width: 32
+      height: 32
+      delay: 8
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+  - name: kick
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/kick00.png
+      width: 32
+      height: 32
+      delay: 8
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/kick01.png
+      width: 32
+      height: 32
+      delay: 8
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/kick02.png
+      width: 32
+      height: 32
+      delay: 8
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+      offense:
+        x_pos: 11
+        y_pos: -4
+        width: 8
+        height: 6
+      collision:
+        path: data/collision/collision.yml
+        opponent: HIT_M
+        x_pos: 0
+        y_pos: 6
+        index: 2
+    - path: data/fei_young/kick03.png
+      width: 32
+      height: 32
+      delay: 8
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/kick04.png
+      width: 32
+      height: 32
+      delay: 8
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+  - name: back_kick
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/back_kick00.png
+      width: 32
+      height: 32
+      delay: 8
+      move:
+        x_vel: 0
+        y_vel: 0
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/back_kick01.png
+      width: 32
+      height: 32
+      delay: 8
+      move:
+        x_vel: 0.2
+        y_vel: 0
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/back_kick02.png
+      width: 32
+      height: 32
+      delay: 8
+      move:
+        x_vel: 0.2
+        y_vel: 0
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/back_kick03.png
+      width: 32
+      height: 32
+      delay: 8
+      move:
+        x_vel: 0.2
+        y_vel: 0
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+      offense:
+        x_pos: 11
+        y_pos: -2
+        width: 9
+        height: 8
+      collision:
+        path: data/collision/collision.yml
+        opponent: KNOCK_DOWN
+        x_pos: 0
+        y_pos: 6
+        index: 2
+    - path: data/fei_young/back_kick04.png
+      width: 32
+      height: 32
+      delay: 8
+      move:
+        x_vel: 0.2
+        y_vel: 0
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/back_kick05.png
+      width: 32
+      height: 32
+      delay: 8
+      move:
+        x_vel: 0
+        y_vel: 0
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+  - name: special
+    show_hitbox: true
+    frame:
+    - path: data/fei_young/special00.png
+      width: 32
+      height: 32
+      delay: 8
+      move:
+        x_vel: 0
+        y_vel: 0
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/special01.png
+      width: 32
+      height: 32
+      delay: 8
+      move:
+        x_vel: 0.55
+        y_vel: 0
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/special02.png
+      width: 32
+      height: 32
+      delay: 8
+      move:
+        x_vel: 0.55
+        y_vel: 0
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/special03.png
+      width: 32
+      height: 32
+      delay: 8
+      move:
+        x_vel: 0.55
+        y_vel: 0
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/special04.png
+      width: 32
+      height: 32
+      delay: 8
+      move:
+        x_vel: 0.55
+        y_vel: 0
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+      offense:
+        x_pos: 9
+        y_pos: 2
+        width: 9
+        height: 8
+      collision:
+        path: data/collision/collision.yml
+        opponent: KNOCK_DOWN
+        x_pos: 0
+        y_pos: 6
+        index: 2
+    - path: data/fei_young/special05.png
+      width: 32
+      height: 32
+      delay: 8
+      move:
+        x_vel: 0.55
+        y_vel: 0
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/special06.png
+      width: 32
+      height: 32
+      delay: 8
+      move:
+        x_vel: 0
+        y_vel: 0
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0
+    - path: data/fei_young/special07.png
+      width: 32
+      height: 32
+      delay: 8
+      move:
+        x_vel: 0
+        y_vel: 0
+      defense:
+        x_pos: -6
+        y_pos: -16.0
+        width: 12
+        height: 31.0

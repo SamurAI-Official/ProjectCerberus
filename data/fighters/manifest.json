@@ -1,11 +1,30 @@
 [
   {
+    "id": "tsu_ibano",
+    "name": "TSU IBANO",
+    "detail": "Hon'no gijutsu. Not a blast -- a stabilizing field. Short, unremarkable normals, but his special enforces baseline reality hard enough to floor anything standing in it. Lean and unhurried; the only fighter here who answers pressure rather than applying it.",
+    "universe": "yokai_honno_academy",
+    "health": 100,
+    "yaml": "res://data/tsu_ibano/tsu_ibano.yml",
+    "moves": "res://data/tsu_ibano/moves.yml"
+  },
+  {
+    "id": "fei_young",
+    "name": "FEI YOUNG",
+    "detail": "Taijutsu only. \"I can't cast a gijutsu, but I can damn sure punch one.\" Longer reach and heavier normals, no projectile, and the best approach speed in the slice. Where Tsu answers pressure, Fei applies it.",
+    "universe": "yokai_honno_academy",
+    "health": 100,
+    "yaml": "res://data/fei_young/fei_young.yml",
+    "moves": "res://data/fei_young/moves.yml"
+  },
+  {
     "id": "stock_ryu",
-    "name": "RYU",
-    "detail": "The engine's own reference fighter. This is the vendored dev fixture, not a Project Cerberus character -- it is here because it is the only complete frame set that exists, and it is what proves the pipeline end to end. The vertical-slice roster (Tsu Ibano and Fei Young) replaces it in M3.",
+    "name": "RYU (fixture)",
+    "detail": "The vendored engine's own reference fighter, kept as the regression fixture the M0 and M1 verification scenes run against. Not a Project Cerberus character.",
     "universe": "fixture",
     "health": 100,
     "yaml": "res://data/ryu/ryu.yml",
     "moves": "res://data/ryu/moves.yml"
   }
 ]
+

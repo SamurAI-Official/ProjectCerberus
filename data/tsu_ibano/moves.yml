@@ -1,0 +1,64 @@
+moves:
+  move:
+  - trigger: QCF_HP
+    keys: F,~D,c
+  - trigger: QCF_HP
+    keys: F,~D,~c
+  - trigger: DB
+    keys: /D,/B
+  - trigger: DB
+    keys: /B,/D
+  - trigger: DB
+    keys: D,B
+  - trigger: DB
+    keys: B,D
+  - trigger: UB
+    keys: /U,/B
+  - trigger: UB
+    keys: /B,/U
+  - trigger: UB
+    keys: U,B
+  - trigger: UB
+    keys: B,U
+  - trigger: UF
+    keys: /U,/F
+  - trigger: UF
+    keys: /F,/U
+  - trigger: UF
+    keys: U,F
+  - trigger: UF
+    keys: F,U
+  - trigger: F
+    keys: /F
+  - trigger: F
+    keys: F
+  - trigger: B
+    keys: /B
+  - trigger: B
+    keys: B
+  - trigger: U
+    keys: /U
+  - trigger: U
+    keys: U
+  - trigger: D
+    keys: /D
+  - trigger: D
+    keys: D
+  - trigger: ~F
+    keys: ~F
+  - trigger: ~B
+    keys: ~B
+  - trigger: ~D
+    keys: ~D
+  - trigger: LP
+    keys: a
+  - trigger: MP
+    keys: b
+  - trigger: HP
+    keys: c
+  - trigger: LK
+    keys: x
+  - trigger: MK
+    keys: y
+  - trigger: HK
+    keys: z

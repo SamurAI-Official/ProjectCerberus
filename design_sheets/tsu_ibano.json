@@ -1,0 +1,17 @@
+{
+  "id": "tsu_ibano",
+  "name": "TSU IBANO",
+  "detail": "Hon'no gijutsu. Not a blast -- a stabilizing field. Tsu's normals are short and unremarkable; his special enforces baseline reality hard enough to floor anything standing in it. Lean, unhurried, and the only fighter in the slice who can neutralise what the opponent throws.",
+  "universe": "yokai_honno_academy",
+  "health": 100,
+  "profile": {
+    "reach": 0.95
+  },
+  "palette": {
+    "skin": [232, 200, 168],
+    "torso": [36, 58, 62],
+    "near_limb": [52, 100, 104],
+    "far_limb": [26, 52, 58],
+    "accent": [150, 235, 220]
+  }
+}

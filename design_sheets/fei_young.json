@@ -1,0 +1,17 @@
+{
+  "id": "fei_young",
+  "name": "FEI YOUNG",
+  "detail": "Taijutsu only. \"I can't cast a gijutsu, but I can damn sure punch one.\" Longer reach and heavier normals, no projectile, and the best approach speed in the slice. Where Tsu answers pressure, Fei applies it.",
+  "universe": "yokai_honno_academy",
+  "health": 100,
+  "profile": {
+    "reach": 1.12
+  },
+  "palette": {
+    "skin": [222, 176, 132],
+    "torso": [122, 36, 32],
+    "near_limb": [182, 70, 48],
+    "far_limb": [92, 26, 24],
+    "accent": [250, 210, 120]
+  }
+}
