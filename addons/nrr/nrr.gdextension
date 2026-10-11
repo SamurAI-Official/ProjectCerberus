@@ -1,0 +1,77 @@
+; NRR GDExtension descriptor.
+;
+; One entry per platform/architecture so the same addon loads on any hardware
+; pipeline: D3D12/Vulkan desktop (Windows, Linux), Metal desktop (macOS
+; universal), Vulkan/GLES mobile (Android arm64 + x86_64 emulator), Metal/ANE
+; mobile (iOS arm64) and WebGPU/GLES web (wasm32).
+;
+; The libraries are build output, not committed: see
+; engine_plugins/godot/src/CMakeLists.txt and the plugin README. When a
+; library is absent for the current platform, Godot logs the failed load and
+; NRR.gd's initialize() reports available == false, so the game keeps running
+; with plain passthrough rather than a crash.
+
+[configuration]
+
+entry_symbol = "nrr_godot_library_init"
+; The binding is generated from one of godot-cpp's API dumps, so the library is
+; only loadable by a Godot at least that new. This value must track
+; NRR_GODOT_API_VERSION in src/CMakeLists.txt (default 4.7 - godot-cpp 10.x
+; ships extension_api-4-7.json). Lower it only together with a rebuild against
+; the matching godot-cpp API dump; Godot refuses to load a library whose
+; compatibility_minimum is newer than the engine.
+compatibility_minimum = "4.7"
+reloadable = true
+
+[libraries]
+
+; ---- Windows (x86_64) ----
+windows.debug.x86_64 = "res://addons/nrr/bin/windows/debug/nrr_godot.windows.debug.x86_64.dll"
+windows.release.x86_64 = "res://addons/nrr/bin/windows/release/nrr_godot.windows.release.x86_64.dll"
+
+; ---- Linux (x86_64, arm64) ----
+linux.debug.x86_64 = "res://addons/nrr/bin/linux/debug/libnrr_godot.linux.debug.x86_64.so"
+linux.release.x86_64 = "res://addons/nrr/bin/linux/release/libnrr_godot.linux.release.x86_64.so"
+linux.debug.arm64 = "res://addons/nrr/bin/linux/debug/libnrr_godot.linux.debug.arm64.so"
+linux.release.arm64 = "res://addons/nrr/bin/linux/release/libnrr_godot.linux.release.arm64.so"
+
+; ---- macOS ----
+; Upstream ships a `.framework` path here for a universal macOS build; its own README says
+; "macOS/iOS produce .framework bundles rather than the flat library names listed; adjust the
+; .gdextension entry to match". The CMake build the README describes writes a flat dylib named
+; nrr_godot.macos.<variant>.<arch>.dylib, so these point at that - see tools/build_nrr_macos.sh,
+; which builds it and installs it here. An arm64 build satisfies the universal key; make it a fat
+; binary with `lipo -create` against an x86_64 build if a universal addon is wanted.
+macos.debug = "res://addons/nrr/bin/macos/debug/libnrr_godot.macos.debug.arm64.dylib"
+macos.release = "res://addons/nrr/bin/macos/release/libnrr_godot.macos.release.arm64.dylib"
+
+; ---- Android (arm64 device, x86_64 emulator) ----
+android.debug.arm64 = "res://addons/nrr/bin/android/debug/arm64/libnrr_godot.android.debug.arm64.so"
+android.release.arm64 = "res://addons/nrr/bin/android/release/arm64/libnrr_godot.android.release.arm64.so"
+android.debug.x86_64 = "res://addons/nrr/bin/android/debug/x86_64/libnrr_godot.android.debug.x86_64.so"
+android.release.x86_64 = "res://addons/nrr/bin/android/release/x86_64/libnrr_godot.android.release.x86_64.so"
+
+; ---- iOS (arm64) ----
+ios.debug.arm64 = "res://addons/nrr/bin/ios/debug/libnrr_godot.ios.debug.arm64.framework/libnrr_godot.ios"
+ios.release.arm64 = "res://addons/nrr/bin/ios/release/libnrr_godot.ios.release.arm64.framework/libnrr_godot.ios"
+
+; ---- Web (wasm32) ----
+web.debug.wasm32 = "res://addons/nrr/bin/web/debug/nrr_godot.web.debug.wasm32.wasm"
+web.release.wasm32 = "res://addons/nrr/bin/web/release/nrr_godot.web.release.wasm32.wasm"
+
+; ---- What the binding needs beside it, and where that actually happens ----
+; Godot copies [libraries] into the export's lib/<abi>/, which on Android is where the loader looks.
+; It does *not* copy a GDExtension's dependencies there: the section below is accepted, exports without
+; a complaint, and puts nothing in the APK. That was established by unzipping one and looking - first
+; with a bare path (which is not a key at all in a ConfigFile, and was ignored in silence), then with
+; the correct `path = ""` form (which made no difference).
+;
+; So the runtime does not ride this section on Android. It rides the Gradle build's dependency on
+; com.microsoft.onnxruntime:onnxruntime-android, which AGP merges into lib/<abi>/ itself - see
+; android/build/build.gradle, which tools/build_nrr_android.sh adds that line to. The entry below is
+; left in place because it is harmless and is the right place for the runtime on a platform whose
+; exporter does honour it, which Android's does not:
+;
+[dependencies]
+
+; res://addons/nrr/bin/android/debug/arm64/libonnxruntime.so = ""
