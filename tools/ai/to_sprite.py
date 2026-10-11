@@ -59,6 +59,11 @@ import openpose_render  # noqa: E402
 
 SHEET_DIR = REPO_ROOT / "design_sheets"
 
+# How far a row must span the render to count as drawn ground rather than art.
+# At 512px the widest a fighter gets is around 40% of the frame, so this is well
+# clear of any real pose -- including a knockdown, which is the widest of them.
+GROUND_SPAN = 0.75
+
 # How far from the sampled backdrop colour a pixel may be and still count as
 # backdrop. Generous, because a "clean white background" render still has a
 # faint vignette and JPEG-ish texture in it, and anything the fill misses shows
@@ -152,6 +157,33 @@ def backdrop_mask(rgb, tolerance=BACKDROP_TOLERANCE):
     return filled
 
 
+def strip_ground(rgb, backdrop, span=GROUND_SPAN):
+    """Clear a full-width band the generator drew as a ground line or shadow.
+
+    The prompt asks for no ground shadow and the negative prompt lists one, but the
+    net still draws a floor under the skeleton it is handed -- a skeleton that
+    visibly stands on empty space. That line spans the render, so the flood fill
+    cannot reach it from the border and it would ship as a black bar welded to the
+    fighter's feet. The game draws its own ground and floor line; anything here is
+    artifact, and it also drags the measured silhouette down with it.
+
+    Returns (mask, rows cleared) so the count shows up in the census.
+    """
+    solid = ~backdrop
+    width = rgb.shape[1]
+    covered = solid.sum(axis=1) > width * span
+
+    # Absorb the anti-aliased rows either side: they are the line's own edge, and
+    # leaving them behind leaves a grey seam exactly where the bar used to be.
+    grown = covered.copy()
+    for y in np.nonzero(covered)[0]:
+        for neighbour in (y - 1, y + 1):
+            if 0 <= neighbour < len(covered) and solid[neighbour].sum() > width * 0.5:
+                grown[neighbour] = True
+
+    return backdrop | grown[:, None], int(grown.sum())
+
+
 def dilate(mask, width):
     """Grow a boolean mask by `width` pixels, 4-connected."""
     grown = mask.copy()
@@ -217,6 +249,7 @@ def render_sprite(raw_path, sheet, roles, colours, state, outline_width=1,
     rgb = np.asarray(scaled, dtype=np.uint8)
 
     backdrop = backdrop_mask(rgb, tolerance)
+    backdrop, ground_rows = strip_ground(rgb, backdrop)
     assigned = quantise(rgb, colours).reshape(rgb.shape[:2])
     flat = colours[assigned].astype(np.uint8)
 
@@ -259,6 +292,7 @@ def render_sprite(raw_path, sheet, roles, colours, state, outline_width=1,
     census = {
         "canvas": list(canvas),
         "silhouette": silhouette,
+        "ground_rows_cleared": ground_rows,
         "colours": sum(1 for count in counts.values() if count > 0),
         "roles": {role: count for role, count in counts.items() if count > 0},
     }
