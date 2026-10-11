@@ -1,0 +1,890 @@
+diff --git a/src/libopenfight/actions.cpp b/src/libopenfight/actions.cpp
+index fca69d7..f24e31d 100644
+--- a/src/libopenfight/actions.cpp
++++ b/src/libopenfight/actions.cpp
+@@ -35,6 +35,45 @@ CollisionAction::CollisionAction(string object, float x_pos, float y_pos, int in
+     this->to_opponent = to_opponent;
+ }
+ 
++namespace {
++
++// Damage per landed trigger. The triggers the shipped data actually uses are
++// HIT_L, HIT_M, HIT_H, KNOCK_DOWN and THROWN (grep `opponent:` across data/), so
++// all five are covered rather than only the three HIT_* ones.
++//
++// An unrecognised trigger falls back to the medium value instead of dealing
++// zero: a silently harmless attack is far harder to notice than a wrong number,
++// and this table is the only place damage is decided.
++int damageForTrigger(const string &trigger, bool blocked) {
++    int damage = 7; // HIT_M, and the fallback
++
++    if (trigger == "HIT_L")
++        damage = 4;
++    else if (trigger == "HIT_M")
++        damage = 7;
++    else if (trigger == "HIT_H")
++        damage = 11;
++    else if (trigger == "KNOCK_DOWN")
++        damage = 10;
++    else if (trigger == "THROWN")
++        damage = 9;
++
++    if (blocked)
++        damage = 1; // chip damage
++
++    return damage;
++}
++
++// openfight represents blocking as a state name, not a flag. The defender's own
++// action table maps a HIT_* trigger to block_low/block_high while holding back
++// and to hurt_* otherwise, and updateState() reports success for either -- so the
++// prefix of the resulting state is the only available block check.
++bool stateIsBlock(const string &state) {
++    return state.rfind("block", 0) == 0;
++}
++
++} // namespace
++
+ void CollisionAction::doAction(Player *player, Player *opponent) {
+     bool opponent_updated = false;
+ 
+@@ -44,8 +83,32 @@ void CollisionAction::doAction(Player *player, Player *opponent) {
+     if (to_opponent.size() > 0)
+         opponent_updated = opponent->updateState(to_opponent, true);
+ 
+-    if (opponent_updated)
+-        player->copyObject(object, x_pos, y_pos, index);
++    if (!opponent_updated)
++        return;
++
++    // Project Cerberus: this branch is the only place a blow actually lands, so
++    // it is where health and the match event belong. `player` is the attacker --
++    // or the projectile, which carries the attacker's copied listener and player
++    // number -- and `opponent` is the defender.
++    const string defender_state = opponent->getCurrentState();
++    const bool blocked = stateIsBlock(defender_state);
++    const int damage = damageForTrigger(to_opponent, blocked);
++
++    opponent->takeDamage(damage);
++
++    if (player->hasMatchListener()) {
++        MatchEvent event;
++        event.type = MatchEventType::HIT;
++        event.attacker = player->getPlayerNumber();
++        event.defender = opponent->getPlayerNumber();
++        event.damage = damage;
++        event.blocked = blocked;
++        event.strength = to_opponent;
++        event.state = defender_state;
++        player->notifyMatch(event);
++    }
++
++    player->copyObject(object, x_pos, y_pos, index);
+ }
+ 
+ Actions::Actions() {
+diff --git a/src/libopenfight/gameContext.cpp b/src/libopenfight/gameContext.cpp
+index dd0ebfb..5b6b453 100644
+--- a/src/libopenfight/gameContext.cpp
++++ b/src/libopenfight/gameContext.cpp
+@@ -5,7 +5,11 @@
+ 
+ using namespace std;
+ 
+-GameContext::GameContext() : initialized(false) {
++GameContext::GameContext()
++    : initialized(false), round(0), round_time_ms(0.0f), round_over(false), round_over_ms(0.0f),
++      round_ended_by_time(false), match_over(false), match_winner(-1) {
++    round_wins[0] = 0;
++    round_wins[1] = 0;
+ }
+ 
+ GameContext::~GameContext() {
+@@ -34,26 +38,55 @@ bool GameContext::setup(const GameSetup &setup, RenderBackend &renderer, const R
+     object_manager->add("0", p1);
+     object_manager->add("1", p2);
+ 
++    // Project Cerberus: a stable player number per fighter, plus the match's
++    // hit listener. `inverted` cannot serve as identity because PlayerBridge
++    // flips it whenever the two cross over each other.
++    p1->setPlayerNumber(0);
++    p2->setPlayerNumber(1);
++
++    auto listener = [this](const MatchEvent &event) { pushEvent(event); };
++    p1->setMatchListener(listener);
++    p2->setMatchListener(listener);
++
+     initialized = true;
++
++    // resetMatch() rather than a manual round setup, so there is exactly one
++    // code path that begins a round.
++    resetMatch();
++
+     return true;
+ }
+ 
+ void GameContext::update(const FrameInput &input, float delta_ms) {
+-    (void)delta_ms;
+     if (!initialized)
+         return;
+ 
++    if (!round_over && !match_over)
++        round_time_ms += delta_ms;
++
+     bool player_one_keys[KEY_MAX];
+     bool player_two_keys[KEY_MAX];
+ 
++    // During the KO beat the fighters keep animating, so the knockdown plays
++    // out, but they receive no input.
++    const bool frozen = round_over || match_over;
++
+     for (int i = 0; i < KEY_MAX; i++) {
+-        player_one_keys[i] = input.players[0][i];
+-        player_two_keys[i] = input.players[1][i];
++        player_one_keys[i] = frozen ? false : input.players[0][i];
++        player_two_keys[i] = frozen ? false : input.players[1][i];
+     }
+ 
+     player_one.update(player_one_keys);
+     player_two.update(player_two_keys);
+     updateObjects();
++
++    if (!round_over && !match_over) {
++        checkRoundEnd();
++    } else if (round_over && !match_over) {
++        round_over_ms += delta_ms;
++        if (round_over_ms >= ROUND_END_DELAY_MS)
++            startRound();
++    }
+ }
+ 
+ void GameContext::updateObjects() {
+@@ -94,4 +127,193 @@ void GameContext::shutdown() {
+     object_manager->clear();
+     texture_manager->clear();
+     initialized = false;
++
++    // Project Cerberus: leave the match state clean, because setup() re-enters
++    // shutdown() when it is called on a live context and a stale match_over
++    // would otherwise survive into the new one.
++    round = 0;
++    round_wins[0] = 0;
++    round_wins[1] = 0;
++    round_time_ms = 0.0f;
++    round_over = false;
++    round_over_ms = 0.0f;
++    round_ended_by_time = false;
++    match_over = false;
++    match_winner = -1;
++    events.clear();
++}
++
++// ---------------------------------------------------------------------------
++// Project Cerberus: round flow
++// ---------------------------------------------------------------------------
++
++void GameContext::checkRoundEnd() {
++    auto p1 = player_one.getPlayer();
++    auto p2 = player_two.getPlayer();
++    if (p1 == nullptr || p2 == nullptr)
++        return;
++
++    const bool ko1 = p1->isKO();
++    const bool ko2 = p2->isKO();
++
++    if (ko1 || ko2) {
++        // Double KO is a draw, and neither fighter is credited a round win.
++        int winner = -1;
++        if (ko1 && !ko2)
++            winner = 1;
++        else if (ko2 && !ko1)
++            winner = 0;
++
++        finishRound(winner, false);
++        return;
++    }
++
++    if (round_time_ms >= ROUND_TIME_MS) {
++        // Time over: more health wins, equal health is a draw. There is no
++        // sudden death yet -- noted rather than silently chosen.
++        int winner = -1;
++        if (p1->getHealth() > p2->getHealth())
++            winner = 0;
++        else if (p2->getHealth() > p1->getHealth())
++            winner = 1;
++
++        finishRound(winner, true);
++    }
++}
++
++void GameContext::finishRound(int winner, bool time_over) {
++    round_over = true;
++    round_over_ms = 0.0f;
++    round_ended_by_time = time_over;
++
++    if (winner >= 0 && winner < 2) {
++        round_wins[winner]++;
++
++        if (round_wins[winner] >= ROUNDS_TO_WIN) {
++            match_over = true;
++            match_winner = winner;
++        }
++    }
++
++    MatchEvent ended;
++    ended.type = MatchEventType::ROUND_ENDED;
++    ended.winner = winner;
++    ended.time_over = time_over;
++    pushEvent(ended);
++
++    if (match_over) {
++        MatchEvent finished;
++        finished.type = MatchEventType::MATCH_ENDED;
++        finished.winner = match_winner;
++        pushEvent(finished);
++    }
++}
++
++void GameContext::startRound() {
++    if (!initialized)
++        return;
++
++    round++;
++    round_time_ms = 0.0f;
++    round_over = false;
++    round_over_ms = 0.0f;
++    round_ended_by_time = false;
++
++    // Instanced projectiles must go. The fighters must NOT: they are owned by
++    // PlayerAgent through shared_ptr, and clear() deletes what it holds -- which
++    // is exactly why shutdown() detaches "0" and "1" first. Mirrored here.
++    object_manager->detach("0");
++    object_manager->detach("1");
++    object_manager->clear();
++
++    auto p1 = player_one.getPlayer();
++    auto p2 = player_two.getPlayer();
++
++    if (p1 != nullptr) {
++        p1->resetForRound();
++        object_manager->add("0", p1.get());
++    }
++
++    if (p2 != nullptr) {
++        p2->resetForRound();
++        object_manager->add("1", p2.get());
++    }
++
++    MatchEvent started;
++    started.type = MatchEventType::ROUND_STARTED;
++    started.round = round;
++    pushEvent(started);
++}
++
++void GameContext::resetMatch() {
++    round = 0;
++    round_wins[0] = 0;
++    round_wins[1] = 0;
++    round_time_ms = 0.0f;
++    round_over = false;
++    round_over_ms = 0.0f;
++    round_ended_by_time = false;
++    match_over = false;
++    match_winner = -1;
++
++    startRound();
++}
++
++// ---------------------------------------------------------------------------
++// Project Cerberus: accessors and the event queue
++// ---------------------------------------------------------------------------
++
++int GameContext::getHealth(int player) const {
++    if (player == 0 && player_one.getPlayer() != nullptr)
++        return player_one.getPlayer()->getHealth();
++
++    if (player == 1 && player_two.getPlayer() != nullptr)
++        return player_two.getPlayer()->getHealth();
++
++    return 0;
++}
++
++int GameContext::getRound() const {
++    return round;
++}
++
++int GameContext::getRoundWins(int player) const {
++    if (player >= 0 && player < 2)
++        return round_wins[player];
++
++    return 0;
++}
++
++int GameContext::getRoundTimeMs() const {
++    return static_cast<int>(round_time_ms);
++}
++
++bool GameContext::isRoundOver() const {
++    return round_over;
++}
++
++bool GameContext::isMatchOver() const {
++    return match_over;
++}
++
++int GameContext::getMatchWinner() const {
++    return match_winner;
++}
++
++const std::vector<MatchEvent> &GameContext::getEvents() const {
++    return events;
++}
++
++void GameContext::clearEvents() {
++    events.clear();
++}
++
++void GameContext::pushEvent(const MatchEvent &event) {
++    // A malformed character could otherwise queue events without bound if the
++    // host stopped draining. OpenFightNode drains every frame, so this cap
++    // should never be reached in practice.
++    if (events.size() >= 256)
++        events.erase(events.begin());
++
++    events.push_back(event);
+ }
+diff --git a/src/libopenfight/gameContext.h b/src/libopenfight/gameContext.h
+index 937216f..2dd7a7f 100644
+--- a/src/libopenfight/gameContext.h
++++ b/src/libopenfight/gameContext.h
+@@ -3,6 +3,7 @@
+ 
+ #include "fileReader.h"
+ #include "input.h"
++#include "matchEvents.h"
+ #include "playerAgent.h"
+ #include "playerBridge.h"
+ #include "renderBackend.h"
+@@ -30,9 +31,34 @@ private:
+     PlayerBridge bridge;
+     bool initialized;
+ 
++    // ---- Project Cerberus: match state ------------------------------------
++    // openfight had no concept of a round, so all of this is new. The shape
++    // chosen here is "best of ROUNDS_TO_WIN" with a KO beat: when a round ends
++    // the simulation keeps animating but player input is suppressed for
++    // ROUND_END_DELAY_MS, which is the gap an announcer needs.
++    int round;
++    int round_wins[2];
++    float round_time_ms;
++    bool round_over;
++    float round_over_ms;
++    bool round_ended_by_time;
++    bool match_over;
++    int match_winner;
++    std::vector<MatchEvent> events;
++
+     void updateObjects();
++    void checkRoundEnd();
++    void finishRound(int winner, bool time_over);
++    void pushEvent(const MatchEvent &event);
+ 
+ public:
++    // Best of three: first to two round wins.
++    static constexpr int ROUNDS_TO_WIN = 2;
++    // 99 "seconds" of accumulated game time; see utilities.cpp for
++    // GAME_TIME_UPDATE_FREQ.
++    static constexpr int ROUND_TIME_MS = 99000;
++    static constexpr float ROUND_END_DELAY_MS = 2500.0f;
++
+     GameContext();
+     ~GameContext();
+ 
+@@ -41,6 +67,26 @@ public:
+     void update(const FrameInput &input, float delta_ms);
+     void render(RenderBackend &renderer);
+     void shutdown();
++
++    // ---- Project Cerberus: what OpenFightNode exposes to Godot ------------
++    int getHealth(int player) const;
++    int getRound() const;
++    int getRoundWins(int player) const;
++    int getRoundTimeMs() const;
++    bool isRoundOver() const;
++    bool isMatchOver() const;
++    int getMatchWinner() const;
++
++    // Begins the next round: restores both fighters, clears projectiles and
++    // resets the clock. Safe to call on a fresh match.
++    void startRound();
++    // Full reset: round counter, round wins, then startRound().
++    void resetMatch();
++
++    // Events accumulated since the last clearEvents(). OpenFightNode drains
++    // this every frame and re-emits as Godot signals.
++    const std::vector<MatchEvent> &getEvents() const;
++    void clearEvents();
+ };
+ 
+ #endif
+diff --git a/src/libopenfight/matchEvents.h b/src/libopenfight/matchEvents.h
+new file mode 100644
+index 0000000..d35f5a4
+--- /dev/null
++++ b/src/libopenfight/matchEvents.h
+@@ -0,0 +1,46 @@
++#ifndef OPEN_FIGHT_MATCH_EVENTS_H
++#define OPEN_FIGHT_MATCH_EVENTS_H
++
++#include <string>
++
++// Project Cerberus addition.
++//
++// openfight already resolves hits: CollisionAction::doAction() calls
++// opponent->updateState(to_opponent, true) and reports success, and the
++// defender's own action table decides whether that lands as block_* or
++// hurt_*. What the engine has nowhere to put is everything a match needs on top
++// of that -- health, rounds, and any way to tell the host about them. Player has
++// no health field at all, GameContext has no round concept, and OpenFightNode
++// exposes no signals.
++//
++// These structs are that seam. CollisionAction pushes a HIT, GameContext owns
++// the round state machine and pushes the round events, and OpenFightNode drains
++// the list once per frame and re-emits it as Godot signals.
++
++enum class MatchEventType {
++    HIT,
++    ROUND_STARTED,
++    ROUND_ENDED,
++    MATCH_ENDED,
++};
++
++struct MatchEvent {
++    MatchEventType type = MatchEventType::HIT;
++
++    // HIT
++    int attacker = -1;      // 0 or 1
++    int defender = -1;      // 0 or 1
++    int damage = 0;         // damage actually applied (chip damage when blocked)
++    bool blocked = false;
++    std::string strength;   // the trigger that landed: "HIT_L" / "HIT_M" / "HIT_H" / ...
++    std::string state;      // the defender's resulting state name
++
++    // ROUND_ENDED / MATCH_ENDED
++    int winner = -1;        // -1 means a draw (double KO or equal health at time over)
++    bool time_over = false;
++
++    // ROUND_STARTED
++    int round = 0;
++};
++
++#endif
+diff --git a/src/libopenfight/player.cpp b/src/libopenfight/player.cpp
+index 095924e..ed5edfc 100644
+--- a/src/libopenfight/player.cpp
++++ b/src/libopenfight/player.cpp
+@@ -8,6 +8,14 @@ Player::Player() {
+     is_hurt = false;
+     index = 0;
+ 
++    health = DEFAULT_MAX_HEALTH;
++    max_health = DEFAULT_MAX_HEALTH;
++    player_number = 0;
++    spawn_x = 0.0f;
++    spawn_y = 0.0f;
++    spawn_alpha = 1.0f;
++    spawn_scale = 1.0f;
++
+     animation_manager = new ObjectManager<Animation>();
+     objects = new ObjectManager<Player>();
+ }
+@@ -28,6 +36,18 @@ Player::Player(const Player &p) {
+     is_hurt = p.is_hurt;
+     index = p.index;
+ 
++    // Copied on purpose: copyObject() clones a projectile template, and a
++    // projectile resolves its own hits, so it needs both the defending health
++    // bookkeeping and the attacker's listener to report through.
++    health = p.health;
++    max_health = p.max_health;
++    player_number = p.player_number;
++    spawn_x = p.spawn_x;
++    spawn_y = p.spawn_y;
++    spawn_alpha = p.spawn_alpha;
++    spawn_scale = p.spawn_scale;
++    match_listener = p.match_listener;
++
+     current_state = p.current_state;
+     previous_state = p.previous_state;
+ 
+@@ -268,3 +288,81 @@ void Player::setCurrentState(string state) {
+     }
+     animation_manager->get(current_state)->update(x_pos, y_pos, 1, inverted);
+ }
++
++// ---------------------------------------------------------------------------
++// Project Cerberus: health, identity, round reset
++// ---------------------------------------------------------------------------
++
++int Player::getHealth() const {
++    return health;
++}
++
++int Player::getMaxHealth() const {
++    return max_health;
++}
++
++bool Player::isKO() const {
++    return health <= 0;
++}
++
++void Player::takeDamage(int amount) {
++    if (amount <= 0)
++        return;
++
++    health -= amount;
++
++    if (health < 0)
++        health = 0;
++}
++
++void Player::setPlayerNumber(int number) {
++    player_number = number;
++}
++
++int Player::getPlayerNumber() const {
++    return player_number;
++}
++
++const std::string &Player::getCurrentState() const {
++    return current_state;
++}
++
++void Player::setMatchListener(std::function<void(const MatchEvent &)> listener) {
++    match_listener = std::move(listener);
++}
++
++bool Player::hasMatchListener() const {
++    return static_cast<bool>(match_listener);
++}
++
++void Player::notifyMatch(const MatchEvent &event) {
++    if (match_listener)
++        match_listener(event);
++}
++
++void Player::resetForRound() {
++    health = max_health;
++    is_hurt = false;
++
++    x_pos = spawn_x;
++    y_pos = spawn_y;
++    alpha = spawn_alpha;
++    scale = spawn_scale;
++
++    // Clear latched inputs. Without this a round can start with the previous
++    // round's "holding back"/"holding down" still set. PlayerAgent only writes
++    // state[key] when a key CHANGES, so a key held across the round boundary
++    // reads as released until it is let go for the first time -- acceptable,
++    // and better than carrying a block into the next round.
++    for (auto &entry : state)
++        entry.second = false;
++    state["INVERT"] = inverted;
++
++    // Not every character has to define `start`, and setCurrentState() would
++    // dereference a null animation if it does not.
++    if (animation_manager->get("start") != NULL) {
++        setCurrentState("start");
++        animation_manager->get(current_state)->restart();
++        animation_manager->get(current_state)->update(x_pos, y_pos, scale, inverted);
++    }
++}
+diff --git a/src/libopenfight/player.h b/src/libopenfight/player.h
+index b16e0e1..e68aa0c 100644
+--- a/src/libopenfight/player.h
++++ b/src/libopenfight/player.h
+@@ -2,6 +2,7 @@
+ #define OPEN_FIGHT_PLAYER_H
+ 
+ #include <algorithm>
++#include <functional>
+ #include <iostream>
+ #include <map>
+ #include <sstream>
+@@ -13,6 +14,7 @@
+ #include "collision.h"
+ #include "fileReader.h"
+ #include "graphicsCore.h"
++#include "matchEvents.h"
+ #include "objectManager.h"
+ #include "utilities.h"
+ 
+@@ -33,6 +35,20 @@ private:
+     bool is_hurt;
+     int index;
+ 
++    // Project Cerberus: match state the engine never had. `health` is authored
++    // per character via the optional `character.health` YAML key and defaults
++    // to DEFAULT_MAX_HEALTH. The spawn_* values are captured at the end of
++    // initialize() so a round reset can restore the exact starting transform
++    // without re-parsing the YAML.
++    int health;
++    int max_health;
++    int player_number;
++    float spawn_x;
++    float spawn_y;
++    float spawn_alpha;
++    float spawn_scale;
++    std::function<void(const MatchEvent &)> match_listener;
++
+     std::string current_state;
+     std::string previous_state;
+ 
+@@ -62,6 +78,31 @@ public:
+     Collision *getOffense();
+     Collision *getDefense();
+ 
++    // ---- Project Cerberus: health, identity and round reset ----------------
++    static const int DEFAULT_MAX_HEALTH = 100;
++
++    int getHealth() const;
++    int getMaxHealth() const;
++    bool isKO() const;
++    void takeDamage(int amount);
++
++    void setPlayerNumber(int number);
++    int getPlayerNumber() const;
++
++    // The state machine's current state, needed to tell a block from a hit:
++    // openfight has no boolean for it, the resulting state name is the signal.
++    const std::string &getCurrentState() const;
++
++    // Match-level listener, set by GameContext. Fired on the ATTACKER when a
++    // hit lands, because that is the object CollisionAction is holding.
++    void setMatchListener(std::function<void(const MatchEvent &)> listener);
++    bool hasMatchListener() const;
++    void notifyMatch(const MatchEvent &event);
++
++    // Restores the spawn transform and full health. Used between rounds; avoids
++    // re-parsing the character YAML.
++    void resetForRound();
++
+     void initialize(std::string file_name, bool player_one, float x_pos, float y_pos,
+                     const ReadTextFileCallback &read_text_file = ReadTextFileCallback());
+     void setOpponent(Player *opponent);
+diff --git a/src/libopenfight/playerAgent.cpp b/src/libopenfight/playerAgent.cpp
+index cd358b7..764f935 100644
+--- a/src/libopenfight/playerAgent.cpp
++++ b/src/libopenfight/playerAgent.cpp
+@@ -8,7 +8,7 @@ using namespace std;
+ PlayerAgent::PlayerAgent() : player(nullptr), moves(nullptr), current_frame(0) {
+ }
+ 
+-std::shared_ptr<Player> PlayerAgent::getPlayer() {
++std::shared_ptr<Player> PlayerAgent::getPlayer() const {
+     return player;
+ }
+ 
+diff --git a/src/libopenfight/playerAgent.h b/src/libopenfight/playerAgent.h
+index 633fe07..eeafe7a 100644
+--- a/src/libopenfight/playerAgent.h
++++ b/src/libopenfight/playerAgent.h
+@@ -27,7 +27,7 @@ public:
+     PlayerAgent();
+     virtual ~PlayerAgent() = default;
+ 
+-    std::shared_ptr<Player> getPlayer();
++    std::shared_ptr<Player> getPlayer() const;
+     bool initialize(std::string file_name, std::string moves_file, bool player_one,
+                     const ReadTextFileCallback &read_text_file = ReadTextFileCallback());
+     void update(bool *keys);
+diff --git a/src/libopenfight/yaml.cpp b/src/libopenfight/yaml.cpp
+index 0c146a0..b3882b3 100644
+--- a/src/libopenfight/yaml.cpp
++++ b/src/libopenfight/yaml.cpp
+@@ -147,6 +147,13 @@ void Player::initialize(string file_name, bool player_one, float x_pos, float y_
+     if (root["type"])
+         type = getString(root, "type");
+ 
++    // Optional per-character health. Absent means DEFAULT_MAX_HEALTH, so every
++    // existing character YAML keeps working unchanged.
++    max_health = root["health"] ? root["health"].as<int>() : DEFAULT_MAX_HEALTH;
++    if (max_health <= 0)
++        max_health = DEFAULT_MAX_HEALTH;
++    health = max_health;
++
+     // Initial position
+     if (root["position"]) {
+         const auto &pos = root["position"];
+@@ -242,4 +249,13 @@ void Player::initialize(string file_name, bool player_one, float x_pos, float y_
+ 
+         animation_manager->add(name, animation);
+     }
++
++    // Capture the transform the character actually starts at, so
++    // resetForRound() can restore it without re-parsing this file. Taken here
++    // rather than from x_initial/y_initial because those are offsets applied on
++    // top of the spawn location PlayerAgent chose.
++    spawn_x = x_pos;
++    spawn_y = y_pos;
++    spawn_alpha = alpha;
++    spawn_scale = scale;
+ }
+diff --git a/src/platform/godot/openFightNode.cpp b/src/platform/godot/openFightNode.cpp
+index 47312c9..063b4fb 100644
+--- a/src/platform/godot/openFightNode.cpp
++++ b/src/platform/godot/openFightNode.cpp
+@@ -57,6 +57,27 @@ void OpenFightNode::_bind_methods() {
+     ADD_PROPERTY(PropertyInfo(Variant::STRING, "player_two_path"), "set_player_two_path", "get_player_two_path");
+     ADD_PROPERTY(PropertyInfo(Variant::STRING, "moves_path"), "set_moves_path", "get_moves_path");
+     ADD_PROPERTY(PropertyInfo(Variant::STRING, "background_path"), "set_background_path", "get_background_path");
++
++    // ---- Project Cerberus: match API --------------------------------------
++    ClassDB::bind_method(D_METHOD("get_health", "player"), &OpenFightNode::get_health);
++    ClassDB::bind_method(D_METHOD("get_round"), &OpenFightNode::get_round);
++    ClassDB::bind_method(D_METHOD("get_round_wins", "player"), &OpenFightNode::get_round_wins);
++    ClassDB::bind_method(D_METHOD("get_round_time_ms"), &OpenFightNode::get_round_time_ms);
++    ClassDB::bind_method(D_METHOD("is_round_over"), &OpenFightNode::is_round_over);
++    ClassDB::bind_method(D_METHOD("is_match_over"), &OpenFightNode::is_match_over);
++    ClassDB::bind_method(D_METHOD("get_match_winner"), &OpenFightNode::get_match_winner);
++    ClassDB::bind_method(D_METHOD("start_round"), &OpenFightNode::start_round);
++    ClassDB::bind_method(D_METHOD("reset_match"), &OpenFightNode::reset_match);
++
++    // Signals, so a host can drive health bars, round banners and results
++    // without polling every frame. `winner` is -1 for a draw.
++    ADD_SIGNAL(MethodInfo("hit", PropertyInfo(Variant::INT, "attacker"), PropertyInfo(Variant::INT, "defender"),
++                          PropertyInfo(Variant::INT, "damage"), PropertyInfo(Variant::BOOL, "blocked"),
++                          PropertyInfo(Variant::STRING, "strength"), PropertyInfo(Variant::STRING, "state")));
++    ADD_SIGNAL(MethodInfo("round_started", PropertyInfo(Variant::INT, "round")));
++    ADD_SIGNAL(
++        MethodInfo("round_ended", PropertyInfo(Variant::INT, "winner"), PropertyInfo(Variant::BOOL, "time_over")));
++    ADD_SIGNAL(MethodInfo("match_ended", PropertyInfo(Variant::INT, "winner")));
+ }
+ 
+ void OpenFightNode::_notification(int what) {
+@@ -78,6 +99,10 @@ void OpenFightNode::_notification(int what) {
+             update_accumulator_ms -= GAME_TIME_UPDATE_FREQ;
+         }
+ 
++        // After the step loop, not inside it: a frame may have stepped several
++        // fixed ticks, and every hit those produced still has to be reported.
++        emitMatchEvents();
++
+         queue_redraw();
+         break;
+     }
+@@ -191,3 +216,76 @@ void OpenFightNode::set_background_path(const String &path) {
+ String OpenFightNode::get_background_path() const {
+     return background_path;
+ }
++
++// ---------------------------------------------------------------------------
++// Project Cerberus: match state
++// ---------------------------------------------------------------------------
++
++void OpenFightNode::emitMatchEvents() {
++    if (game == nullptr)
++        return;
++
++    // Take a batch COPY before iterating. Emitting a signal runs GDScript
++    // synchronously, and a handler is very likely to call reset_match() or
++    // start_round() -- which would mutate the vector being iterated and, worse,
++    // invalidate the reference. Clearing first also means an event is delivered
++    // exactly once.
++    const std::vector<MatchEvent> batch = game->getEvents();
++    game->clearEvents();
++
++    for (const MatchEvent &event : batch) {
++        switch (event.type) {
++        case MatchEventType::HIT:
++            emit_signal(StringName("hit"), event.attacker, event.defender, event.damage, event.blocked,
++                        String(event.strength.c_str()), String(event.state.c_str()));
++            break;
++        case MatchEventType::ROUND_STARTED:
++            emit_signal(StringName("round_started"), event.round);
++            break;
++        case MatchEventType::ROUND_ENDED:
++            emit_signal(StringName("round_ended"), event.winner, event.time_over);
++            break;
++        case MatchEventType::MATCH_ENDED:
++            emit_signal(StringName("match_ended"), event.winner);
++            break;
++        }
++    }
++}
++
++int OpenFightNode::get_health(int player) const {
++    return game != nullptr ? game->getHealth(player) : 0;
++}
++
++int OpenFightNode::get_round() const {
++    return game != nullptr ? game->getRound() : 0;
++}
++
++int OpenFightNode::get_round_wins(int player) const {
++    return game != nullptr ? game->getRoundWins(player) : 0;
++}
++
++int OpenFightNode::get_round_time_ms() const {
++    return game != nullptr ? game->getRoundTimeMs() : 0;
++}
++
++bool OpenFightNode::is_round_over() const {
++    return game != nullptr && game->isRoundOver();
++}
++
++bool OpenFightNode::is_match_over() const {
++    return game != nullptr && game->isMatchOver();
++}
++
++int OpenFightNode::get_match_winner() const {
++    return game != nullptr ? game->getMatchWinner() : -1;
++}
++
++void OpenFightNode::start_round() {
++    if (game != nullptr)
++        game->startRound();
++}
++
++void OpenFightNode::reset_match() {
++    if (game != nullptr)
++        game->resetMatch();
++}
+diff --git a/src/platform/godot/openFightNode.h b/src/platform/godot/openFightNode.h
+index b866ffd..e39e287 100644
+--- a/src/platform/godot/openFightNode.h
++++ b/src/platform/godot/openFightNode.h
+@@ -29,6 +29,11 @@ private:
+     static std::string toResourcePath(const String &value);
+     FrameInput readFrameInput() const;
+ 
++    // Drains GameContext's event list and re-emits each entry as a Godot
++    // signal. Called once per NOTIFICATION_PROCESS, after the fixed-step update
++    // loop, so a frame that stepped several ticks still reports every hit.
++    void emitMatchEvents();
++
+ protected:
+     static void _bind_methods();
+     void _notification(int what);
+@@ -48,6 +53,21 @@ public:
+     String get_moves_path() const;
+     void set_background_path(const String &path);
+     String get_background_path() const;
++
++    // ---- Project Cerberus: match state exposed to Godot -------------------
++    // Before this, the extension's entire Godot surface was four settable
++    // strings: no health, no rounds, and no signals, so a host could not build a
++    // match on top of it.
++    int get_health(int player) const;
++    int get_round() const;
++    int get_round_wins(int player) const;
++    int get_round_time_ms() const;
++    bool is_round_over() const;
++    bool is_match_over() const;
++    int get_match_winner() const;
++
++    void start_round();
++    void reset_match();
+ };
+ 
+ } // namespace godot

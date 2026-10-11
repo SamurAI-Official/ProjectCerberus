@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tools/verify/m1_match.gd" id="1_m1"]
+
+[node name="M1Match" type="Node"]
+script = ExtResource("1_m1")

@@ -13,17 +13,35 @@ horror), **Us vs. The Clowns** (1992 biker), and **Yokai Hon'nō Academy**
 (shonen). The first vertical slice is **Tsu Ibano vs. Fei Young** in the
 **Gijutsu Gym**.
 
-## Status: M0 complete
-
-The engine builds on macOS arm64 and runs. What is and is not done:
+## Status: M0–M1 complete
 
 | | |
 |---|---|
-| ✅ M0 | openfight GDExtension builds natively and loads in Godot 4.7.2; class registers; 600-frame headless smoke test passes |
-| ⏳ M1 | fork in health / damage / rounds / signals (the engine has none — see below) |
+| ✅ M0 | openfight GDExtension builds natively on macOS arm64 and loads in Godot 4.7.2; class registers; 600-frame headless smoke test; Metal render test |
+| ✅ M1 | health, damage, best-of-three rounds and 4 Godot signals patched into the engine — a full match runs headless and passes its assertions |
 | ⏳ M2 | title / character select / match / results shell, gamepad input |
 | ⏳ M3 | art + YAML pipeline, the two vertical-slice fighters |
 | ⏳ M4 | vertical slice lock |
+
+### M1, verified
+
+```
+round 1 started (p1=100 p2=100 hp)
+first hit: attacker=0 defender=1 damage=11 blocked=false strength=HIT_H state=hurt_high -> p2 health=89
+round ended: winner=0 time_over=false wins=(1,0) health=(100,0)
+round 2 started (p1=100 p2=100 hp)
+round ended: winner=0 time_over=false wins=(2,0) health=(100,0)
+match ended: winner=0 after 20 hits
+PASS: hits, damage, round rotation and match end all behaved
+```
+
+20 hits × 11 damage = 220 total: 200 to KO two rounds plus 20 overkill, and the
+attacker finishes untouched because it was the only one acting. Reproduce with:
+
+```sh
+/Applications/Godot.app/Contents/MacOS/Godot --headless --path . res://tools/verify/m1_match.tscn
+```
+
 
 ## Why this project has to patch its engine
 
@@ -37,9 +55,17 @@ openfight's own `ROADMAP.md`. So the plan of record is:
   convention NRR uses for its Godot fork), and
 * keep all game logic in GDScript.
 
-Working in patches keeps us rebasable on upstream and keeps our LGPL-3.0
-obligations simple: dynamic linking through the GDExtension, with the modified
-engine source published right here.
+Patch `0001` is 11 files and 658 lines; it adds health, damage resolution,
+best-of-three rounds and four signals, and it is verified to apply cleanly onto
+a pristine submodule checkout and to reproduce the tree byte-for-byte. Full
+notes, including why damage lives in `CollisionAction::doAction()` and why
+blocking is a state-name prefix rather than a flag, are in
+[`patches/openfight/README.md`](patches/openfight/README.md).
+
+Keeping the engine in patches rather than a fork keeps us rebasable on upstream
+and keeps our LGPL-3.0 obligations simple: dynamic linking through the
+GDExtension, with the modified engine source published right here.
+
 
 ### A false lead, recorded on purpose
 
@@ -82,7 +108,9 @@ data contract.
 git submodule update --init --recursive
 brew install yaml-cpp        # the extension links exactly one library
 pip3 install --user scons
-./tools/build/build_openfight.sh
+
+./patches/openfight/apply.sh       # patch the engine (idempotent)
+./tools/build/build_openfight.sh   # build + install addons/openfight/
 ```
 
 Then verify:
@@ -90,6 +118,7 @@ Then verify:
 ```sh
 /Applications/Godot.app/Contents/MacOS/Godot --headless --path . --import
 /Applications/Godot.app/Contents/MacOS/Godot --headless --path . res://tools/verify/m0_smoke.tscn
+/Applications/Godot.app/Contents/MacOS/Godot --headless --path . res://tools/verify/m1_match.tscn
 ```
 
 and play:
