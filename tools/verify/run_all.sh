@@ -75,6 +75,10 @@ else
     # headless roster test notices too, but it reports it as a 120-second timeout
     # rather than as a box problem, which is a much longer walk to the same place.
     run m3_boxes "${GODOT}" --path . res://tools/verify/m3_boxes.tscn
+    # Video and audio options, including whether the neural upscaler is actually
+    # upscaling or merely installed -- two states that look identical from outside.
+    # Windowed, because the pass needs rendered frames before it will say anything.
+    run video_options "${GODOT}" --path . res://tools/verify/video_options.tscn
 fi
 
 echo
