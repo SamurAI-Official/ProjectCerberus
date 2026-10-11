@@ -20,7 +20,8 @@ horror), **Us vs. The Clowns** (1992 biker), and **Yokai Hon'nō Academy**
 | ✅ M0 | openfight GDExtension builds natively on macOS arm64 and loads in Godot 4.7.2; class registers; 600-frame headless smoke test; Metal render test |
 | ✅ M1 | health, damage, best-of-three rounds and 4 Godot signals patched into the engine — a full match runs headless and passes its assertions |
 | ✅ M2 | full menu flow — title, fighter select, stage select, match, results, options and an in-match pause menu; gamepad bindings; settings persisted to disk. Walked end to end headless. |
-| ⏳ M3 | art + YAML pipeline, the two vertical-slice fighters |
+| ✅ M3 | art + YAML pipeline; the two vertical-slice fighters are playable end to end — every state reachable, every hitbox connecting |
+| ⏳ M3.5 | art fidelity: alpha, 1:1 pixels, 16-colour palettes, AI-generated frames |
 | ⏳ M4 | vertical slice lock |
 
 ### M2, verified
@@ -51,6 +52,64 @@ The match shell itself is covered by `m2_hud.tscn`:
   bar target min: p1=100 p2=0
   result label  : 'PLAYER 1 WINS'
 ```
+
+### M3, verified
+
+`tools/verify/m3_roster.tscn` loads the real match with Tsu Ibano against Fei
+Young and forces a fight to a decision — the pipeline emitting plausible PNGs is
+not the claim, the claim is that a fighter built from a design sheet is
+*playable*.
+
+```
+  matchup: TSU IBANO vs FEI YOUNG in GIJUTSU GYM
+=== M3 roster test summary ===
+  elapsed        : 19.7s (1174 frames)
+  hits           : 30 (210 damage)
+  hit strengths  : { "HIT_M": 30 }
+  defender states: ["hurt_mid"]
+  min health     : p1=100 p2=0
+  winner         : 0
+PASS: the generated fighters are playable end to end
+```
+
+The hit strength is the interesting line. A light punch reaches `1punch`, which
+carries `HIT_M`, and the defender's own state machine turns that into `hurt_mid` —
+so the assertion pins the whole chain `LP -> 1punch -> HIT_M -> hurt_mid` rather
+than merely noticing that something landed.
+
+`tools/verify/m3_boxes.tscn` is the check that fails when it stops being true. It
+walks player one in and screenshots the engine's own box overlay, which the
+generated YAML switches on with `show_hitbox`. A hitbox that is in the wrong place
+leaves everything else looking healthy — every frame loads, every state is
+reachable, the round timer runs — so the only symptom is an absence, and a
+screenshot of where the engine *tested* is worth more than any amount of reading
+where it should have:
+
+```
+=== M3 box overlay check ===
+  hits     : 15 (105 damage)
+PASS: hitboxes and hurtboxes connect in the engine
+```
+
+All eight scenes pass:
+
+```
+  m0_smoke   PASS      m0_render  PASS
+  m1_match   PASS      m2_render  PASS
+  m2_hud     PASS      m3_boxes   PASS
+  m2_flow    PASS
+  m3_roster  PASS
+```
+
+### Open bug: a round restart can stop the fight connecting
+
+Reproduce with `m3_boxes.tscn` at `PUNCH_PERIOD_FRAMES = 24`: round one ends by KO
+as normal, and round two then runs its full 99-second timer with the fighters
+adjacent, animating, and no hitbox ever drawn in front of them. It is not a
+geometry problem — the same match completes when the punch cadence is 14 frames,
+and enlarging the hitbox and hurtbox both make it land again. It is recorded in
+`tools/verify/m2_flow.gd` next to the cadence it constrains, because the symptom
+imitates a box bug closely enough to be worth a warning.
 
 
 ### M1, verified
@@ -131,7 +190,8 @@ data/
   ryu/, background.png   the vendored engine fixture
 tools/build/             build_openfight.sh
 tools/validate/          validate_manifest.py -- roster + YAML + frame files resolve
-tools/verify/            run_all.sh + the verification scenes
+tools/verify/            run_all.sh + the verification scenes (m3_boxes is the
+                         box-overlay check; it needs a window, not --headless)
 docs/pipeline/           sprite spec, findings
 docs/lore/               canon reference
 ```
