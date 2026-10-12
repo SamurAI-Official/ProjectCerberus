@@ -22,6 +22,12 @@ __pycache__/
 /build/
 *.log
 
+# to_sprite.py writes its acceptance evidence beside whatever directory it converts
+# into. Under build/ that is the point; when the converter is aimed at a shipped
+# data/<fighter>/ directory the report is still scratch, and committing it would
+# put a conversion log in the art contract (no fighter's tracked files include one).
+data/**/census.json
+
 # ---- macOS ----
 .DS_Store
 
