@@ -199,18 +199,22 @@ def band_masks(mask: np.ndarray, joints: dict | None = None) -> dict:
     is scoped to the poses that break it rather than applied to every frame -- the numbers the
     floors were set from were all measured standing.
 
-    The head band is the exception, and it is cut along the head bone even on an upright figure.
-    A box slice at the top 22% of the silhouette is not a head on a fighter: a raised arm in a
-    punch, a recoiling crown in a hurt, or plain breathing all move that boundary over non-head
-    anatomy, and the head is small enough that the slice lands on a collar or a sleeve. Measured
-    over Tsu Ibano's img2img batch, the box head band drifts 50-200 of 255 *within a single
-    state* (idle 51, stand 79, hurt_mid 124, special 117) purely from that boundary moving, while
-    the head-bone cut holds the same states under ~26. The head is not a judged band -- see
-    `JUDGED_BANDS` -- so this corrects a reported number without moving the verdict, and it makes
-    the number mean "the head" rather than "whatever crossed the top of the box".
+    The head band is the exception among the box-cut bands, and the torso and legs join it on the
+    poses that move. A box slice is a body part only while the figure holds one shape; a kick
+    extends a leg through the torso's rows, a stand sways, a hurt recoils, and the slice then reads
+    a limb or a shadow where it meant the blazer. Measured over Tsu Ibano's img2img batch, cutting
+    the torso along the bone instead of the box takes 3kick 77->29, stand 52->23, 2kick 54->35,
+    block_low 37->16, hurt_mid 39->23 -- the poses whose silhouette changes within the state -- and
+    is a wash (within a few points either way) on the rest. So all three bands are bone-cut here,
+    which is the same cut `skeleton_bands` already applies to a figure that is not upright; the box
+    is kept only as the fallback for a frame with no skeleton to cut along.
+
+    The non-upright states (knocked_down, hit_ground, hurt_air, ground) already took the bone path
+    before this and are unchanged by it -- the numbers that argued for scoping the cut to the box
+    were measured on standing figures, and the only upright state the bone reads worse is 2punch
+    (torso 22->28), which stays under the notice line and so is not a failure either way.
     """
-    use_skeleton = joints is not None and not upright(joints)
-    if use_skeleton:
+    if joints is not None:
         return skeleton_bands(mask, joints)
     rows = np.nonzero(mask.any(axis=1))[0]
     if not len(rows):
@@ -224,8 +228,6 @@ def band_masks(mask: np.ndarray, joints: dict | None = None) -> dict:
         band = np.zeros_like(mask)
         band[first:last] = mask[first:last]
         out[name] = band
-    if joints is not None:
-        out["head"] = skeleton_bands(mask, joints)["head"]
     return out
 
 
