@@ -42,6 +42,7 @@ class ComfyClient:
     def __init__(self, host="127.0.0.1", port=8188, client_id=None):
         self.base = f"http://{host}:{port}"
         self.client_id = client_id or uuid.uuid4().hex
+        self._uploads = {}
 
     # -- transport ----------------------------------------------------------
 
@@ -158,6 +159,36 @@ class ComfyClient:
                 on_tick()
             time.sleep(interval)
         raise ComfyError(f"prompt {prompt_id} did not finish within {timeout:.0f}s")
+
+    def object_info(self, node_class):
+        """One node class's definition, or None when the server has never heard of it.
+
+        Used to turn "the graph was rejected" into "this dependency is not installed, here is the
+        command": a missing custom node is otherwise a 400 whose node error names a class the caller
+        believes it just referenced.
+        """
+        try:
+            payload = json.loads(self._request(f"/object_info/{node_class}", timeout=20))
+        except ComfyError:
+            return None
+        # ComfyUI answers the per-class route with the definition wrapped in the class name --
+        # {"IPAdapterAdvanced": {"input": ...}} -- while a server that answers with the bare
+        # definition is also accepted here. Reading `input` off the wrapper finds nothing, which is
+        # how a correctly installed custom node read as absent.
+        info = payload.get(node_class) or payload
+        return info if info.get("input") else None
+
+    def fresh(self, path, subfolder=""):
+        """`upload_image`, memoised for the life of this client.
+
+        The reference arms send the same view for every frame of a state -- one body view across
+        six idle frames is one upload, not six -- and the key is the path, because the path is what
+        changes when a box in the design sheet is retuned and the crop is re-extracted.
+        """
+        key = (str(path), subfolder)
+        if key not in self._uploads:
+            self._uploads[key] = self.upload_image(path, subfolder=subfolder)
+        return self._uploads[key]
 
     def fetch(self, image):
         """Download one output image dict -> bytes."""

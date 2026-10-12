@@ -7,23 +7,236 @@
   "profile": {
     "reach": 1.12
   },
-  "appearance": "Fei Young, athletic young brawler with tanned skin, sleeveless rust-red academy gi with gold trim, black sash, short dark hair, fists wrapped in white tape, determined scowl, black training trousers",
+  "appearance": "Fei Young, a loud athletic young brawler in the blue Yokai Honno Academy school uniform: a cerulean blue blazer with pale trim over a white collared shirt, the red necktie flung over one shoulder, wild spiky dark hair, bare clenched fists, tan trousers, dark brown shoes",
+  "reference": {
+    "sheet": "design_sheets/refs/fei_young_sheet.jpeg",
+    "note": "Yokai Honno Academy character sheet, front view. Measured by tools/ai/ref_palette.py. The tie region is the flung tie rather than the knot: he is drawn with the knot at his throat and the rest of the tie horizontal, and the flung part is the larger sample of the same red.",
+    "samples": {
+      "hair": {
+        "box": [
+          110,
+          25,
+          190,
+          78
+        ],
+        "material": "dark"
+      },
+      "face": {
+        "box": [
+          112,
+          78,
+          190,
+          150
+        ],
+        "material": "skin"
+      },
+      "collar": {
+        "box": [
+          128,
+          130,
+          196,
+          178
+        ],
+        "material": "white"
+      },
+      "tie": {
+        "box": [
+          196,
+          46,
+          308,
+          116
+        ],
+        "material": "red"
+      },
+      "jacket": {
+        "box": [
+          95,
+          120,
+          230,
+          285
+        ],
+        "material": "blue"
+      },
+      "sleeve": {
+        "box": [
+          80,
+          195,
+          126,
+          268
+        ],
+        "material": "blue"
+      },
+      "trousers": {
+        "box": [
+          96,
+          284,
+          218,
+          442
+        ],
+        "material": "khaki"
+      }
+    },
+    "views": {
+      "front": {
+        "box": [68, 28, 252, 476],
+        "shows": "front standing view, tie flying over the shoulder",
+        "trim": true
+      },
+      "back": {
+        "box": [342, 30, 552, 478],
+        "shows": "back standing view, tie flying clear of the body",
+        "trim": true
+      },
+      "three_quarter": {
+        "box": [604, 30, 740, 476],
+        "shows": "narrow profile view; this sheet has no plain side view, this is the closest",
+        "trim": true
+      },
+      "face_neutral": {
+        "box": [76, 22, 183, 140],
+        "shows": "the front view's own head. This sheet has no separate neutral panel and every expression panel on it is extreme, so the neutral face is read off the standing view",
+        "emotion": "neutral"
+      },
+      "face_shock": {
+        "box": [782, 36, 950, 268],
+        "shows": "head + collar, whites showing, sweat drops",
+        "emotion": "shock"
+      },
+      "face_laugh": {
+        "box": [966, 32, 1126, 270],
+        "shows": "head + collar, eyes shut, mouth wide open",
+        "emotion": "laugh"
+      },
+      "face_grin": {
+        "box": [1124, 106, 1364, 402],
+        "shows": "bust, crossed hands, dangerous grin",
+        "emotion": "grin",
+        "trim": true
+      },
+      "pose_sprint": {
+        "box": [56, 468, 338, 742],
+        "shows": "running, arms and legs at full stretch",
+        "trim": true
+      },
+      "pose_stance": {
+        "box": [328, 556, 700, 742],
+        "shows": "low wide stance, both hands near the floor",
+        "trim": true
+      },
+      "pose_kick": {
+        "box": [692, 428, 1022, 745],
+        "shows": "spinning back-kick. The shockwave burst around the foot is disconnected line art, so the trim drops it -- and because it is dropped the box is cut back to the figure rather than left with the burst's empty half",
+        "trim": true
+      },
+      "pose_hooks": {
+        "box": [1036, 432, 1364, 738],
+        "shows": "rapid-fire hooks, two figures",
+        "trim": true
+      }
+    },
+    "expressions": {
+      "neutral": {
+        "view": "face_neutral",
+        "prompt": "flat neutral expression, eyes open"
+      },
+      "attack": {
+        "view": "face_grin",
+        "prompt": "wide dangerous grin, teeth showing"
+      },
+      "hurt": {
+        "view": "face_shock",
+        "prompt": "shocked open-mouthed yell, eyes wide"
+      },
+      "fail": {
+        "view": "face_shock",
+        "prompt": "stunned, eyes wide, mouth open"
+      },
+      "win": {
+        "view": "face_laugh",
+        "prompt": "open-mouthed laugh, eyes shut"
+      }
+    }
+  },
   "palette16": {
-    "outline": [0, 0, 0],
-    "skin_light": [240, 202, 158],
-    "skin": [214, 168, 118],
-    "skin_shadow": [158, 112, 74],
-    "cloth_light": [176, 74, 52],
-    "cloth": [126, 40, 34],
-    "cloth_shadow": [84, 22, 22],
-    "limb_light": [206, 104, 66],
-    "limb": [172, 70, 44],
-    "limb_shadow": [120, 42, 30],
-    "far": [96, 32, 26],
-    "far_shadow": [62, 18, 18],
-    "accent": [252, 214, 118],
-    "accent_shadow": [188, 142, 60],
-    "highlight": [255, 248, 232],
-    "eye": [44, 24, 20]
+    "outline": [
+      0,
+      0,
+      0
+    ],
+    "skin_light": [
+      246,
+      208,
+      182
+    ],
+    "skin": [
+      244,
+      200,
+      165
+    ],
+    "skin_shadow": [
+      204,
+      171,
+      143
+    ],
+    "cloth_light": [
+      85,
+      160,
+      195
+    ],
+    "cloth": [
+      62,
+      157,
+      198
+    ],
+    "cloth_shadow": [
+      60,
+      130,
+      156
+    ],
+    "limb_light": [
+      64,
+      157,
+      198
+    ],
+    "limb": [
+      179,
+      148,
+      91
+    ],
+    "limb_shadow": [
+      161,
+      136,
+      88
+    ],
+    "far": [
+      160,
+      135,
+      87
+    ],
+    "far_shadow": [
+      61,
+      131,
+      157
+    ],
+    "accent": [
+      161,
+      53,
+      49
+    ],
+    "accent_shadow": [
+      71,
+      11,
+      10
+    ],
+    "highlight": [
+      254,
+      254,
+      254
+    ],
+    "eye": [
+      56,
+      46,
+      37
+    ]
   }
 }

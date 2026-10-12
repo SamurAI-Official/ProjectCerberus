@@ -36,6 +36,42 @@ over 1024x1024 pixels, and the outline width is one or two pixels at the *game*
 scale -- so working at game scale for the fill means the mask is computed where
 its errors are a quarter of a pixel, and quantising last means the sixteen tones
 are chosen for the pixels that actually ship.
+
+Holding the art to the pose
+---------------------------
+`--bound <dir>` takes the directory a run's frames were rendered from -- the run's
+own `init/`, same names as `--raw` -- and limits each sprite to that frame's own
+silhouette, grown by the outline ring. A repaint is allowed to repaint the pose;
+it is not allowed to extend it. On the game's canvases that is the difference
+between a frame that fits and one whose hair is cut flat by the edge of its
+texture: our drawing of a punch leaves 7-8 pixels of clearance at the sprite's
+top, and the model draws about 7 pixels of hair above the crown it was given on
+roughly a third of the attack frames. The census records what the bound cleared
+per frame and the run prints the total, because a bound that is doing real work
+should be legible rather than silent -- and a share near 1.0 means the bound does
+not belong to these frames at all.
+
+Installing into the game
+------------------------
+`--out` is wherever the sprites should go, and the game's frame directory is a
+valid answer:
+
+    python3 tools/ai/to_sprite.py tsu_ibano --raw build/ai/tsu_ibano/raw \\
+                                          --out data/tsu_ibano
+
+The names written here (`2punch00.png`) are the names `data/tsu_ibano/tsu_ibano.yml`
+resolves through `ResourceLoader`, so they land where the engine is already
+looking. Three existing checks then cover the swap, which is why it needs no
+staging step of its own: `tools/validate/validate_manifest.py` counts the colours
+in every frame the roster declares and fails the build if one has drifted past
+sixteen; `tools/verify/m3_boxes.tscn` draws the hitboxes over the real frames,
+where a sprite that quantised to the wrong silhouette shows up; and
+`tools/verify/run_all.sh` runs both, plus the scenes that fight with them.
+
+Install a whole fighter's state list or none of it. A partial install is two
+different hands in one animation -- part generated, part `figure.render` -- and
+nothing downstream would notice, because both are valid sixteen-colour frames
+that register correctly.
 """
 
 from __future__ import annotations
@@ -72,7 +108,7 @@ BACKDROP_TOLERANCE = 42.0
 
 # The flood fill runs on the full-size render, so this is the number of pixels a
 # fill has to walk, not the number it has to walk at final size. 1024x1024 in
-# pure Python is a few seconds per frame and 117 frames is a coffee break; the
+# pure Python is a few seconds per frame and 142 frames is a coffee break; the
 # fill is only ever started from the border, so in practice it touches the
 # backdrop and stops.
 # The flood fill runs on the render *after* it has been scaled to game pixel
@@ -230,7 +266,7 @@ def _place(canvas, sprite, offset):
 
 
 def render_sprite(raw_path, sheet, roles, colours, state, outline_width=1,
-                  tolerance=BACKDROP_TOLERANCE):
+                  tolerance=BACKDROP_TOLERANCE, bound_path=None):
     """One raw render -> one placed, quantised, outlined RGBA frame.
 
     Returns (image, census); the census is the per-role pixel count plus the
@@ -264,6 +300,26 @@ def render_sprite(raw_path, sheet, roles, colours, state, outline_width=1,
         flat = np.where(ring[..., None], np.array([0, 0, 0], np.uint8), flat)
         alpha = np.where(ring, 255, alpha).astype(np.uint8)
 
+    outside = 0
+    if bound_path is not None:
+        # A repaint may repaint the pose, it may not extend it. `bound_path` is the image the frame
+        # was rendered *from* -- our own drawing of the pose -- and the silhouette is taken from its
+        # own backdrop test, dilated by the ring so the outline survives (the ring lives one pixel
+        # outside the figure by construction).
+        #
+        # Measured on one batch before this existed: the model draws hair 1.2 engine units above the
+        # crown our drawing gives it (7 px at game scale) on about a third of the attack frames, and
+        # the sprite canvas has 7-8 px of clearance there -- so those frames landed on their own top
+        # border and the texture cut the hair tip flat. What this clears is reported in the census as
+        # `outside`, so a bound that is doing real work is visible rather than silent.
+        bound = Image.open(bound_path).convert("RGB").resize(
+            (scaled_size, scaled_size), Image.LANCZOS)
+        pose = ~backdrop_mask(np.asarray(bound, dtype=np.uint8), tolerance)
+        allowed = dilate(pose, outline_width)
+        outside = int(((alpha > 0) & ~allowed).sum())
+        alpha = np.where(allowed, alpha, 0).astype(np.uint8)
+        flat = np.where(allowed[..., None], flat, 0).astype(np.uint8)
+
     sprite = Image.fromarray(np.dstack([flat, alpha]), "RGBA")
 
     offset = (int(canvas[0] / 2 - scaled_size / 2),
@@ -296,11 +352,20 @@ def render_sprite(raw_path, sheet, roles, colours, state, outline_width=1,
         "colours": sum(1 for count in counts.values() if count > 0),
         "roles": {role: count for role, count in counts.items() if count > 0},
     }
+    if bound_path is not None:
+        # The share, not only the count: a bound that clears a few hundred pixels on a frame of a
+        # few thousand is the model's hair crossing the outline, and one that clears most of the
+        # figure is a mismatched bound (the wrong frame, or a control image that is not a drawing).
+        census["bound"] = {
+            "path": str(bound_path),
+            "outside": outside,
+            "share": round(outside / float(max(1, int((~backdrop).sum()))), 4),
+        }
     return placed, census
 
 
 def process_all(fighter_id, raw_dir, out_dir, outline_width=1,
-                tolerance=BACKDROP_TOLERANCE):
+                tolerance=BACKDROP_TOLERANCE, bound_dir=None):
     """Convert every raw render in `raw_dir`. Returns (written, censuses)."""
     path = SHEET_DIR / f"{fighter_id}.json"
     if not path.is_file():
@@ -322,8 +387,17 @@ def process_all(fighter_id, raw_dir, out_dir, outline_width=1,
         # The frame name carries the state, and the state carries the canvas --
         # the same naming build_fighter writes the game's own frames under.
         state = raw_path.stem.rstrip("0123456789")
+        bound_path = None
+        if bound_dir is not None:
+            bound_path = Path(bound_dir) / raw_path.name
+            if not bound_path.is_file():
+                # Every raw render in a run has its conditioning image written beside it before any
+                # sampling, so a missing one is the wrong directory rather than a frame to convert
+                # unbounded -- which would be a batch half bounded and half not.
+                raise SystemExit(f"{raw_path.name} has no bound at {bound_path}: --bound must be "
+                                 "the conditioning directory the run was made with")
         image, census = render_sprite(raw_path, sheet, roles, colours, state,
-                                      outline_width, tolerance)
+                                      outline_width, tolerance, bound_path)
         if census["colours"] > len(roles):
             raise SystemExit(
                 f"{raw_path.stem}: {census['colours']} colours, budget is {len(roles)}; "
@@ -348,10 +422,15 @@ def main(argv=None):
                         help="outline ring in game pixels; 0 disables")
     parser.add_argument("--tolerance", type=float, default=BACKDROP_TOLERANCE,
                         help="backdrop flood-fill tolerance")
+    parser.add_argument("--bound", default=None,
+                        help="directory of the images the frames were rendered from -- a run's own "
+                             "init/, same names as --raw. The sprite is then held to the pose's own "
+                             "silhouette, grown by the outline ring, and whatever the model drew "
+                             "outside it is cleared and reported (see the census's 'bound').")
     args = parser.parse_args(argv)
 
     written, censuses = process_all(args.fighter, args.raw, args.out,
-                                    args.outline_width, args.tolerance)
+                                    args.outline_width, args.tolerance, args.bound)
 
     print(f"{args.fighter}: {len(written)} sprite(s) -> {args.out}")
     for name, census in sorted(censuses.items()):
@@ -363,6 +442,15 @@ def main(argv=None):
                      % (silhouette["feet"], silhouette["crown"],
                         silhouette["back"], silhouette["front"]))
         print(f"  {name:14s} {width}x{height}  {census['colours']:2d} colours  {where}")
+    if args.bound:
+        # One number for the whole batch, because a bound quietly doing a lot of work is the state
+        # this option exists to make visible.
+        pairs = [(name, census["bound"]) for name, census in censuses.items() if "bound" in census]
+        cleared = sum(bound["outside"] for _name, bound in pairs)
+        worst = max(pairs, key=lambda pair: pair[1]["share"]) if pairs else None
+        print("  bound: cleared %d pixel(s) the model drew outside the pose%s"
+              % (cleared, "; worst %s at %.1f%% of its figure" % (worst[0], 100 * worst[1]["share"])
+                 if worst else ""))
     return 0
 
 

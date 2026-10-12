@@ -7,23 +7,239 @@
   "profile": {
     "reach": 0.95
   },
-  "appearance": "Tsu Ibano, lean young martial artist in a high-collared teal academy gi with pale mint trim, sleeveless, short dark hair, calm unreadable expression, white hand wraps, charcoal trousers, light training sandals",
+  "appearance": "Tsu Ibano, a lean young martial artist in the blue Yokai Honno Academy school uniform: a cerulean blue blazer over a white collared shirt and a red necktie, tan trousers, dark brown shoes, short dark brown hair, both hands empty and raised in a fighting stance",
+  "reference": {
+    "sheet": "design_sheets/refs/tsu_ibano_sheet.jpeg",
+    "note": "Yokai Honno Academy character sheet, front view. The palette is measured from it by tools/ai/ref_palette.py: each region is generous, and the material predicate is what narrows it -- that is what keeps the satchel strap crossing the chest out of the blazer's blue.",
+    "samples": {
+      "hair": {
+        "box": [
+          112,
+          28,
+          186,
+          78
+        ],
+        "material": "dark"
+      },
+      "face": {
+        "box": [
+          114,
+          78,
+          186,
+          150
+        ],
+        "material": "skin"
+      },
+      "collar": {
+        "box": [
+          130,
+          138,
+          198,
+          180
+        ],
+        "material": "white"
+      },
+      "tie": {
+        "box": [
+          136,
+          145,
+          190,
+          262
+        ],
+        "material": "red"
+      },
+      "jacket": {
+        "box": [
+          100,
+          126,
+          232,
+          280
+        ],
+        "material": "blue"
+      },
+      "sleeve": {
+        "box": [
+          82,
+          198,
+          128,
+          270
+        ],
+        "material": "blue"
+      },
+      "trousers": {
+        "box": [
+          96,
+          284,
+          218,
+          442
+        ],
+        "material": "khaki"
+      }
+    },
+    "views": {
+      "front": {
+        "box": [76, 33, 242, 476],
+        "shows": "front standing view; satchel strap across the chest",
+        "trim": true
+      },
+      "back": {
+        "box": [370, 33, 556, 478],
+        "shows": "back standing view; the sheet's own label arrow is dropped by the trim",
+        "trim": true
+      },
+      "three_quarter": {
+        "box": [592, 33, 744, 476],
+        "shows": "third standing view, body turned away and face back towards the camera",
+        "trim": true
+      },
+      "face_neutral": {
+        "box": [798, 36, 958, 262],
+        "shows": "head + collar, eyes open. The sheet calls it 'Blank stare'",
+        "emotion": "neutral"
+      },
+      "face_smile": {
+        "box": [978, 38, 1136, 262],
+        "shows": "head + collar, eyes closed, small smile. The sheet calls it 'mediocre'",
+        "emotion": "smile"
+      },
+      "face_panic": {
+        "box": [1180, 40, 1338, 268],
+        "shows": "head + collar, whites showing, sweat drops",
+        "emotion": "panic"
+      },
+      "face_focus": {
+        "box": [1102, 212, 1268, 440],
+        "shows": "bust, brows down. The sheet calls it 'deep focus, understated determination'",
+        "emotion": "focus",
+        "trim": true
+      },
+      "pose_run": {
+        "box": [70, 478, 345, 742],
+        "shows": "running, one foot off the ground; the sheet's 'slumping into a seat' panel",
+        "trim": true
+      },
+      "pose_low": {
+        "box": [336, 556, 660, 742],
+        "shows": "low wide stance with one hand near the floor",
+        "trim": true
+      },
+      "pose_watch": {
+        "box": [684, 486, 812, 745],
+        "shows": "standing, head down, checking the watch",
+        "trim": true
+      },
+      "vfx_rewrite": {
+        "box": [855, 498, 1080, 712],
+        "shows": "the special's swirl. Not a hitbox source -- a colour reference for the effect"
+      },
+      "vfx_ground": {
+        "box": [1078, 505, 1352, 715],
+        "shows": "bare ground with the corruption at its edge; what the special exposes"
+      }
+    },
+    "expressions": {
+      "neutral": {
+        "view": "face_neutral",
+        "prompt": "calm blank expression, eyes open"
+      },
+      "attack": {
+        "view": "face_focus",
+        "prompt": "brows down, focused stare"
+      },
+      "hurt": {
+        "view": "face_panic",
+        "prompt": "pained grimace, eyes wide, mouth open"
+      },
+      "fail": {
+        "view": "face_panic",
+        "prompt": "dazed, eyes wide, mouth open"
+      },
+      "win": {
+        "view": "face_smile",
+        "prompt": "faint closed-eyes smile"
+      }
+    }
+  },
   "palette16": {
-    "outline": [0, 0, 0],
-    "skin_light": [246, 220, 190],
-    "skin": [226, 192, 158],
-    "skin_shadow": [176, 140, 112],
-    "cloth_light": [74, 118, 122],
-    "cloth": [46, 82, 88],
-    "cloth_shadow": [28, 54, 60],
-    "limb_light": [96, 146, 148],
-    "limb": [66, 112, 116],
-    "limb_shadow": [42, 76, 82],
-    "far": [38, 70, 76],
-    "far_shadow": [24, 48, 54],
-    "accent": [152, 238, 222],
-    "accent_shadow": [92, 176, 166],
-    "highlight": [246, 254, 252],
-    "eye": [30, 46, 54]
+    "outline": [
+      0,
+      0,
+      0
+    ],
+    "skin_light": [
+      240,
+      206,
+      179
+    ],
+    "skin": [
+      240,
+      199,
+      165
+    ],
+    "skin_shadow": [
+      196,
+      159,
+      134
+    ],
+    "cloth_light": [
+      89,
+      159,
+      192
+    ],
+    "cloth": [
+      68,
+      156,
+      192
+    ],
+    "cloth_shadow": [
+      64,
+      121,
+      144
+    ],
+    "limb_light": [
+      69,
+      156,
+      192
+    ],
+    "limb": [
+      177,
+      146,
+      91
+    ],
+    "limb_shadow": [
+      162,
+      136,
+      87
+    ],
+    "far": [
+      161,
+      135,
+      86
+    ],
+    "far_shadow": [
+      65,
+      122,
+      145
+    ],
+    "accent": [
+      162,
+      57,
+      52
+    ],
+    "accent_shadow": [
+      107,
+      49,
+      45
+    ],
+    "highlight": [
+      243,
+      255,
+      255
+    ],
+    "eye": [
+      59,
+      50,
+      43
+    ]
   }
 }
