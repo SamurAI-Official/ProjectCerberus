@@ -379,10 +379,29 @@ STYLE = ("2D fighting game character sprite, full body, side view facing right, 
          "flat cel shading, bold clean black outlines, limited flat colour palette, "
          "crisp silhouette, clean pure white background, no text, no watermark")
 
+# The 90s anime/cel fighting-game read, on top of STYLE. STYLE names the
+# constraints (flat, cel, side view, white bg); this names the *look* the
+# reference sheets ask for -- the crisp linework and saturated flat colour of a
+# 90s anime fighter. It is a bias, not a load-bearing phrase like STYLE's "side
+# view facing right": the checkpoint already pulls anime, this steers the era and
+# the finish. Kept separate so the hard constraints can be re-measured without
+# touching the aesthetic direction. First measured at build/ai/i2i_anime -- see
+# the commit message that carries it.
+STYLE_ANIME = ("90s anime style, retro anime, crisp lineart, sharp black ink lines, "
+               "saturated flat colours, cel-shaded, clean vector-like shapes, "
+               "vivid, high contrast, no gradient shading, no airbrush, no blur")
+
 NEGATIVE = ("3/4 view, front view, multiple characters, cropped, cut off, "
             "extra limbs, extra arms, extra legs, deformed hands, mutated hands, "
             "blurry, soft gradient, photorealistic, 3d render, text, watermark, "
             "signature, background scenery, ground shadow, border, frame, "
+            # The anti-90s-cel half of the negative: the things a painterly model
+            # reaches for that undo the flat look. A 90s cel sprite is hard-edged
+            # and few-tone; these ban the smooth, shaded, over-worked result that
+            # would otherwise be the failure mode of any modern checkpoint.
+            "gradient shading, airbrush, soft shading, smooth shading, painterly, "
+            "sketch, crosshatching, grainy, noisy, chromatic aberration, "
+            "photorealistic skin, subsurface scattering, lens flare, bokeh, "
             # Props. A character sheet shows the fighter walking to school with a
             # satchel; a fighter sprite with a satchel in its hand is a sprite
             # whose punch has a bag in it. The design sheet's props are costume
@@ -1188,7 +1207,7 @@ def generate(fighter_id, states, out_dir, size=DEFAULT_SIZE, steps=20, cfg=7.0,
             "it looks like. Without it the generator invents a different person in\n"
             "every frame, which is the one failure a palette cannot repair.")
 
-    shared = f"{appearance}, {STYLE}"
+    shared = f"{appearance}, {STYLE_ANIME}, {STYLE}"
     out_dir = Path(out_dir)
     raw_dir = out_dir / "raw"
     raw_dir.mkdir(parents=True, exist_ok=True)
@@ -1261,7 +1280,7 @@ def generate(fighter_id, states, out_dir, size=DEFAULT_SIZE, steps=20, cfg=7.0,
             continue
 
         role, expression = expression_for_state(sheet, frame["state"])
-        positive = f"{appearance}, {expression['prompt']}, {STYLE}"
+        positive = f"{appearance}, {expression['prompt']}, {STYLE_ANIME}, {STYLE}"
         pose_upload = client.fresh(frame["pose"], subfolder=f"cerberus_{mode}")
         if mode == "img2img":
             graph = build_workflow_img2img(pose_upload, positive, frame_seed, size,
