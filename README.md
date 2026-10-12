@@ -195,36 +195,66 @@ it enlarges is a setting: **NRR** (neural, the default), **Nearest**
 (pixel-perfect) or **Smooth** (interpolated). The options screen offers all three
 and shows which one is actually in force.
 
-NRR is vendored at `addons/nrr` with its native binding built for macOS arm64, and
-it genuinely loads: `video_options` reports
+NRR is vendored at `addons/nrr`; its native binding is built for macOS arm64 from NRR
+`198dba7` plus the four patches in `patches/nrr/`, and it loads, runs and upscales.
+Measured headless on this machine, CPU execution provider, release build:
 
 ```
-  nrr vendored=true binding=true model=true
-  nrr backend    : CPU
-  nrr model      : res://addons/nrr/models/upscale_msreal_scale.onnx
-  nrr last error : 'nrr_render: model input 'color' resolution 768x432 conflicts
-                    with the model's static input shape'
-  nrr frames out : 0
+  nrr_probe:
+    384x216  ->  768x432     200 ms    half-resolution canvas -> canvas
+    768x432  -> 1536x864     834 ms    canvas -> the 2x model's grid
+    1024x576 -> 2048x1152   1440 ms
 ```
 
-**It is not upscaling, and the game says so rather than pretending.** The
-published model takes exactly 512x512 — `tools/verify/nrr_probe.tscn` asks it
-size by size, and of twelve candidate sizes only that one is accepted, returning
-the same size it was given. Our canvas is 768x432, so every frame is declined.
-The model card describes something different ("dynamic H/W", "2x the input"), and
-where a card and an artifact disagree the artifact is what ran.
+1920x1080 needs a 2.5x head, because 2.5 x 768 = 1920 exactly and the ratio belongs to
+the model: nothing outside the graph resamples the frame, so a tier is chosen by
+installing a model rather than by setting one.
 
-That is why the options screen prints the runtime's own words and not a summary of
-the file listing: *"NRR is running but declining every frame: nrr_render: model
-input 'color' resolution 768x432 conflicts with the model's static input shape."*
-An upscaler that is selected, installed and silently not running is
-indistinguishable from a working one unless somebody asks it, so `video_options`
-asks it and asserts that the screen agrees with the answer.
+**The reason this section used to give for NRR declining every frame was wrong, and the
+correction is worth more than the original entry.** It said 512x512 was the runtime's
+limit and blamed a pinned revision older than the released model. The real cause was that
+the macOS build contained no ONNX Runtime at all: NRR's CMake looked for the Android and
+Windows layouts and neither of the Unix ones, so `NRR_HAVE_ONNXRUNTIME` stayed off, the
+configure log said `ONNX Runtime: not found (placeholder inference path)`, and the
+runtime's *placeholder* path -- which reports a fixed 1x3x512x512 input shape and has no
+session to execute -- was the only thing answering. 512x512 was the one size it agreed
+to run, in 1.9 ms, without a model. Linking ORT exposed a second defect behind it: the
+Godot binding read its result back from the texture it had allocated itself rather than
+the one `nrr_render` returns, which is sized to the model's output grid, so every frame
+came back correctly sized, correctly formatted, entirely zero, with an empty error
+string. Both are now `patches/nrr/0003` and `patches/nrr/0004`, and
+`tools/verify/nrr_output_check.gd` is the tool that made the empty frame visible: a
+checkerboard in, both frames out, so a crop, a resample, a same-size refinement and an
+empty frame are four different pictures.
 
-To make it actually upscale, either the game renders at 512x512 — which throws
-away the 1:1 pixel mapping the art was built for — or NRR publishes a model whose
-input is not square. Neither is a configuration change, so the shipped default
-stays NRR and the shipped behaviour is an honest pixel-perfect picture.
+**Nor would installing one help, which is the finding worth having.** Scored against
+our own art -- a frame composed at the game's own 6 px/unit, downscaled, then brought
+back up against the frame itself as ground truth -- the released 2x model loses to
+bicubic by 3.8-4.6 dB at every tier, *including* the 128-to-256 tier it was trained at,
+and its error map is dense inside flat regions rather than at edges: it invents texture
+on flat 16-colour art. The 2.5x model is the one that matches 1080p from this canvas
+(2.5x of 768x432 is exactly 1920x1080, which is why the Hub publishes it at all), and
+it lands level with bicubic while needing a depth plane this renderer has no source
+for. Both are trained on 3D-rendered Godot captures, and a flat 2D canvas has nothing
+for them to reconstruct.
+
+That is why the options screen prints the runtime's own words rather than a summary of the
+file listing. An upscaler that is selected, installed and silently not running is
+indistinguishable from a working one unless somebody asks it, so `video_options` asks it
+and asserts that the screen agrees with the answer -- and a pass that returns a frame of
+the wrong size, or an empty one, is exactly what that assertion is for.
+
+**So NRR runs now, and the shipped default still does not use it, for a measured reason:
+834 ms against a 16.6 ms frame budget.** A 768x432 -> 1536x864 pass costs 0.83 s on this
+machine's CPU provider and roughly 1.4-2 s for a 1080p output. That is a quality pass
+rather than a frame-time one, and the GPU route is a build away rather than a setting:
+NRR's provider preference offers CUDA and CPU (`NRR_EXECUTION_PROVIDER`), and ONNX
+Runtime's CoreML provider is present on this machine but nothing in the binding selects
+it. What would change the verdict, given the model finding above, is a model trained on
+this art -- the trainer, the pairing generator (`gen_training_pairs.py --ratio 2.5`) and
+the gates are all in the NRR tree and now reachable from here, and the 2.5x model that
+came out of them is 91 k parameters. Until then the shipped default stays NRR selected,
+with the honest pixel-perfect picture behind it.
 
 
 ### Open bug: a round restart can stop the fight connecting
@@ -319,11 +349,45 @@ data/
   stages/manifest.json   stages (name, detail, background)
   ryu/, background.png   the vendored engine fixture
 tools/build/             build_openfight.sh, build_nrr_macos.sh
+tools/pipeline/          build_fighter.py + figure.py -- draws every frame of every
+                         state from its design sheet, then writes the character YAML
+                         and moves.yml beside them. build_stage.py draws a stage
+                         background, contact_sheet.py lays a whole fighter out in
+                         one image, inspect_character.py reads a YAML's geometry back
+tools/ai/                the art pipeline. ref_palette.py measures a fighter's sixteen
+                         colours off the reference sheet they were drawn from;
+                         gen_frames.py renders frames through ComfyUI; to_sprite.py
+                         quantises and registers a render into a game frame and
+                         reports what it had to do; frame_fidelity.py says whether a
+                         generated frame still occupies the drawing its hitboxes were
+                         measured from; identity_check.py says whether it is still the
+                         same character, band by band, and names which cut it banded
+                         them with; openpose_render.py, comfy_client.py;
+                         sheet_views.py crops the named views out of a reference
+                         sheet: --detect proposes boxes from the drawing, --qc draws
+                         them so the proposal can be checked, --write records them in
+                         the design sheet beside reference.samples, and --extract
+                         writes them masked, because the conditioning stages want one
+                         view at a time rather than a page of grid paper
+tools/strike_strip.py    every strike, on the frame its hitbox is live, in L/M/H order
+tools/measure_world.py   reads the world->screen mapping back off a debug capture
+tools/nrr_model_report.py
+                         runs the released NRR models through ONNX Runtime: what the
+                         two graphs declare, which tier each serves from this canvas,
+                         and how each scores against our own art -- the measurement
+                         "The render path" is written from. Downloads the 2.5x model
+                         into build/nrr/models and writes its evidence sheets to
+                         build/nrr
 tools/validate/          validate_manifest.py -- roster + YAML + frame files resolve
 tools/verify/            run_all.sh + the verification scenes. m3_boxes (the box
                          overlay) and video_options (the render path) need a
-                         window; nrr_probe is a tool, not a check -- it reports
-                         which frame sizes the released NRR model accepts
+                         window; nrr_probe and nrr_output_check are tools, not
+                         checks -- the first reports which sizes the vendored binding
+                         accepts and what it returns for each, which is not the
+                         model's own limit (tools/nrr_model_report.py measures the
+                         artifact); the second pushes a checkerboard through the pass
+                         and writes both frames, which is what told a crop, a resample
+                         and an empty frame apart when the binding returned one
 docs/pipeline/           sprite spec, findings
 docs/lore/               canon reference
 ```
@@ -339,6 +403,34 @@ detail line, or which universe it belongs to. `tools/validate/validate_manifest.
 is what keeps them honest — it resolves every `res://` path, rejects duplicate
 ids, and checks that each character YAML declares a `start` state and references
 no missing frame files.
+
+### Handing generated art to the build
+
+`data/` is filled by `build_fighter.py` (the puppet, drawn from the skeleton) or by
+generated frames, which are installed rather than drawn. Three steps, and each is a
+check on the one before:
+
+```sh
+python3 tools/ai/gen_frames.py tsu_ibano --mode img2img --out build/ai/tsu_ibano
+python3 tools/ai/to_sprite.py tsu_ibano --raw build/ai/tsu_ibano/raw \
+        --bound build/ai/tsu_ibano/init --out data/tsu_ibano
+./tools/verify/run_all.sh
+```
+
+`--bound` is the run's own `init/` directory, and it is the step that decides whether
+the art fits the game's frame: a repaint may repaint the pose, it may not extend it.
+Without it the model's hair reaches the top of the sprite canvas on about a third of
+the attack frames and the texture cuts it flat — `python3 build/sprite_check.py
+data/tsu_ibano` counts those frames, and reads zero with `--bound` (the run prints how
+many pixels it cleared, so a bound doing real work is visible rather than frictionless).
+
+The AI-side gates are the same three, run against the run directory instead of the
+game's, and they are what to look at before installing: `identity_check.py` (is it the
+same character), `frame_fidelity.py` (is it the same pose) and
+`tools/validate/validate_reach.py` (does the art still reach the box the skeleton
+derived). Installing needs no staging step of its own because `validate_manifest.py`
+and `run_all.sh` cover the swap; what it does need is all of a fighter's states or none
+of them, since a partial install is two different hands in one animation.
 
 ## Building
 
