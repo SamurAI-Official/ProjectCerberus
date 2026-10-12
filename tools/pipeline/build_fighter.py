@@ -54,17 +54,24 @@ SHEET_DIR = REPO_ROOT / "design_sheets"
 # furthest the art actually reaches: 13.5 units forward of the origin for the body
 # poses (hurt_high) and 17.5 for the reach poses (hurt_air). Against the old 16 and
 # 32 the textures were narrower than the drawings, and PIL clips at the canvas
-# edge, so 86 of 117 frames had art sliced off flat at the boundary -- the idle
-# guard arm lost its hand entirely. The reference Ryu art clips on 4 frames of
-# 143, so a margin is what the engine expects; this was a regression, not a
-# limitation of the renderer.
+# edge, so 86 of the 117 frames the spec had at the time had art sliced off flat
+# at the boundary -- the idle guard arm lost its hand entirely. The reference Ryu
+# art clips on 4 frames of 143, so a margin is what the engine expects; this was a
+# regression, not a limitation of the renderer.
 #
 # Widening cannot move anything. GodotRenderBackend::drawSprite draws the texture
 # into a rect centred on the player origin, and figure._to_px centres the canvas on
 # that same origin, so the added units are transparent margin on both sides. The
 # widths below leave the same ~1.5 units of margin the reference keeps.
 BODY_BOX = (30, 64)   # 180x384 canvas
-REACH_BOX = (38, 64)  # 228x384 canvas
+# 40 rather than 38, and the extra unit is a shoe. `figure.render` now draws a
+# shoe at the ankle, and a kick is the pose that throws its foot furthest
+# forward: with a shoe the striking foot reaches 19.5 units, against the 19 the
+# box had. The alternative was a shoe that stops at the ankle, which is a boot
+# with no toe. The on-screen hitboxes do not move: `box_at` and `hurtbox_for`
+# both derive the YAML x_pos from the declared width, so a wider box means the
+# same hitbox in a wider texture, as the comment above explains.
+REACH_BOX = (40, 64)  # 240x384 canvas
 
 FEET = figure.GROUND_Y  # 0.0 -- feet on the origin, which is the engine's ground
 CROWN = 31.0
@@ -445,6 +452,39 @@ STATE_SPEC = [
     ("special_lite", 5,  7, REACH, False, "special_lite"),
 ]
 
+# Which face a state wears, by the *role* the design sheet names rather than the view: the sheet's
+# `expressions` block maps each role to one of its frozen face views plus the words that go in the
+# prompt. Split this way because which states are angry is the game's business and which panel is
+# angry is the artist's -- a second fighter with four completely different face panels needs no
+# change in this file, and a new state cannot quietly inherit the wrong face.
+STATE_EXPRESSION = {
+    "start": "neutral", "idle": "neutral", "turn": "neutral",
+    "walk_forward": "neutral", "walk_back": "neutral", "stop_walk": "neutral",
+    "start_duck": "neutral", "end_duck": "neutral", "duck": "neutral",
+    "duck_back": "neutral",
+    "jump": "neutral", "jump_forward": "neutral", "jump_back": "neutral",
+    "block_high": "neutral", "block_low": "neutral",
+    "hurt_mid": "hurt", "hurt_high": "hurt", "hurt_low": "hurt", "hurt_air": "hurt",
+    "land": "hurt", "stand": "hurt",
+    "knocked_down": "fail", "hit_ground": "fail", "ground": "fail",
+    "1punch": "attack", "2punch": "attack", "3punch": "attack",
+    "1kick": "attack", "2kick": "attack", "3kick": "attack",
+    "special": "attack", "special_lite": "attack",
+}
+
+# Checked here rather than at the point of use, because the failure it prevents is invisible: a
+# state missing from the table would wear whatever the fallback is for the whole of its animation,
+# in every frame, in a build that would otherwise look finished.
+_missing_expressions = [entry[0] for entry in STATE_SPEC if entry[0] not in STATE_EXPRESSION]
+if _missing_expressions:
+    raise ValueError("STATE_EXPRESSION does not cover: %s"
+                     % ", ".join(_missing_expressions))
+_states = {entry[0] for entry in STATE_SPEC}
+_unknown_expressions = [state for state in STATE_EXPRESSION if state not in _states]
+if _unknown_expressions:
+    raise ValueError("STATE_EXPRESSION names states that do not exist: %s"
+                     % ", ".join(sorted(_unknown_expressions)))
+
 # Per-frame physics. Only the states that move are listed; the rest stand still,
 # which is what "no move block" means to the engine.
 MOVES = {
@@ -582,20 +622,45 @@ def strike_box(state, count, profile, canvas):
 
 
 def render_frames(sheet, frames_dir):
-    """Writes every frame of every state. Returns how many were written."""
+    """Writes every frame of every state. Returns how many were written.
+
+    Frames that the specification no longer declares are deleted. That is not
+    housekeeping: a state's frame count *is* its length in ticks, so shortening
+    one -- which is how the cancel window was widened -- leaves the old last
+    frame on disk. Nothing plays it, because the character YAML lists its frames
+    explicitly, but `validate_manifest.py` reads the directory and then reports
+    the orphan as a frame over the colour budget in a palette that no longer
+    exists: a true report of a false problem.
+    """
     palette = figure.Palette(sheet["palette16"])
     profile = sheet.get("profile", {})
     frames_dir.mkdir(parents=True, exist_ok=True)
 
-    written = 0
+    written, names = 0, set()
     for state, count, _delay, box, _continual, pose_name in STATE_SPEC:
         builder = POSES.get(pose_name, POSES["idle"])
         canvas = tuple(int(dim * figure.PX_PER_UNIT) for dim in BOXES[box])
 
         for index in range(count):
             skeleton = figure.pose(**builder(index, count, profile))
-            figure.render(skeleton, canvas, palette).save(frames_dir / f"{state}{index:02d}.png")
+            name = f"{state}{index:02d}.png"
+            figure.render(skeleton, canvas, palette).save(frames_dir / name)
+            names.add(name)
             written += 1
+
+    pruned = []
+    for path in sorted(frames_dir.glob("*.png")):
+        if path.name in names:
+            continue
+        pruned.append(path.name)
+        path.unlink()
+        # Godot's import cache is a separate file beside the frame; leaving it
+        # behind leaves the editor reporting an import for an image that is not
+        # there.
+        (frames_dir / f"{path.name}.import").unlink(missing_ok=True)
+
+    if pruned:
+        print(f"  pruned {len(pruned)} stale frame(s): {', '.join(pruned)}")
 
     return written
 

@@ -7,9 +7,10 @@ The box in STATE_SPEC is both the size of the frame texture and the logical size
 the engine draws it at. PIL clips drawing at the canvas edge, so a box narrower
 than the figure does not error -- it shears the fighter off flat at the boundary.
 That is exactly what had been happening: BODY_BOX was 16 units wide against poses
-reaching 13.5 units from the origin, so 86 of 117 frames had art sitting on the
-texture edge and the idle guard arm had lost its hand. The reference Ryu art
-clips on 4 frames of 143, so a margin is the intended behaviour, not a luxury.
+reaching 13.5 units from the origin, so 86 of the frames then in the spec had art
+sitting on the texture edge and the idle guard arm had lost its hand. The
+reference Ryu art clips on 4 frames of 143, so a margin is the intended
+behaviour, not a luxury.
 
 Two checks, because they fail independently:
 

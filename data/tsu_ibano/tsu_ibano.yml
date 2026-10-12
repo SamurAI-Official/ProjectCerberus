@@ -915,38 +915,38 @@ character:
     show_hitbox: true
     frame:
     - path: data/tsu_ibano/hurt_air00.png
-      width: 38
+      width: 40
       height: 64
       delay: 7
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/hurt_air01.png
-      width: 38
+      width: 40
       height: 64
       delay: 7
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/hurt_air02.png
-      width: 38
+      width: 40
       height: 64
       delay: 7
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/hurt_air03.png
-      width: 38
+      width: 40
       height: 64
       delay: 7
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
@@ -954,38 +954,38 @@ character:
     show_hitbox: true
     frame:
     - path: data/tsu_ibano/knocked_down00.png
-      width: 38
+      width: 40
       height: 64
       delay: 9
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/knocked_down01.png
-      width: 38
+      width: 40
       height: 64
       delay: 9
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/knocked_down02.png
-      width: 38
+      width: 40
       height: 64
       delay: 9
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/knocked_down03.png
-      width: 38
+      width: 40
       height: 64
       delay: 9
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
@@ -993,29 +993,29 @@ character:
     show_hitbox: true
     frame:
     - path: data/tsu_ibano/hit_ground00.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/hit_ground01.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/hit_ground02.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
@@ -1054,11 +1054,11 @@ character:
     show_hitbox: true
     frame:
     - path: data/tsu_ibano/ground00.png
-      width: 38
+      width: 40
       height: 64
       delay: 20
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
@@ -1097,25 +1097,25 @@ character:
     show_hitbox: true
     frame:
     - path: data/tsu_ibano/1punch00.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/1punch01.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
       offense:
-        x_pos: 25
+        x_pos: 26
         y_pos: 52.2543
         width: 9.65123
         height: 6
@@ -1126,38 +1126,38 @@ character:
         y_pos: 6
         index: 2
     - path: data/tsu_ibano/1punch02.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/1punch03.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/1punch04.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/1punch05.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
@@ -1166,34 +1166,34 @@ character:
     show_hitbox: true
     frame:
     - path: data/tsu_ibano/2punch00.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/2punch01.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/2punch02.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
       offense:
-        x_pos: 25
+        x_pos: 26
         y_pos: 53.1628
         width: 10.376
         height: 6
@@ -1204,47 +1204,47 @@ character:
         y_pos: 6
         index: 2
     - path: data/tsu_ibano/2punch03.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/2punch04.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/2punch05.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/2punch06.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/2punch07.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
@@ -1252,43 +1252,43 @@ character:
     show_hitbox: true
     frame:
     - path: data/tsu_ibano/3punch00.png
-      width: 38
+      width: 40
       height: 64
       delay: 9
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/3punch01.png
-      width: 38
+      width: 40
       height: 64
       delay: 9
       move:
         x_vel: 0.22
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/3punch02.png
-      width: 38
+      width: 40
       height: 64
       delay: 9
       move:
         x_vel: 0.22
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
       offense:
-        x_pos: 25
+        x_pos: 26
         y_pos: 53.2219
         width: 11.4772
         height: 7
@@ -1299,62 +1299,62 @@ character:
         y_pos: 6
         index: 2
     - path: data/tsu_ibano/3punch03.png
-      width: 38
+      width: 40
       height: 64
       delay: 9
       move:
         x_vel: 0.22
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/3punch04.png
-      width: 38
+      width: 40
       height: 64
       delay: 9
       move:
         x_vel: 0.22
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/3punch05.png
-      width: 38
+      width: 40
       height: 64
       delay: 9
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/3punch06.png
-      width: 38
+      width: 40
       height: 64
       delay: 9
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/3punch07.png
-      width: 38
+      width: 40
       height: 64
       delay: 9
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
@@ -1363,25 +1363,25 @@ character:
     show_hitbox: true
     frame:
     - path: data/tsu_ibano/1kick00.png
-      width: 38
+      width: 40
       height: 64
       delay: 7
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/1kick01.png
-      width: 38
+      width: 40
       height: 64
       delay: 7
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
       offense:
-        x_pos: 25
+        x_pos: 26
         y_pos: 31.2819
         width: 6.99249
         height: 6
@@ -1392,38 +1392,38 @@ character:
         y_pos: 6
         index: 2
     - path: data/tsu_ibano/1kick02.png
-      width: 38
+      width: 40
       height: 64
       delay: 7
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/1kick03.png
-      width: 38
+      width: 40
       height: 64
       delay: 7
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/1kick04.png
-      width: 38
+      width: 40
       height: 64
       delay: 7
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/1kick05.png
-      width: 38
+      width: 40
       height: 64
       delay: 7
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
@@ -1432,43 +1432,43 @@ character:
     show_hitbox: true
     frame:
     - path: data/tsu_ibano/2kick00.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/2kick01.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0.18
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/2kick02.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0.18
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
       offense:
-        x_pos: 25
+        x_pos: 26
         y_pos: 44.0048
         width: 17.0684
         height: 7
@@ -1479,62 +1479,62 @@ character:
         y_pos: 6
         index: 2
     - path: data/tsu_ibano/2kick03.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0.18
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/2kick04.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/2kick05.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/2kick06.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/2kick07.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
@@ -1542,31 +1542,31 @@ character:
     show_hitbox: true
     frame:
     - path: data/tsu_ibano/3kick00.png
-      width: 38
+      width: 40
       height: 64
       delay: 10
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/3kick01.png
-      width: 38
+      width: 40
       height: 64
       delay: 10
       move:
         x_vel: 0.28
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
       offense:
-        x_pos: 25
+        x_pos: 26
         y_pos: 45.7829
         width: 17.6495
         height: 8
@@ -1577,74 +1577,74 @@ character:
         y_pos: 6
         index: 2
     - path: data/tsu_ibano/3kick02.png
-      width: 38
+      width: 40
       height: 64
       delay: 10
       move:
         x_vel: 0.28
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/3kick03.png
-      width: 38
+      width: 40
       height: 64
       delay: 10
       move:
         x_vel: 0.28
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/3kick04.png
-      width: 38
+      width: 40
       height: 64
       delay: 10
       move:
         x_vel: 0.28
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/3kick05.png
-      width: 38
+      width: 40
       height: 64
       delay: 10
       move:
         x_vel: 0.28
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/3kick06.png
-      width: 38
+      width: 40
       height: 64
       delay: 10
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/3kick07.png
-      width: 38
+      width: 40
       height: 64
       delay: 10
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
@@ -1652,31 +1652,31 @@ character:
     show_hitbox: true
     frame:
     - path: data/tsu_ibano/special00.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/special01.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0.55
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
       offense:
-        x_pos: 25
+        x_pos: 26
         y_pos: 51.7954
         width: 11.3636
         height: 9
@@ -1687,74 +1687,74 @@ character:
         y_pos: 6
         index: 2
     - path: data/tsu_ibano/special02.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0.55
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/special03.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0.55
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/special04.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0.55
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/special05.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0.55
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/special06.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/special07.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
@@ -1762,31 +1762,31 @@ character:
     show_hitbox: true
     frame:
     - path: data/tsu_ibano/special_lite00.png
-      width: 38
+      width: 40
       height: 64
       delay: 7
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/special_lite01.png
-      width: 38
+      width: 40
       height: 64
       delay: 7
       move:
         x_vel: 0.34
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
       offense:
-        x_pos: 25
+        x_pos: 26
         y_pos: 51.8925
         width: 9.99264
         height: 6
@@ -1797,38 +1797,38 @@ character:
         y_pos: 6
         index: 2
     - path: data/tsu_ibano/special_lite02.png
-      width: 38
+      width: 40
       height: 64
       delay: 7
       move:
         x_vel: 0.34
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/special_lite03.png
-      width: 38
+      width: 40
       height: 64
       delay: 7
       move:
         x_vel: 0.34
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/tsu_ibano/special_lite04.png
-      width: 38
+      width: 40
       height: 64
       delay: 7
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31

@@ -915,38 +915,38 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/hurt_air00.png
-      width: 38
+      width: 40
       height: 64
       delay: 7
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/hurt_air01.png
-      width: 38
+      width: 40
       height: 64
       delay: 7
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/hurt_air02.png
-      width: 38
+      width: 40
       height: 64
       delay: 7
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/hurt_air03.png
-      width: 38
+      width: 40
       height: 64
       delay: 7
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
@@ -954,38 +954,38 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/knocked_down00.png
-      width: 38
+      width: 40
       height: 64
       delay: 9
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/knocked_down01.png
-      width: 38
+      width: 40
       height: 64
       delay: 9
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/knocked_down02.png
-      width: 38
+      width: 40
       height: 64
       delay: 9
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/knocked_down03.png
-      width: 38
+      width: 40
       height: 64
       delay: 9
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
@@ -993,29 +993,29 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/hit_ground00.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/hit_ground01.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/hit_ground02.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
@@ -1054,11 +1054,11 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/ground00.png
-      width: 38
+      width: 40
       height: 64
       delay: 20
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
@@ -1097,25 +1097,25 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/1punch00.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/1punch01.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
       offense:
-        x_pos: 25
+        x_pos: 26
         y_pos: 52.6231
         width: 9.80129
         height: 6
@@ -1126,38 +1126,38 @@ character:
         y_pos: 6
         index: 2
     - path: data/fei_young/1punch02.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/1punch03.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/1punch04.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/1punch05.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
@@ -1166,34 +1166,34 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/2punch00.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/2punch01.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/2punch02.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
       offense:
-        x_pos: 25
+        x_pos: 26
         y_pos: 53.7053
         width: 10.3657
         height: 6
@@ -1204,47 +1204,47 @@ character:
         y_pos: 6
         index: 2
     - path: data/fei_young/2punch03.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/2punch04.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/2punch05.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/2punch06.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/2punch07.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
@@ -1252,31 +1252,31 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/3punch00.png
-      width: 38
+      width: 40
       height: 64
       delay: 9
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/3punch01.png
-      width: 38
+      width: 40
       height: 64
       delay: 9
       move:
         x_vel: 0.22
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
       offense:
-        x_pos: 25
+        x_pos: 26
         y_pos: 52.73
         width: 11.4486
         height: 7
@@ -1287,74 +1287,74 @@ character:
         y_pos: 6
         index: 2
     - path: data/fei_young/3punch02.png
-      width: 38
+      width: 40
       height: 64
       delay: 9
       move:
         x_vel: 0.22
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/3punch03.png
-      width: 38
+      width: 40
       height: 64
       delay: 9
       move:
         x_vel: 0.22
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/3punch04.png
-      width: 38
+      width: 40
       height: 64
       delay: 9
       move:
         x_vel: 0.22
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/3punch05.png
-      width: 38
+      width: 40
       height: 64
       delay: 9
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/3punch06.png
-      width: 38
+      width: 40
       height: 64
       delay: 9
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/3punch07.png
-      width: 38
+      width: 40
       height: 64
       delay: 9
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
@@ -1363,25 +1363,25 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/1kick00.png
-      width: 38
+      width: 40
       height: 64
       delay: 7
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/1kick01.png
-      width: 38
+      width: 40
       height: 64
       delay: 7
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
       offense:
-        x_pos: 25
+        x_pos: 26
         y_pos: 31.9192
         width: 8.13765
         height: 6
@@ -1392,38 +1392,38 @@ character:
         y_pos: 6
         index: 2
     - path: data/fei_young/1kick02.png
-      width: 38
+      width: 40
       height: 64
       delay: 7
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/1kick03.png
-      width: 38
+      width: 40
       height: 64
       delay: 7
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/1kick04.png
-      width: 38
+      width: 40
       height: 64
       delay: 7
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/1kick05.png
-      width: 38
+      width: 40
       height: 64
       delay: 7
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
@@ -1432,43 +1432,43 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/2kick00.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/2kick01.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0.18
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/2kick02.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0.18
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
       offense:
-        x_pos: 25
+        x_pos: 26
         y_pos: 48.2881
         width: 16.8331
         height: 7
@@ -1479,62 +1479,62 @@ character:
         y_pos: 6
         index: 2
     - path: data/fei_young/2kick03.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0.18
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/2kick04.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/2kick05.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/2kick06.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/2kick07.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
@@ -1542,55 +1542,55 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/3kick00.png
-      width: 38
+      width: 40
       height: 64
       delay: 10
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/3kick01.png
-      width: 38
+      width: 40
       height: 64
       delay: 10
       move:
         x_vel: 0.28
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/3kick02.png
-      width: 38
+      width: 40
       height: 64
       delay: 10
       move:
         x_vel: 0.28
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/3kick03.png
-      width: 38
+      width: 40
       height: 64
       delay: 10
       move:
         x_vel: 0.28
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
       offense:
-        x_pos: 25
+        x_pos: 26
         y_pos: 46.6966
         width: 17.5703
         height: 8
@@ -1601,50 +1601,50 @@ character:
         y_pos: 6
         index: 2
     - path: data/fei_young/3kick04.png
-      width: 38
+      width: 40
       height: 64
       delay: 10
       move:
         x_vel: 0.28
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/3kick05.png
-      width: 38
+      width: 40
       height: 64
       delay: 10
       move:
         x_vel: 0.28
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/3kick06.png
-      width: 38
+      width: 40
       height: 64
       delay: 10
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/3kick07.png
-      width: 38
+      width: 40
       height: 64
       delay: 10
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
@@ -1652,55 +1652,55 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/special00.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/special01.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0.55
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/special02.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0.55
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/special03.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0.55
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
       offense:
-        x_pos: 25
+        x_pos: 26
         y_pos: 51.9058
         width: 11.3692
         height: 9
@@ -1711,50 +1711,50 @@ character:
         y_pos: 6
         index: 2
     - path: data/fei_young/special04.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0.55
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/special05.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0.55
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/special06.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/special07.png
-      width: 38
+      width: 40
       height: 64
       delay: 8
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
@@ -1762,31 +1762,31 @@ character:
     show_hitbox: true
     frame:
     - path: data/fei_young/special_lite00.png
-      width: 38
+      width: 40
       height: 64
       delay: 7
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/special_lite01.png
-      width: 38
+      width: 40
       height: 64
       delay: 7
       move:
         x_vel: 0.34
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
       offense:
-        x_pos: 25
+        x_pos: 26
         y_pos: 52.1824
         width: 10.1714
         height: 6
@@ -1797,38 +1797,38 @@ character:
         y_pos: 6
         index: 2
     - path: data/fei_young/special_lite02.png
-      width: 38
+      width: 40
       height: 64
       delay: 7
       move:
         x_vel: 0.34
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/special_lite03.png
-      width: 38
+      width: 40
       height: 64
       delay: 7
       move:
         x_vel: 0.34
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31
     - path: data/fei_young/special_lite04.png
-      width: 38
+      width: 40
       height: 64
       delay: 7
       move:
         x_vel: 0
         y_vel: 0
       defense:
-        x_pos: 13
+        x_pos: 14
         y_pos: 32
         width: 12
         height: 31

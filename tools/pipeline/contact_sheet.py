@@ -48,8 +48,8 @@ def main(argv) -> int:
     for state, count, _delay, _box, _continual, _pose in STATE_SPEC:
         columns.append([frames_dir / f"{state}{index:02d}.png" for index in range(count)])
 
-    # Wrapped into rows rather than one long strip: 117 frames in a single row is
-    # a 45000-pixel-wide image, which is the same as not having one.
+    # Wrapped into rows rather than one long strip: a fighter's 142 frames in a
+    # single row is a 55000-pixel-wide image, which is the same as not having one.
     cells = []
     for column in columns:
         cells.extend(column)

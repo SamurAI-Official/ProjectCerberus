@@ -80,6 +80,18 @@ def _limb(root, upper_len, lower_len, a1, a2, sign):
     return mid, tip
 
 
+def _lerp(point, other, t):
+    """A point `t` of the way from `point` to `other`, in pixels.
+
+    Used to place the collar and the tie *inside* the torso quad rather than at
+    fixed pixel offsets from it: the torso leans and drops with the pose, so a
+    tie pinned to the skeleton at a constant offset would slide off the chest in
+    a crouch.
+    """
+    return (point[0] + (other[0] - point[0]) * t,
+            point[1] + (other[1] - point[1]) * t)
+
+
 def _rotate(point, pivot, degrees):
     a = math.radians(degrees)
     dx, dy = point[0] - pivot[0], point[1] - pivot[1]
@@ -285,6 +297,31 @@ def render(skeleton, canvas, palette):
     draw.polygon(_panel(torso, 0.78, -0.16), fill=palette.rgba("cloth_light"))
     draw.polygon(_panel(torso, 0.68, 0.26), fill=palette.rgba("cloth_shadow"))
 
+    # Collar and necktie, on the chest and under the chin.
+    #
+    # This replaces a band of `accent` drawn across the brow. That band was the
+    # palette's only use of the character's signature colour, and at this size it
+    # read as a headband on a blank-headed mannequin -- the fighters are academy
+    # students in a blazer, so the signature colour belongs on the tie. `accent`
+    # and `accent_shadow` are the tie's red, and the collar is the shirt the
+    # reference sheet draws under it.
+    neck_px = at("neck")
+    front_top, front_bottom = torso[2], torso[3]
+    knot = _lerp(front_top, torso[0], 0.34)
+    waist = _lerp(front_bottom, torso[1], 0.34)
+    tie_tip = (knot[0] - 2, knot[1] + (waist[1] - knot[1]) * 0.55)
+
+    collar = [(neck_px[0] - 7, neck_px[1] + 1), (neck_px[0] + 9, neck_px[1] + 1),
+              (neck_px[0] + 1, neck_px[1] + 11)]
+    draw.polygon(collar, fill=palette.rgba("highlight"),
+                 outline=palette.rgba("outline"), width=OUTLINE_PX)
+    draw.polygon([(knot[0] - 5, knot[1] + 1), (knot[0] + 5, knot[1] + 1),
+                  (tie_tip[0] + 3, tie_tip[1]), (tie_tip[0] - 4, tie_tip[1])],
+                 fill=palette.rgba("accent"), outline=palette.rgba("outline"),
+                 width=OUTLINE_PX)
+    draw.line([(knot[0] - 2, knot[1] + 3), (tie_tip[0] - 2, tie_tip[1] - 2)],
+              fill=palette.rgba("accent_shadow"), width=3)
+
     # Near leg, then the shin in the shadow tone so the knee bend is readable --
     # one flat tone turns a limb into a pipe.
     knee_far = at("knee_far")
@@ -293,7 +330,7 @@ def render(skeleton, canvas, palette):
     _ink_and_fill(draw, [at("shoulder_far"), at("elbow_far"), at("hand_far")],
                   palette["limb_light"], 9)
 
-    # Head: highlight, jaw shadow, eye, catchlight, accent band across the brow.
+    # Head: skull, highlight, jaw shadow, eye, catchlight, and a cap of hair.
     # At this size a face is a handful of pixels, and those pixels carry most of
     # the character.
     head = at("head")
@@ -311,11 +348,21 @@ def render(skeleton, canvas, palette):
     draw.rectangle([eye_x + 1, head[1] - 2, eye_x + 2, head[1] - 1],
                    fill=palette.rgba("highlight"))
 
-    brow = head[1] - radius * 0.55
-    draw.line([(head[0] - radius, brow), (head[0] + radius, brow)],
-              fill=palette.rgba("accent"), width=3)
-    draw.line([(head[0] - radius, brow + 3), (head[0] + radius, brow + 3)],
-              fill=palette.rgba("accent_shadow"), width=2)
+    # Hair, in `eye`. The role is the darkest tone the character owns -- on both
+    # reference sheets that is the hair, and the eyes are drawn in it too -- and
+    # a cap over the top half of the skull is what turns a bare oval into a head
+    # with a hairline. It is drawn two pixels proud of the skull so the hair
+    # reads as volume sitting on the head rather than paint on it.
+    draw.pieslice([box[0], box[1] - 2, box[2], box[3]], 180, 360,
+                  fill=palette.rgba("eye"))
+
+    # Shoes, last so they sit over the ankles. Both reference sheets draw dark
+    # brown shoes, and a foot-coloured boot at the end of a tan trouser leg is
+    # the difference between a student in shoes and a mannequin on stilts.
+    for foot in ("foot_near", "foot_far"):
+        fx, fy = at(foot)
+        draw.line([(fx - 4, fy), (fx + 6, fy)], fill=palette.rgba("outline"), width=9)
+        draw.line([(fx - 3, fy), (fx + 5, fy)], fill=palette.rgba("eye"), width=6)
 
     return image
 
