@@ -406,6 +406,19 @@ def process_all(fighter_id, raw_dir, out_dir, outline_width=1,
         written.append(out_dir / raw_path.name)
         censuses[raw_path.stem] = census
 
+    # A run may legitimately cover a subset: a probe converts one state. What must not pass quietly
+    # is a partial set landing on a populated directory, because the frames it does not cover stay
+    # as drawn art beside generated art in one animation and nothing downstream can tell -- both are
+    # valid sixteen-colour frames that register. So the coverage is reported, and anything already
+    # in the output that this run did not write is named.
+    spec = sum(count for _state, count, *_ in build_fighter.STATE_SPEC)
+    leftover = sorted(path.name for path in out_dir.glob("*.png") if path.stem not in censuses)
+    print(f"  covered {len(censuses)} of the {spec} frame(s) the spec declares")
+    if leftover:
+        shown = ", ".join(leftover[:4]) + (", ..." if len(leftover) > 4 else "")
+        print(f"  WARNING: {len(leftover)} frame(s) in {out_dir} were not written by this run and "
+              f"were left alone ({shown}); a partial install is drawn art beside generated art")
+
     report = {"fighter": fighter_id, "palette_roles": len(roles), "frames": censuses}
     (out_dir / "census.json").write_text(json.dumps(report, indent=2) + "\n",
                                          encoding="utf-8")
