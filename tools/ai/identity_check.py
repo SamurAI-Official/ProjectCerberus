@@ -198,8 +198,19 @@ def band_masks(mask: np.ndarray, joints: dict | None = None) -> dict:
     assume a standing figure, which is the same assumption the hitboxes make and is the reason this
     is scoped to the poses that break it rather than applied to every frame -- the numbers the
     floors were set from were all measured standing.
+
+    The head band is the exception, and it is cut along the head bone even on an upright figure.
+    A box slice at the top 22% of the silhouette is not a head on a fighter: a raised arm in a
+    punch, a recoiling crown in a hurt, or plain breathing all move that boundary over non-head
+    anatomy, and the head is small enough that the slice lands on a collar or a sleeve. Measured
+    over Tsu Ibano's img2img batch, the box head band drifts 50-200 of 255 *within a single
+    state* (idle 51, stand 79, hurt_mid 124, special 117) purely from that boundary moving, while
+    the head-bone cut holds the same states under ~26. The head is not a judged band -- see
+    `JUDGED_BANDS` -- so this corrects a reported number without moving the verdict, and it makes
+    the number mean "the head" rather than "whatever crossed the top of the box".
     """
-    if joints is not None and not upright(joints):
+    use_skeleton = joints is not None and not upright(joints)
+    if use_skeleton:
         return skeleton_bands(mask, joints)
     rows = np.nonzero(mask.any(axis=1))[0]
     if not len(rows):
@@ -213,6 +224,8 @@ def band_masks(mask: np.ndarray, joints: dict | None = None) -> dict:
         band = np.zeros_like(mask)
         band[first:last] = mask[first:last]
         out[name] = band
+    if joints is not None:
+        out["head"] = skeleton_bands(mask, joints)["head"]
     return out
 
 
