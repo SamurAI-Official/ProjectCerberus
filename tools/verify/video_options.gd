@@ -313,11 +313,13 @@ func _check_nrr_runtime() -> void:
 			% [float(stats.get("render_time_ms", 0.0)), str(stats.get("passthrough", true))])
 
 	# The assertion that matters, and it is deliberately not "NRR is upscaling".
-	# Whether the runtime accepts this game's frames is a fact about the model that
-	# no amount of configuration changes -- the published one takes 512x512 and this
-	# game draws 768x432 -- so failing here would fail on a correct machine. What is
-	# non-negotiable is that the screen does not claim an upscale it is not
-	# performing: installation, operation and the sentence shown have to agree.
+	# Whether the runtime accepts this game's frames is a fact about the binding that
+	# no amount of configuration changes -- the pinned one takes 512x512 and this game
+	# draws 768x432, while the model itself takes any size at all (the environment is
+	# not the artifact; tools/nrr_model_report.py measures the artifact) -- so failing
+	# here would fail on a correct machine. What is non-negotiable is that the screen
+	# does not claim an upscale it is not performing: installation, operation and the
+	# sentence shown have to agree.
 	var running := not bool(stats.get("passthrough", true))
 	if running:
 		if not report.begins_with("In use: NRR"):

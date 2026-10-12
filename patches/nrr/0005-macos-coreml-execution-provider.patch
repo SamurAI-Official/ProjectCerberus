@@ -1,0 +1,276 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -211,6 +211,12 @@
+ 
+ set(NRR_ORT_DLL "")
+ set(NRR_HAVE_CUDA_EP OFF)
++# CoreML is a different kind of provider from CUDA, and the test for it is different for a reason:
++# on Apple platforms it is compiled *into* libonnxruntime, so there is no onnxruntime_providers_coreml
++# library to look for the way the CUDA arm looks for onnxruntime_providers_cuda.dll. What the release
++# packages do ship is coreml_provider_factory.h, which is also the header that declares the attach
++# call, so its presence is both the availability test and the thing the compile needs.
++set(NRR_HAVE_COREML_EP OFF)
+ if(NRR_PLATFORM_ANDROID
+    AND EXISTS "${NRR_ONNXRUNTIME_ROOT}/include/onnxruntime_c_api.h"
+    AND EXISTS "${NRR_ONNXRUNTIME_ROOT}/lib/${ANDROID_ABI}/libonnxruntime.so")
+@@ -266,7 +272,12 @@
+     set(NRR_HAVE_ONNXRUNTIME ON)
+     set(NRR_ORT_INCLUDE_DIR "${NRR_ONNXRUNTIME_ROOT}/include")
+     set(NRR_ORT_LIB "${NRR_ONNXRUNTIME_ROOT}/lib/libonnxruntime.dylib")
+-    message(STATUS "ONNX Runtime: ${NRR_ONNXRUNTIME_ROOT} (real inference, CPU EP only)")
++    if(EXISTS "${NRR_ONNXRUNTIME_ROOT}/include/coreml_provider_factory.h")
++        set(NRR_HAVE_COREML_EP ON)
++        message(STATUS "ONNX Runtime: ${NRR_ONNXRUNTIME_ROOT} (real inference, CoreML EP available)")
++    else()
++        message(STATUS "ONNX Runtime: ${NRR_ONNXRUNTIME_ROOT} (real inference, CPU EP only)")
++    endif()
+ else()
+     set(NRR_HAVE_ONNXRUNTIME OFF)
+     message(STATUS "ONNX Runtime: not found (placeholder inference path)")
+@@ -280,6 +291,9 @@
+         if(NRR_HAVE_CUDA_EP)
+             target_compile_definitions(${target} ${scope} NRR_HAVE_CUDA_EP)
+         endif()
++        if(NRR_HAVE_COREML_EP)
++            target_compile_definitions(${target} ${scope} NRR_HAVE_COREML_EP)
++        endif()
+     endif()
+ endfunction()
+ 
+diff --git a/runtime/accel_kernel.cpp b/runtime/accel_kernel.cpp
+index f0aba0c..a297ad1 100644
+--- a/runtime/accel_kernel.cpp
++++ b/runtime/accel_kernel.cpp
+@@ -48,6 +48,11 @@ AccelEP accel_ep_for_vendor(const char* vendor) {
+     if (v.find("riscv") != std::string::npos ||
+         v.find("risc-v") != std::string::npos) return AccelEP::RISCV;
+     if (v.find("vulkan") != std::string::npos) return AccelEP::VULKAN;
++    /* Apple silicon reports itself as "Apple", which is the vendor string the machine this project
++     * builds on produces, and Core ML is the provider that reaches those GPUs. Before this arm an
++     * Apple GPU fell through to the CPU provider: a Mac was the one machine whose own accelerator
++     * had no name here. */
++    if (v.find("apple") != std::string::npos) return AccelEP::COREML;
+     return AccelEP::CPU;
+ }
+ 
+@@ -886,6 +891,10 @@ void AcceleratorExecutionKernel::refresh_available_providers() {
+     accel_caps_.supports_rocm     = has("ROCMExecutionProvider");
+     accel_caps_.supports_directml = has("DmlExecutionProvider");
+     accel_caps_.supports_openvino = has("OpenVINOExecutionProvider");
++    /* Measured from the loaded library like the rest. On the Apple packages this is TRUE on any
++     * Mac - the provider is part of libonnxruntime there - so it is a capability, not a promise
++     * that a given session landed on the GPU. Where execution landed is preferred_ep, below. */
++    accel_caps_.supports_coreml   = has("CoreMLExecutionProvider");
+     /* No ORT build exposes a RISC-V execution provider: a RISC-V host runs the CPU
+      * EP, so this is measured too rather than assumed from the vendor name. */
+     accel_caps_.supports_riscv    = has("RiscvExecutionProvider");
+@@ -913,6 +922,7 @@ void AcceleratorExecutionKernel::apply_measured_provider(const std::string& meas
+     else if (measured == "ROCMExecutionProvider")      accel_caps_.preferred_ep = AccelEP::ROCM;
+     else if (measured == "DmlExecutionProvider")       accel_caps_.preferred_ep = AccelEP::DIRECTML;
+     else if (measured == "OpenVINOExecutionProvider")  accel_caps_.preferred_ep = AccelEP::OPEN_VINO;
++    else if (measured == "CoreMLExecutionProvider")    accel_caps_.preferred_ep = AccelEP::COREML;
+     else                                               accel_caps_.preferred_ep = AccelEP::CPU;
+ }
+ 
+diff --git a/runtime/accel_kernel.h b/runtime/accel_kernel.h
+index c6cd102..9b9dc02 100644
+--- a/runtime/accel_kernel.h
++++ b/runtime/accel_kernel.h
+@@ -44,11 +44,17 @@ enum class AccelEP {
+     OPEN_VINO,  // Intel OpenVINO EP
+     VULKAN,     // Portable Vulkan/SPIR-V fallback
+     RISCV,      // RISC-V scalar RVV / NPU baseline
++    // Apple Core ML, which on macOS is the accelerated provider NRR can actually reach: the ONNX
++    // Runtime release packages for Apple carry it inside libonnxruntime, so it needs no vendor
++    // runtime the way CUDA needs cudart and cuDNN. Appended at the END rather than slotted in
++    // beside the other GPU providers on purpose: these enumerators are reported as numbers by the
++    // diagnostics, so inserting one in the middle would renumber every provider after it.
++    COREML,
+ };
+ 
+ // Pick the provider appropriate for a vendor name
+ // ("NVIDIA" -> CUDA, "AMD"/"Radeon" -> ROCM, "Intel" -> OPEN_VINO, "RISC-V"
+-// -> RISCV, "Vulkan" -> VULKAN, anything unknown -> CPU).
++// -> RISCV, "Apple" -> COREML, "Vulkan" -> VULKAN, anything unknown -> CPU).
+ AccelEP accel_ep_for_vendor(const char* vendor);
+ 
+ // Accelerator memory budget + EP negotiation hints
+@@ -69,6 +75,7 @@ struct AccelCapabilities {
+     bool supports_directml = false;
+     bool supports_openvino = false;
+     bool supports_riscv = false;
++    bool supports_coreml = false;
+     bool supports_fp16 = false;
+     bool supports_fp8 = false;
+     uint32_t max_texture_size = 8192;
+diff --git a/runtime/onnx_runtime.cpp b/runtime/onnx_runtime.cpp
+index c016986..bc90b29 100644
+--- a/runtime/onnx_runtime.cpp
++++ b/runtime/onnx_runtime.cpp
+@@ -12,6 +12,13 @@
+ #include <string>
+ 
+ #ifdef NRR_HAVE_ONNXRUNTIME
++/* The CoreML execution provider's attach call. The header is only in the Apple release packages,
++ * and there is no separate provider library to load there - the provider is part of
++ * libonnxruntime itself - so this include is also the whole of the platform test. The build sets
++ * NRR_HAVE_COREML_EP from the header's presence (see the CMake arm); nothing is guessed here. */
++#if defined(NRR_HAVE_COREML_EP)
++#include <coreml_provider_factory.h>
++#endif
+ /* OrtApi::CreateSession takes a path whose character type is ORTCHAR_T:
+  * wchar_t on Windows, char everywhere else. This block used to pull in
+  * <windows.h> and build a std::wstring unconditionally, so the ORT-enabled
+@@ -625,7 +632,7 @@ void ONNXRuntime::set_execution_provider(const char* provider) {
+ #ifdef NRR_HAVE_ONNXRUNTIME
+     apply_provider(preferred_provider_);
+ #else
+-    use_cpu_ep_ = use_cuda_ep_ = use_directml_ep_ = false;
++    use_cpu_ep_ = use_cuda_ep_ = use_coreml_ep_ = use_directml_ep_ = false;
+     active_provider_.clear();
+     if (preferred_provider_.empty()) {
+         use_cpu_ep_ = true;
+@@ -634,6 +641,7 @@ void ONNXRuntime::set_execution_provider(const char* provider) {
+     std::string pl = to_lower(preferred_provider_);
+     if (pl == "cpu") use_cpu_ep_ = true;
+     else if (pl == "cuda") use_cuda_ep_ = true;
++    else if (pl == "coreml") use_coreml_ep_ = true;
+     else if (pl == "directml") use_directml_ep_ = true;
+ #endif
+ }
+@@ -771,8 +779,57 @@ bool ONNXRuntime::append_tensorrt_provider() {
+ #endif
+ }
+ 
++bool ONNXRuntime::append_coreml_provider() {
++#if defined(NRR_HAVE_COREML_EP)
++    if (api_ == nullptr || session_options_ == nullptr) {
++        /* Deferred, exactly as the CUDA and TensorRT arms are: set_execution_provider() runs before
++         * load_model(), when there are no session options to attach to yet, and load_model() applies
++         * the provider again once there are. No note is written here - one written now would shadow
++         * the real outcome. */
++        return false;
++    }
++
++    /* COREML_FLAG_CREATE_MLPROGRAM asks the provider for an MLProgram rather than a NeuralNetwork.
++     * That is what the CoreML EP's own documentation recommends for anything newer than Core ML 5,
++     * and NRR's upscaler is a convolution stack - exactly the shape that falls back to the CPU
++     * node-by-node under the older representation.
++     *
++     * COREML_FLAG_USE_CPU_AND_GPU is the compute-unit request rather than a claim: Core ML still
++     * places each layer, and the alternative flags pin the whole graph somewhere (CPU_ONLY is a
++     * correctness reference, ANY is the same set with the Neural Engine added - and the ANE is
++     * reported by Apple to behave badly on convolution-heavy graphs). This is the choice to make
++     * before there is a measurement, and the measurement is what decides whether NRR keeps it. */
++    uint32_t coreml_flags = COREML_FLAG_CREATE_MLPROGRAM | COREML_FLAG_USE_CPU_AND_GPU;
++
++    /* The return value is the measurement. Unlike CUDA there is no provider library to load and no
++     * driver to probe - on Apple platforms the CoreML provider is compiled into libonnxruntime
++     * itself (see the CMake arm) - so a success here means ORT built the CoreML session options,
++     * and that is all it can mean. Whether the graph then *runs* on the GPU is reported by the
++     * provider at session creation, which is why nothing here claims a device. */
++    OrtStatus* status =
++        OrtSessionOptionsAppendExecutionProvider_CoreML(session_options_, coreml_flags);
++    if (status != nullptr) {
++        provider_note_ =
++            std::string("CoreML execution provider could not be attached: ") +
++            api_->GetErrorMessage(status) +
++            " (falls back to the CPU execution provider)";
++        api_->ReleaseStatus(status);
++        return false;
++    }
++    return true;
++#else
++    /* This ONNX Runtime package has no CoreML provider: the Apple release packages carry it, and
++     * this build found no coreml_provider_factory.h to compile against. */
++    provider_note_ =
++        "requested 'coreml' execution provider, but this ONNX Runtime package has no CoreML "
++        "provider (it is built into the Apple release packages; this build found no "
++        "coreml_provider_factory.h) -> using CPU EP";
++    return false;
++#endif
++}
++
+ bool ONNXRuntime::apply_provider(const std::string& preferred) {
+-    use_cpu_ep_ = use_cuda_ep_ = use_directml_ep_ = false;
++    use_cpu_ep_ = use_cuda_ep_ = use_coreml_ep_ = use_directml_ep_ = false;
+     active_provider_.clear();
+     /* Idempotent: load_model() applies the preferred provider again once the
+      * session options are real, so a note from an earlier, deferred attempt must
+@@ -817,6 +874,44 @@ bool ONNXRuntime::apply_provider(const std::string& preferred) {
+         return true;
+     }
+ 
++    if (pl == "coreml") {
++        /* Apple's own accelerator, and the only accelerated provider a Mac can reach: in the Apple
++         * release packages CoreML lives inside libonnxruntime rather than in a separately fetched
++         * vendor runtime the way CUDA does.
++         *
++         * Explicit rather than folded into `auto`, and that is the point rather than an oversight.
++         * `auto` is documented above as "the best provider this package can offer", and on this
++         * platform "best" has not been measured: NRR's released models are convolution stacks over
++         * 16-colour art, and a provider that partitions a graph and sends the parts it dislikes back
++         * to the CPU can easily lose to the CPU provider it replaced. So the default stays the one
++         * that was measured, and the fast path is one environment variable away:
++         *
++         *   NRR_EXECUTION_PROVIDER=coreml
++         *
++         * Promoting it into `auto` is a change to make with the timings in hand (see
++         * tools/verify/nrr_probe.tscn, which prints them per provider). */
++#if defined(NRR_HAVE_COREML_EP)
++        if (append_coreml_provider()) {
++            use_coreml_ep_ = true;
++            active_provider_ = "CoreMLExecutionProvider";
++            return true;
++        }
++        if (session_options_ == nullptr) {
++            /* Deferred: the attach happens for real in load_model(); active_provider_ stays empty
++             * because nothing has been measured yet, and use_coreml_ep_ records the request. */
++            use_coreml_ep_ = true;
++            return true;
++        }
++        /* The attach failed for a real reason, which append_coreml_provider() recorded. */
++#else
++        /* No CoreML in this build at all. The call still runs, so the note comes from one place. */
++        append_coreml_provider();
++#endif
++        use_cpu_ep_ = true;
++        active_provider_ = "CPUExecutionProvider";
++        return true;
++    }
++
+     if (pl == "tensorrt") {
+         /* The provider this package actually offers (TensorrtExecutionProvider is in the list the
+          * tests print), which is why V5 starts here: the attach can be verified on this machine
+diff --git a/runtime/onnx_runtime.h b/runtime/onnx_runtime.h
+index c0993fe..4ff6cb7 100644
+--- a/runtime/onnx_runtime.h
++++ b/runtime/onnx_runtime.h
+@@ -83,6 +83,7 @@ public:
+     // Execution providers
+     bool use_cpu() const { return use_cpu_ep_; }
+     bool use_cuda() const { return use_cuda_ep_; }
++    bool use_coreml() const { return use_coreml_ep_; }
+     bool use_directml() const { return use_directml_ep_; }
+ 
+     /* The execution provider the session was actually created with. This is set
+@@ -141,6 +142,10 @@ private:
+     /* TensorRT (V5): runs on CUDA, so the same driver probe decides whether there is anywhere to run,
+      * and the package has to offer the provider - both measured, both reported in provider_note_. */
+     bool append_tensorrt_provider();
++    /* CoreML: the Apple GPU/ANE provider, for the platforms where this is the only accelerated one
++     * NRR can reach. There is no driver probe to make and no library to fail to load - the provider
++     * is inside libonnxruntime - so the return value of the attach is the whole measurement. */
++    bool append_coreml_provider();
+     void release_session_objects();
+ #endif
+ 
+@@ -167,6 +172,7 @@ private:
+     // Execution providers
+     bool use_cpu_ep_ = true;
+     bool use_cuda_ep_ = false;
++    bool use_coreml_ep_ = false;
+     bool use_directml_ep_ = false;
+     std::string preferred_provider_;
+     /* Measured, not requested: set only after a provider was appended

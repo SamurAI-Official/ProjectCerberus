@@ -1,0 +1,29 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 96fc09e..2e3b0ed 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -249,6 +249,24 @@ elseif(EXISTS "${NRR_ONNXRUNTIME_ROOT}/include/onnxruntime_c_api.h"
+     else()
+         message(STATUS "ONNX Runtime: ${NRR_ONNXRUNTIME_ROOT} (real inference, CPU EP only)")
+     endif()
++elseif(EXISTS "${NRR_ONNXRUNTIME_ROOT}/include/onnxruntime_c_api.h"
++   AND EXISTS "${NRR_ONNXRUNTIME_ROOT}/lib/libonnxruntime.dylib")
++    # macOS, and the same layout on Linux with libonnxruntime.so. The official release tarball
++    # unpacks to include/ plus lib/libonnxruntime.dylib and lib/libonnxruntime.<ver>.dylib, and it
++    # contains no onnxruntime.lib -- that is the MSVC import library -- so the Windows arm above
++    # cannot match here.
++    #
++    # Without this arm NRR_HAVE_ONNXRUNTIME stays OFF on macOS and the runtime silently builds its
++    # *placeholder* inference path instead. That does not fail; it renders. The placeholder reports
++    # a fixed 1x3x512x512 input shape (see onnx_runtime.cpp's no-SDK branch), so every frame size
++    # but 512x512 is refused with "conflicts with the model's static input shape" and 512x512
++    # "succeeds" without executing a model at all. That is the whole of the macOS shape behaviour
++    # this tree exhibited, and it is a build-configuration gap, not a runtime or model limit: the
++    # conformance loop and the addon both work once the library below is linked.
++    set(NRR_HAVE_ONNXRUNTIME ON)
++    set(NRR_ORT_INCLUDE_DIR "${NRR_ONNXRUNTIME_ROOT}/include")
++    set(NRR_ORT_LIB "${NRR_ONNXRUNTIME_ROOT}/lib/libonnxruntime.dylib")
++    message(STATUS "ONNX Runtime: ${NRR_ONNXRUNTIME_ROOT} (real inference, CPU EP only)")
+ else()
+     set(NRR_HAVE_ONNXRUNTIME OFF)
+     message(STATUS "ONNX Runtime: not found (placeholder inference path)")

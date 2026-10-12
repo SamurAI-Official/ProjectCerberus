@@ -1,0 +1,37 @@
+diff --git a/engine_plugins/godot/nrr_plugin.gd b/engine_plugins/godot/nrr_plugin.gd
+index ef04581..0288fcf 100644
+--- a/engine_plugins/godot/nrr_plugin.gd
++++ b/engine_plugins/godot/nrr_plugin.gd
+@@ -11,18 +11,13 @@ extends EditorPlugin
+ 
+ const _MENU_ITEM := "NRR status"
+ 
+-var _status_item := -1
+-
+-
+ func _enter_tree() -> void:
+-	_status_item = add_tool_menu_item(_MENU_ITEM, _print_status)
++	add_tool_menu_item(_MENU_ITEM, _print_status)
+ 	_print_status()
+ 
+ 
+ func _exit_tree() -> void:
+-	if _status_item != -1:
+-		remove_tool_menu_item(_MENU_ITEM)
+-		_status_item = -1
++	remove_tool_menu_item(_MENU_ITEM)
+ 
+ 
+ func _print_status() -> void:
+@@ -38,9 +33,8 @@ func _print_status() -> void:
+ 
+ 	var caps := nrr.capabilities()
+ 	print_rich(
+-		"[NRR] native binding loaded. library=%s backend=%s entry_points=%d "
+-		+ "neural_acceleration=%s"
+-		% [nrr.library_version(), nrr.backend_name(),
++		("[NRR] native binding loaded. library=%s backend=%s entry_points=%d "
++		+ "neural_acceleration=%s") % [nrr.library_version(), nrr.backend_name(),
+ 		   nrr.native_entry_point_count(),
+ 		   str(caps.get("neural_acceleration", "absent"))])
+ 	nrr.shutdown()

@@ -1,0 +1,40 @@
+diff --git a/runtime/nrr_temporal.h b/runtime/nrr_temporal.h
+index 4d49c22..be33121 100644
+--- a/runtime/nrr_temporal.h
++++ b/runtime/nrr_temporal.h
+@@ -721,8 +721,33 @@ public:
+                  std::vector<uint8_t>& rgb8,
+                  uint32_t width, uint32_t height,
+                  const MotionProvider& motion,
+-                 const PhaseAlignedFrame& phase = PhaseAlignedFrame(),
+-                 const DepthProvider& depth = DepthProvider());
++                 const PhaseAlignedFrame& phase,
++                 const DepthProvider& depth);
++
++    /* The two defaults are built in a member function body rather than as default arguments,
++     * because a default argument is read in the class body, where the nested PhaseAlignedFrame -
++     * and the MotionImage inside DepthProvider - are still incomplete. MSVC allows that; clang
++     * and GCC reject it with "default member initializer ... needed within definition of
++     * enclosing class ... outside of member functions". The full-arity declaration above is what
++     * every call site in this tree uses; the two overloads below exist so the convenience of the
++     * defaults is not lost. See patches/nrr/0001-clang-default-arguments.patch. */
++    Result apply(const NRRFrameInput& input,
++                 std::vector<uint8_t>& rgb8,
++                 uint32_t width, uint32_t height,
++                 const MotionProvider& motion) {
++        PhaseAlignedFrame phase;
++        DepthProvider depth;
++        return apply(input, rgb8, width, height, motion, phase, depth);
++    }
++
++    Result apply(const NRRFrameInput& input,
++                 std::vector<uint8_t>& rgb8,
++                 uint32_t width, uint32_t height,
++                 const MotionProvider& motion,
++                 const PhaseAlignedFrame& phase) {
++        DepthProvider depth;
++        return apply(input, rgb8, width, height, motion, phase, depth);
++    }
+ 
+     /* Turns the phase-aligned integration on or off for this sequence. Off is the default and changes
+      * nothing: the pass costs a placement and a mean per frame, and it rewrites the displayed frame. */

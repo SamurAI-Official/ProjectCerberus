@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tools/verify/nrr_output_check.gd" id="1_outcheck"]
+
+[node name="NrrOutputCheck" type="Control"]
+script = ExtResource("1_outcheck")

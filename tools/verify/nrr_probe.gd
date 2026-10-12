@@ -1,22 +1,36 @@
 extends Control
-## Which frame sizes does the released NRR model actually accept?
+## Which frame sizes does the vendored NRR binding accept, and what does it return for each?
 ##
-## A tool, not a check: it asserts nothing and prints what it measured. It exists
-## because the model card and the artifact disagree. The card describes a graph
-## with "dynamic H/W" that outputs 2x the input and takes a `scale` tier token;
-## this model accepts one size and returns it unchanged, and the only way to know
-## that is to ask it size by size.
+## A tool, not a check: it asserts nothing and prints what it measured. What it measures is the
+## *binding*, not the model -- a distinction that has already cost this project one wrong entry in
+## its README, so it is worth stating twice. `tools/nrr_model_report.py` measures the model through
+## ONNX Runtime directly; this measures the addon, which is the thing the game actually calls.
 ##
 ##   /Applications/Godot.app/Contents/MacOS/Godot --headless --path . \
 ##       res://tools/verify/nrr_probe.tscn
 ##
-## Measured on the vendored artifact, macOS arm64, CPU provider: 512x512 is the
-## only size accepted; every other size comes back with "conflicts with the model's
-## static input shape" and a zero-millisecond render. That is why the game says it
-## is not upscaling -- it draws at 768x432.
+## The earlier reading of this file, and of the README, was wrong, and the correction is the point
+## of keeping the tool: 512x512 was the only size that "worked", every other size came back with
+## "conflicts with the model's static input shape" and a zero-millisecond render, and the cause was
+## written down as a binding that predates the released model. It was not that. The macOS build was
+## falling back to NRR's *placeholder* inference path, because NRR's CMake only looked for an ONNX
+## Runtime in the Android and Windows layouts and never in the macOS/Unix one -- and that path
+## reports a fixed 1x3x512x512 input shape, so 512x512 was the only size it agreed to "run", at
+## 1.9 ms, without executing a model at all. With the layout arm added (patches/nrr/0003) the
+## runtime accepts every size and reports the model's real, fully dynamic shapes; with the
+## read-back fixed (patches/nrr/0004) each size returns the *model's* output grid rather than a
+## zero-filled image at the input size.
 ##
-## Runs headless, which is how NRR's own Godot verification runs it: the runtime
-## needs no window, only frames it is handed.
+## Measured on this machine, macOS arm64, CPU execution provider, release build, at the time of
+## writing -- the right-hand column is the ratio the model's own head produces, which is why a
+## 2.5x model is needed for 768x432 -> 1920x1080:
+##
+##   384x216  ->  768x432    200 ms   (half-resolution canvas -> canvas)
+##   768x432  -> 1536x864    834 ms   (canvas -> the 2x model's tier)
+##   1024x576 -> 2048x1152  1440 ms
+##
+## Runs headless, which is how NRR's own Godot verification runs it: the runtime needs no window,
+## only frames it is handed.
 
 const MODEL := "res://addons/nrr/models/upscale_msreal_scale.onnx"
 
