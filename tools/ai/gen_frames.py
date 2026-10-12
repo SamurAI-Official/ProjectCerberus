@@ -182,17 +182,7 @@ SHEET_DIR = REPO_ROOT / "design_sheets"
 # Both models are already on this machine (see ~/ComfyUI/models). Pinned by name
 # rather than discovered: a roster that changes style because a *different*
 # checkpoint happened to be listed first is a roster that cannot be rebuilt.
-#
-# The SDXL checkpoint is Illustrious-XL-v1.0, an anime model, because the art
-# direction is a 90s cel-anime fighting game (see STYLE). `sd_xl_base_1.0` is
-# generic and DreamShaper (below) is painterly/semi-realistic; neither can draw
-# the flat cel look the reference sheets ask for, and no amount of prompt fixes
-# weights that have never seen the style. It drives every SDXL arm -- canny,
-# reference and ipadapter -- all of which hold the pose and identity through our
-# own drawing or the sheet rather than through this checkpoint, so what the
-# checkpoint decides is the *look*. `sd_xl_base_1.0` stays on disk as the base to
-# revert to; only the pin below changed.
-CHECKPOINT = "Illustrious-XL-v1.0.safetensors"
+CHECKPOINT = "sd_xl_base_1.0.safetensors"
 CONTROL_NET = "xinsir-openpose-sdxl-1.0.safetensors"
 
 # The img2img mode's checkpoint: SD1.5, 2.0 GB against SDXL's 6.5, and it needs no
@@ -389,28 +379,10 @@ STYLE = ("2D fighting game character sprite, full body, side view facing right, 
          "flat cel shading, bold clean black outlines, limited flat colour palette, "
          "crisp silhouette, clean pure white background, no text, no watermark")
 
-# The 90s anime/cel fighting-game read, on top of STYLE. STYLE names the
-# constraints (flat, cel, side view, white bg); this names the *look* the
-# reference sheets ask for -- the crisp linework and saturated flat colour of a
-# 90s anime fighter. It is a bias, not a load-bearing phrase like STYLE's "side
-# view facing right": the checkpoint (Illustrious) already pulls anime, this
-# steers the era and the finish. Kept separate so the hard constraints can be
-# re-measured without touching the aesthetic direction.
-STYLE_ANIME = ("90s anime style, retro anime, crisp lineart, sharp black ink lines, "
-               "saturated flat colours, cel-shaded, clean vector-like shapes, "
-               "vivid, high contrast, no gradient shading, no airbrush, no blur")
-
 NEGATIVE = ("3/4 view, front view, multiple characters, cropped, cut off, "
             "extra limbs, extra arms, extra legs, deformed hands, mutated hands, "
             "blurry, soft gradient, photorealistic, 3d render, text, watermark, "
             "signature, background scenery, ground shadow, border, frame, "
-            # The anti-90s-cel half of the negative: the things a painterly model
-            # reaches for that undo the flat look. A 90s cel sprite is hard-edged
-            # and few-tone; these ban the smooth, shaded, over-worked result that
-            # would otherwise be the failure mode of any modern checkpoint.
-            "gradient shading, airbrush, soft shading, smooth shading, painterly, "
-            "sketch, crosshatching, grainy, noisy, chromatic aberration, "
-            "photorealistic skin, subsurface scattering, lens flare, bokeh, "
             # Props. A character sheet shows the fighter walking to school with a
             # satchel; a fighter sprite with a satchel in its hand is a sprite
             # whose punch has a bag in it. The design sheet's props are costume
@@ -1216,7 +1188,7 @@ def generate(fighter_id, states, out_dir, size=DEFAULT_SIZE, steps=20, cfg=7.0,
             "it looks like. Without it the generator invents a different person in\n"
             "every frame, which is the one failure a palette cannot repair.")
 
-    shared = f"{appearance}, {STYLE_ANIME}, {STYLE}"
+    shared = f"{appearance}, {STYLE}"
     out_dir = Path(out_dir)
     raw_dir = out_dir / "raw"
     raw_dir.mkdir(parents=True, exist_ok=True)
@@ -1289,7 +1261,7 @@ def generate(fighter_id, states, out_dir, size=DEFAULT_SIZE, steps=20, cfg=7.0,
             continue
 
         role, expression = expression_for_state(sheet, frame["state"])
-        positive = f"{appearance}, {expression['prompt']}, {STYLE_ANIME}, {STYLE}"
+        positive = f"{appearance}, {expression['prompt']}, {STYLE}"
         pose_upload = client.fresh(frame["pose"], subfolder=f"cerberus_{mode}")
         if mode == "img2img":
             graph = build_workflow_img2img(pose_upload, positive, frame_seed, size,
