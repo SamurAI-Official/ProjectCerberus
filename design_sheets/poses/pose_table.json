@@ -1,17 +1,17 @@
 {
  "fei_young": {
-  "fingerprint": "dbe6ea6f893be965cd7162670d6cf7c9fbc0f04042b87cb2be1cc97fc52657e2",
+  "fingerprint": "7667b196b9cb39a47bd16777265a018ce5cd6f422497881bfee03bcff8768741",
   "states": {
    "1kick": {
     "box": "reach",
     "canvas": [
-     240,
+     252,
      384
     ],
     "hurtbox": {
      "height": 31.0,
      "width": 12.0,
-     "x_pos": 14.0,
+     "x_pos": 15.0,
      "y_pos": 32.0
     },
     "joints": [
@@ -417,7 +417,7 @@
      "box": {
       "height": 6.0,
       "width": 8.14,
-      "x_pos": 26.0,
+      "x_pos": 27.0,
       "y_pos": 31.92
      },
      "frame": 1,
@@ -427,13 +427,13 @@
    "1punch": {
     "box": "reach",
     "canvas": [
-     240,
+     252,
      384
     ],
     "hurtbox": {
      "height": 31.0,
      "width": 12.0,
-     "x_pos": 14.0,
+     "x_pos": 15.0,
      "y_pos": 32.0
     },
     "joints": [
@@ -839,7 +839,7 @@
      "box": {
       "height": 6.0,
       "width": 9.8,
-      "x_pos": 26.0,
+      "x_pos": 27.0,
       "y_pos": 52.62
      },
      "frame": 1,
@@ -849,13 +849,13 @@
    "2kick": {
     "box": "reach",
     "canvas": [
-     240,
+     252,
      384
     ],
     "hurtbox": {
      "height": 31.0,
      "width": 12.0,
-     "x_pos": 14.0,
+     "x_pos": 15.0,
      "y_pos": 32.0
     },
     "joints": [
@@ -1393,7 +1393,7 @@
      "box": {
       "height": 7.0,
       "width": 16.83,
-      "x_pos": 26.0,
+      "x_pos": 27.0,
       "y_pos": 48.29
      },
      "frame": 2,
@@ -1403,13 +1403,13 @@
    "2punch": {
     "box": "reach",
     "canvas": [
-     240,
+     252,
      384
     ],
     "hurtbox": {
      "height": 31.0,
      "width": 12.0,
-     "x_pos": 14.0,
+     "x_pos": 15.0,
      "y_pos": 32.0
     },
     "joints": [
@@ -1947,7 +1947,7 @@
      "box": {
       "height": 6.0,
       "width": 10.37,
-      "x_pos": 26.0,
+      "x_pos": 27.0,
       "y_pos": 53.71
      },
      "frame": 2,
@@ -1957,13 +1957,13 @@
    "3kick": {
     "box": "reach",
     "canvas": [
-     240,
+     252,
      384
     ],
     "hurtbox": {
      "height": 31.0,
      "width": 12.0,
-     "x_pos": 14.0,
+     "x_pos": 15.0,
      "y_pos": 32.0
     },
     "joints": [
@@ -2501,7 +2501,7 @@
      "box": {
       "height": 8.0,
       "width": 17.57,
-      "x_pos": 26.0,
+      "x_pos": 27.0,
       "y_pos": 46.7
      },
      "frame": 3,
@@ -2511,13 +2511,13 @@
    "3punch": {
     "box": "reach",
     "canvas": [
-     240,
+     252,
      384
     ],
     "hurtbox": {
      "height": 31.0,
      "width": 12.0,
-     "x_pos": 14.0,
+     "x_pos": 15.0,
      "y_pos": 32.0
     },
     "joints": [
@@ -3055,7 +3055,7 @@
      "box": {
       "height": 7.0,
       "width": 11.45,
-      "x_pos": 26.0,
+      "x_pos": 27.0,
       "y_pos": 52.73
      },
      "frame": 1,
@@ -3805,13 +3805,13 @@
    "ground": {
     "box": "reach",
     "canvas": [
-     240,
+     252,
      384
     ],
     "hurtbox": {
      "height": 31.0,
      "width": 12.0,
-     "x_pos": 14.0,
+     "x_pos": 15.0,
      "y_pos": 32.0
     },
     "joints": [
@@ -3887,13 +3887,13 @@
    "hit_ground": {
     "box": "reach",
     "canvas": [
-     240,
+     252,
      384
     ],
     "hurtbox": {
      "height": 31.0,
      "width": 12.0,
-     "x_pos": 14.0,
+     "x_pos": 15.0,
      "y_pos": 32.0
     },
     "joints": [
@@ -4101,13 +4101,13 @@
    "hurt_air": {
     "box": "reach",
     "canvas": [
-     240,
+     252,
      384
     ],
     "hurtbox": {
      "height": 31.0,
      "width": 12.0,
-     "x_pos": 14.0,
+     "x_pos": 15.0,
      "y_pos": 32.0
     },
     "joints": [
@@ -6671,13 +6671,13 @@
    "knocked_down": {
     "box": "reach",
     "canvas": [
-     240,
+     252,
      384
     ],
     "hurtbox": {
      "height": 31.0,
      "width": 12.0,
-     "x_pos": 14.0,
+     "x_pos": 15.0,
      "y_pos": 32.0
     },
     "joints": [
@@ -7165,13 +7165,13 @@
    "special": {
     "box": "reach",
     "canvas": [
-     240,
+     252,
      384
     ],
     "hurtbox": {
      "height": 31.0,
      "width": 12.0,
-     "x_pos": 14.0,
+     "x_pos": 15.0,
      "y_pos": 32.0
     },
     "joints": [
@@ -7709,7 +7709,7 @@
      "box": {
       "height": 9.0,
       "width": 11.37,
-      "x_pos": 26.0,
+      "x_pos": 27.0,
       "y_pos": 51.91
      },
      "frame": 3,
@@ -7719,13 +7719,13 @@
    "special_lite": {
     "box": "reach",
     "canvas": [
-     240,
+     252,
      384
     ],
     "hurtbox": {
      "height": 31.0,
      "width": 12.0,
-     "x_pos": 14.0,
+     "x_pos": 15.0,
      "y_pos": 32.0
     },
     "joints": [
@@ -8065,7 +8065,7 @@
      "box": {
       "height": 6.0,
       "width": 10.17,
-      "x_pos": 26.0,
+      "x_pos": 27.0,
       "y_pos": 52.18
      },
      "frame": 1,
@@ -9969,18 +9969,18 @@
   }
  },
  "tsu_ibano": {
-  "fingerprint": "cf76947b675aef7eda47172bc66ff01ac135dfc2bf43ac8e2de0aa824e59fe5a",
+  "fingerprint": "9b5f13672b0f172f6e49002af5ea1b4730c134371731c2b6e57798fa71e9d987",
   "states": {
    "1kick": {
     "box": "reach",
     "canvas": [
-     240,
+     252,
      384
     ],
     "hurtbox": {
      "height": 31.0,
      "width": 12.0,
-     "x_pos": 14.0,
+     "x_pos": 15.0,
      "y_pos": 32.0
     },
     "joints": [
@@ -10386,7 +10386,7 @@
      "box": {
       "height": 6.0,
       "width": 6.99,
-      "x_pos": 26.0,
+      "x_pos": 27.0,
       "y_pos": 31.28
      },
      "frame": 1,
@@ -10396,13 +10396,13 @@
    "1punch": {
     "box": "reach",
     "canvas": [
-     240,
+     252,
      384
     ],
     "hurtbox": {
      "height": 31.0,
      "width": 12.0,
-     "x_pos": 14.0,
+     "x_pos": 15.0,
      "y_pos": 32.0
     },
     "joints": [
@@ -10808,7 +10808,7 @@
      "box": {
       "height": 6.0,
       "width": 9.65,
-      "x_pos": 26.0,
+      "x_pos": 27.0,
       "y_pos": 52.25
      },
      "frame": 1,
@@ -10818,13 +10818,13 @@
    "2kick": {
     "box": "reach",
     "canvas": [
-     240,
+     252,
      384
     ],
     "hurtbox": {
      "height": 31.0,
      "width": 12.0,
-     "x_pos": 14.0,
+     "x_pos": 15.0,
      "y_pos": 32.0
     },
     "joints": [
@@ -11362,7 +11362,7 @@
      "box": {
       "height": 7.0,
       "width": 17.07,
-      "x_pos": 26.0,
+      "x_pos": 27.0,
       "y_pos": 44.0
      },
      "frame": 2,
@@ -11372,13 +11372,13 @@
    "2punch": {
     "box": "reach",
     "canvas": [
-     240,
+     252,
      384
     ],
     "hurtbox": {
      "height": 31.0,
      "width": 12.0,
-     "x_pos": 14.0,
+     "x_pos": 15.0,
      "y_pos": 32.0
     },
     "joints": [
@@ -11916,7 +11916,7 @@
      "box": {
       "height": 6.0,
       "width": 10.38,
-      "x_pos": 26.0,
+      "x_pos": 27.0,
       "y_pos": 53.16
      },
      "frame": 2,
@@ -11926,13 +11926,13 @@
    "3kick": {
     "box": "reach",
     "canvas": [
-     240,
+     252,
      384
     ],
     "hurtbox": {
      "height": 31.0,
      "width": 12.0,
-     "x_pos": 14.0,
+     "x_pos": 15.0,
      "y_pos": 32.0
     },
     "joints": [
@@ -12470,7 +12470,7 @@
      "box": {
       "height": 8.0,
       "width": 17.65,
-      "x_pos": 26.0,
+      "x_pos": 27.0,
       "y_pos": 45.78
      },
      "frame": 1,
@@ -12480,13 +12480,13 @@
    "3punch": {
     "box": "reach",
     "canvas": [
-     240,
+     252,
      384
     ],
     "hurtbox": {
      "height": 31.0,
      "width": 12.0,
-     "x_pos": 14.0,
+     "x_pos": 15.0,
      "y_pos": 32.0
     },
     "joints": [
@@ -13024,7 +13024,7 @@
      "box": {
       "height": 7.0,
       "width": 11.48,
-      "x_pos": 26.0,
+      "x_pos": 27.0,
       "y_pos": 53.22
      },
      "frame": 2,
@@ -13774,13 +13774,13 @@
    "ground": {
     "box": "reach",
     "canvas": [
-     240,
+     252,
      384
     ],
     "hurtbox": {
      "height": 31.0,
      "width": 12.0,
-     "x_pos": 14.0,
+     "x_pos": 15.0,
      "y_pos": 32.0
     },
     "joints": [
@@ -13856,13 +13856,13 @@
    "hit_ground": {
     "box": "reach",
     "canvas": [
-     240,
+     252,
      384
     ],
     "hurtbox": {
      "height": 31.0,
      "width": 12.0,
-     "x_pos": 14.0,
+     "x_pos": 15.0,
      "y_pos": 32.0
     },
     "joints": [
@@ -14070,13 +14070,13 @@
    "hurt_air": {
     "box": "reach",
     "canvas": [
-     240,
+     252,
      384
     ],
     "hurtbox": {
      "height": 31.0,
      "width": 12.0,
-     "x_pos": 14.0,
+     "x_pos": 15.0,
      "y_pos": 32.0
     },
     "joints": [
@@ -16640,13 +16640,13 @@
    "knocked_down": {
     "box": "reach",
     "canvas": [
-     240,
+     252,
      384
     ],
     "hurtbox": {
      "height": 31.0,
      "width": 12.0,
-     "x_pos": 14.0,
+     "x_pos": 15.0,
      "y_pos": 32.0
     },
     "joints": [
@@ -17134,13 +17134,13 @@
    "special": {
     "box": "reach",
     "canvas": [
-     240,
+     252,
      384
     ],
     "hurtbox": {
      "height": 31.0,
      "width": 12.0,
-     "x_pos": 14.0,
+     "x_pos": 15.0,
      "y_pos": 32.0
     },
     "joints": [
@@ -17678,7 +17678,7 @@
      "box": {
       "height": 9.0,
       "width": 11.36,
-      "x_pos": 26.0,
+      "x_pos": 27.0,
       "y_pos": 51.8
      },
      "frame": 1,
@@ -17688,13 +17688,13 @@
    "special_lite": {
     "box": "reach",
     "canvas": [
-     240,
+     252,
      384
     ],
     "hurtbox": {
      "height": 31.0,
      "width": 12.0,
-     "x_pos": 14.0,
+     "x_pos": 15.0,
      "y_pos": 32.0
     },
     "joints": [
@@ -18034,7 +18034,7 @@
      "box": {
       "height": 6.0,
       "width": 9.99,
-      "x_pos": 26.0,
+      "x_pos": 27.0,
       "y_pos": 51.89
      },
      "frame": 1,

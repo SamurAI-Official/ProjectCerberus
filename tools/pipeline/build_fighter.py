@@ -71,7 +71,16 @@ BODY_BOX = (30, 64)   # 180x384 canvas
 # with no toe. The on-screen hitboxes do not move: `box_at` and `hurtbox_for`
 # both derive the YAML x_pos from the declared width, so a wider box means the
 # same hitbox in a wider texture, as the comment above explains.
-REACH_BOX = (40, 64)  # 240x384 canvas
+#
+# 42 rather than 40, and this time it is the margin the comment above promises.
+# 40 units is +-20 against a foot that reaches 19.5, so a reach pose had 0.5
+# units where a body pose has 1.5 -- and it is the *generated* frames that need
+# it, because the shoe the model draws is a pixel wider than ours and the
+# outline ring is a pixel again. Two generated kicks (2kick02, 3kick01) reached
+# 19.83 units and put art on the last column of the texture, where
+# build/sprite_check.py reads it as clipped; at 42 the same frames sit 6 px
+# clear of it.
+REACH_BOX = (42, 64)  # 252x384 canvas
 
 FEET = figure.GROUND_Y  # 0.0 -- feet on the origin, which is the engine's ground
 CROWN = 31.0
