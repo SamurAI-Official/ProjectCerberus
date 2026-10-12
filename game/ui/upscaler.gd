@@ -10,17 +10,22 @@ class_name Upscaler
 ##
 ## Three ways, in the order the options screen offers them:
 ##
-##   * NRR -- the neural path, and the default. This is the SamurAI-Official NRR
-##     runtime (github.com/samurai-official/nrr), whose Godot 4 addon is vendored
-##     at addons/nrr. It needs three things: the native binding, which is
-##     per-platform build output upstream does not commit and which
-##     tools/build_nrr_macos.sh builds; the released model, published at
+##   * NRR -- the neural path, offered but NOT the default. This is the
+##     SamurAI-Official NRR runtime (github.com/samurai-official/nrr), whose Godot
+##     4 addon is vendored at addons/nrr. It needs three things: the native
+##     binding, which is per-platform build output upstream does not commit and
+##     which tools/build_nrr_macos.sh builds; the released model, published at
 ##     huggingface.co/SamurAI-Official/NRR and installed beside the addon; and a
 ##     rendered frame to upscale. Where any of the three is missing the addon
 ##     reports itself unavailable and passes the frame through untouched -- it
-##     never fabricates a neural frame, and neither does this file.
+##     never fabricates a neural frame, and neither does this file. It is off by
+##     default because on this game's flat 16-colour art it costs ~767 ms/frame on
+##     the CPU against ~8 ms for nearest, and tools/nrr_model_report.py scores its
+##     output *worse* than the classical filter -- so the default is Nearest. It
+##     stays in the menu for anyone who wants it on this art regardless.
 ##   * Nearest -- integer scaling with the canvas filter off: the pixel-perfect
-##     path, and what NRR falls back to on a machine that cannot run it.
+##     path, the default, and what NRR falls back to on a machine that cannot run
+##     it.
 ##   * Smooth -- the same scale with the filter on, for soft edges.
 ##
 ## The rule this file is built on is NRR's own: no capability is claimed that was

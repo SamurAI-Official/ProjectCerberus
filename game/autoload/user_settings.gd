@@ -27,7 +27,13 @@ const LOW_DB := -14.0
 
 var fullscreen := false
 var vsync_enabled := true
-var upscaler := Upscaler.NRR
+## Nearest by default, not NRR. The neural pass is real and installed, but on this
+## game's flat 16-colour pixel art it is measured at 767 ms/frame on the CPU
+## against 8 ms for nearest (see build/nrr_nearest_probe) -- 92x slower, at a
+## picture the repo's own tools/nrr_model_report.py scores *worse* than the
+## classical filter it replaces. So the default is the path that is both fast and
+## honest; NRR stays in the menu for anyone who wants it on this art.
+var upscaler := Upscaler.NEAREST
 var render_resolution := Upscaler.DEFAULT_RESOLUTION
 var show_fps := false
 var sound := DEFAULT_SOUND
@@ -58,7 +64,7 @@ func load_from_disk() -> void:
 	# through to a branch that would read it as "not NRR" and quietly pick nearest
 	# while the file still claimed otherwise.
 	var saved_upscaler := str(config.get_value("video", "upscaler", upscaler))
-	upscaler = saved_upscaler if Upscaler.MODES.has(saved_upscaler) else Upscaler.NRR
+	upscaler = saved_upscaler if Upscaler.MODES.has(saved_upscaler) else Upscaler.NEAREST
 
 	var saved_resolution := str(config.get_value("video", "resolution", render_resolution))
 	render_resolution = saved_resolution if Upscaler.RESOLUTION_IDS.has(saved_resolution) \
@@ -155,7 +161,7 @@ func set_vsync(value: bool) -> void:
 
 ## Returns the mode actually in use, which is not always the one asked for.
 func set_upscaler(value: String) -> String:
-	upscaler = value if Upscaler.MODES.has(value) else Upscaler.NRR
+	upscaler = value if Upscaler.MODES.has(value) else Upscaler.NEAREST
 	apply()
 	save_to_disk()
 	return active_upscaler
