@@ -379,6 +379,9 @@ tools/nrr_model_report.py
                          into build/nrr/models and writes its evidence sheets to
                          build/nrr
 tools/validate/          validate_manifest.py -- roster + YAML + frame files resolve
+                         validate_sprites.py -- the same contract for a *scratch*
+                         sprite directory, before it is installed: canvas size against
+                         the pose table, no art on the texture border, colour budget
 tools/verify/            run_all.sh + the verification scenes. m3_boxes (the box
                          overlay) and video_options (the render path) need a
                          window; nrr_probe and nrr_output_check are tools, not
@@ -420,7 +423,7 @@ python3 tools/ai/to_sprite.py tsu_ibano --raw build/ai/tsu_ibano/raw \
 `--bound` is the run's own `init/` directory, and it is the step that decides whether
 the art fits the game's frame: a repaint may repaint the pose, it may not extend it.
 Without it the model's hair reaches the top of the sprite canvas on about a third of
-the attack frames and the texture cuts it flat — `python3 build/sprite_check.py
+the attack frames and the texture cuts it flat — `tools/validate/validate_sprites.py
 data/tsu_ibano` counts those frames, and reads zero with `--bound` (the run prints how
 many pixels it cleared, so a bound doing real work is visible rather than frictionless).
 
